@@ -15,10 +15,16 @@ static def path(String... args) {
 }
 
 String appName = 'circuit-finder'
+String appNameLowercase = 'circuit-finder'
 String version = '0.1.0'
 String appDescription = 'A search algorithm to find optimal logic circuits.'
 String author = 'Filippo Barbari'
 String authorMail = 'filippo.barbari@gmail.com'
+String basePackage = "com.ledmington"
+String fatJarBaseName = "${appNameLowercase}"
+String fatJarName = "${fatJarBaseName}.jar"
+String fatJarPath = path("${buildDir}", "libs", "${fatJarName}")
+String mainClassName = "${basePackage}.Main"
 
 java {
 	toolchain {
@@ -119,3 +125,28 @@ spotless {
 }
 
 tasks.compileJava.dependsOn(spotlessApply)
+
+tasks.register('fatJar', Jar) {
+	group 'distribution'
+	description 'Builds the fat jar of the application'
+	from sourceSets.main.output
+	dependsOn configurations.runtimeClasspath
+	from {
+		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+	}
+	duplicatesStrategy = 'include'
+	manifest {
+		archiveBaseName = appNameLowercase
+		attributes(
+				//"Implementation-Title": "Gradle",
+				"Implementation-Version": version,
+				"Main-Class": "$mainClassName"
+		)
+	}
+	archiveBaseName = "${fatJarBaseName}"
+
+	doLast {
+		println "The fat jar is ${fatJarPath}"
+		println String.format("Fat jar size: %.3f MB", new File(fatJarPath).length() / 1_000_000)
+	}
+}

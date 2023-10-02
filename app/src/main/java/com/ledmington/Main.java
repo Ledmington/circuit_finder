@@ -17,28 +17,143 @@
 */
 package com.ledmington;
 
-import java.util.random.RandomGenerator;
-import java.util.random.RandomGeneratorFactory;
+import com.ledmington.utils.ImmutableMap;
+import com.ledmington.utils.MiniLogger;
 
 public final class Main {
 
+    private static final int MAX_BITS_SUPPORTED = 64;
+
+    private static final String HELP_MSG = String.join("\n", new String[] {
+        "",
+        " --- Mandatory --- ",
+        "     --bits N             Generates a circuit setting the variable number of bits to N.",
+        "     --operation OPNAME   Generates a circuit which computes the operation corresponding to OPNAME",
+        "",
+        "     --op_list            Prints the list of available operations and exits",
+        "",
+        " --- Output --- ",
+        " -q, --quiet  Sets the verbosity to 0 (only errors)",
+        " -v           Sets the verbosity to 1 (errors and warnings)",
+        " -vv          Sets the verbosity to 2 (errors, warnings and info)",
+        " -vvv         Sets the verbosity to 3 (no output is discarded)",
+        "",
+        " --- Others --- ",
+        " -h, --help     Prints this message and exits.",
+        " -j, --jobs N   Uses N threads.",
+        ""
+    });
+
+    private static final String OP_LIST = String.join("\n", new String[] {
+        "   OP_NAME          BITS          DESCRIPTION",
+        "signed_sum        2*N -> N      Sum of signed integers.",
+        "unsigned_sum      2*N -> N      Sum of unsigned integers.",
+        "signed_sum_of     2*N -> N+1    Sum of signed integers with overflow checking.",
+        "unsigned_sum_of   2*N -> N+1    Sum of unsigned integers with overflow checking.",
+        ""
+    });
+
+    private static final ImmutableMap<String, LogicFunction> nameToOperation =
+            ImmutableMap.<String, LogicFunction>builder()
+                    .put("signed_sum", new SignedSum())
+                    .build();
+
     public static void main(final String[] args) {
-        final int bits = 32;
-        final RandomGenerator rng = RandomGeneratorFactory.getDefault().create(System.nanoTime());
-        Circuit best = new Circuit(bits, rng);
-        Circuit current = new Circuit(best);
-
-        for (int i = 0; i < 123456789; i++) {
-            current.mutate();
-            final int input = rng.nextInt(0, Integer.MAX_VALUE);
-            if (current.evaluate(input) == (int) Math.sqrt(input)) {
-                best = new Circuit(current);
-                System.out.println(best);
+        int nJobs = 1;
+        int bits = -1;
+        String operation = "";
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "-h":
+                case "--help":
+                    System.out.println(HELP_MSG);
+                    System.exit(0);
+                    break;
+                case "-j":
+                case "--jobs":
+                    try {
+                        nJobs = Integer.parseInt(args[i + 1]);
+                    } catch (NumberFormatException e) {
+                        System.out.printf("The parameter '--jobs' needs an integer, not '%s'.\n", args[i + 1]);
+                        System.exit(-1);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("The parameter '--jobs' needs an integer, but none was found.");
+                        System.exit(-1);
+                    }
+                    if (nJobs < 1 || nJobs > Runtime.getRuntime().availableProcessors()) {
+                        System.out.printf(
+                                "Invalid value for '--jobs'. Should have been between 1 and %,d, but was %,d.\n",
+                                Runtime.getRuntime().availableProcessors(), nJobs);
+                    }
+                    i++;
+                    break;
+                case "--bits":
+                    try {
+                        bits = Integer.parseInt(args[i + 1]);
+                    } catch (NumberFormatException e) {
+                        System.out.printf("The parameter '--bits' needs an integer, not '%s'.\n", args[i + 1]);
+                        System.exit(-1);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("The parameter '--bits' needs an integer, but none was found.");
+                        System.exit(-1);
+                    }
+                    if (bits < 1 || bits > MAX_BITS_SUPPORTED) {
+                        System.out.printf(
+                                "Invalid value for '--bits'. Should have been between 1 and %,d but was %,d.\n",
+                                MAX_BITS_SUPPORTED, bits);
+                    }
+                    i++;
+                    break;
+                case "--operation":
+                    try {
+                        operation = args[i + 1];
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("The parameter '--operation' needs a string, but none was found.");
+                        System.exit(-1);
+                    }
+                    i++;
+                    break;
+                case "--op_list":
+                    System.out.println(OP_LIST);
+                    System.exit(0);
+                    break;
+                case "-q":
+                case "--quiet":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.ERROR);
+                    break;
+                case "-v":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.WARNING);
+                    break;
+                case "-vv":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.INFO);
+                    break;
+                case "-vvv":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.DEBUG);
+                    break;
+                default:
+                    System.err.printf("\nUnknown parameter '%s'.\nQuitting.\n", args[i]);
+                    System.exit(-1);
+                    break;
             }
+        }
 
-            if (i % 1_000_000 == 0) {
-                System.out.printf("%,d\n", i);
-            }
+        if (bits < 1) {
+            System.err.println("Parameter '--bits' was not set.");
+            System.exit(-1);
+        }
+        if (operation.isEmpty()) {
+            System.err.println("Parameter '--operation' was not set.");
+            System.exit(-1);
+        }
+
+        if (!nameToOperation.containsKey(operation)) {
+            System.err.printf("Operation '%s' does not exist.\n", operation);
+            System.exit(-1);
+        }
+
+        if (!operation.equals("signed_sum")) {
+            System.err.printf("Operation '%s' not supported at the moment, sorry.\n", operation);
+            System.exit(0);
         }
     }
 }
