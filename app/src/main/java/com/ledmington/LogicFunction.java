@@ -19,4 +19,4 @@ package com.ledmington;
 
 import java.util.function.Function;
 
-public interface LogicFunction extends Function<BoolArray, BoolArray> {}
+public interface LogicFunction extends Function<BitArray, BitArray> {}

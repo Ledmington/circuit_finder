@@ -17,6 +17,8 @@
 */
 package com.ledmington;
 
+import java.math.BigInteger;
+
 import com.ledmington.utils.ImmutableMap;
 import com.ledmington.utils.MiniLogger;
 
@@ -154,6 +156,15 @@ public final class Main {
         if (!operation.equals("signed_sum")) {
             System.err.printf("Operation '%s' not supported at the moment, sorry.\n", operation);
             System.exit(0);
+        }
+
+        final BigInteger limit = BigInteger.TWO.pow(bits);
+        final BigInteger mask = BigInteger.ONE.shiftLeft(bits / 2).subtract(BigInteger.ONE);
+        for (BigInteger i = BigInteger.ZERO; i.compareTo(limit) < 0; i = i.add(BigInteger.ONE)) {
+            final BitArray a = BitArray.convert(bits / 2, i.shiftRight(bits / 2));
+            final BitArray b = BitArray.convert(bits / 2, i.and(mask));
+            System.out.printf(
+                    "%s + %s -> %s\n", a, b, nameToOperation.get(operation).apply(a));
         }
     }
 }

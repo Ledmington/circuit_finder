@@ -19,7 +19,7 @@ package com.ledmington;
 
 public final class SignedSum implements LogicFunction {
     @Override
-    public BoolArray apply(final BoolArray boolArray) {
+    public BitArray apply(final BitArray bitArray) {
         return null;
     }
 }
