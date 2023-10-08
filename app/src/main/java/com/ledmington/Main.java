@@ -19,8 +19,11 @@ package com.ledmington;
 
 import java.math.BigInteger;
 
+import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.ImmutableMap;
 import com.ledmington.utils.MiniLogger;
+import com.ledmington.utils.TerminalCursor;
+import com.ledmington.utils.TerminalCursor.TerminalColor;
 
 public final class Main {
 
@@ -153,18 +156,85 @@ public final class Main {
             System.exit(-1);
         }
 
+        // TODO: delete this
         if (!operation.equals("signed_sum")) {
             System.err.printf("Operation '%s' not supported at the moment, sorry.\n", operation);
             System.exit(0);
         }
 
         final BigInteger limit = BigInteger.TWO.pow(bits);
+        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", bits, FormatUtils.thousands(limit, ","));
+
+        final LogicFunction op = nameToOperation.get(operation);
+        final int inputBits = op.inputBits(bits / 2);
+        final int outputBits = op.outputBits(bits / 2);
+        System.out.println();
+        System.out.printf(
+                "The selected operation requires %,d input bits to produce %,d output bits.", inputBits, outputBits);
+
+        System.out.println();
+        System.out.println("Computing correlation matrix...");
+
+        // Copied and adapted from https://stackoverflow.com/a/28428582
+        final double[] sx = new double[inputBits]; // zero-initialized
+        final double[] sy = new double[outputBits]; // zero-initialized
+        final double[] sxx = new double[inputBits]; // zero-initialized
+        final double[] syy = new double[outputBits]; // zero-initialized
+        final double[][] sxy = new double[inputBits][outputBits]; // zero-initialized
+
         final BigInteger mask = BigInteger.ONE.shiftLeft(bits / 2).subtract(BigInteger.ONE);
-        for (BigInteger i = BigInteger.ZERO; i.compareTo(limit) < 0; i = i.add(BigInteger.ONE)) {
-            final BitArray a = BitArray.convert(bits / 2, i.shiftRight(bits / 2));
-            final BitArray b = BitArray.convert(bits / 2, i.and(mask));
-            System.out.printf(
-                    "%s + %s -> %s\n", a, b, nameToOperation.get(operation).apply(a));
+        for (BigInteger x = BigInteger.ZERO; x.compareTo(limit) < 0; x = x.add(BigInteger.ONE)) {
+            final BitArray a = BitArray.convert(bits / 2, x.shiftRight(bits / 2));
+            final BitArray b = BitArray.convert(bits / 2, x.and(mask));
+            final BitArray in = BitArray.concat(a, b);
+            final BitArray result = op.apply(in);
+
+            for (int i = 0; i < inputBits; i++) {
+                sx[i] += in.get(i) ? 1.0 : 0.0;
+                sxx[i] += in.get(i) ? 1.0 : 0.0;
+            }
+            for (int i = 0; i < outputBits; i++) {
+                sy[i] += result.get(i) ? 1.0 : 0.0;
+                syy[i] += result.get(i) ? 1.0 : 0.0;
+            }
+            for (int i = 0; i < inputBits; i++) {
+                for (int j = 0; j < outputBits; j++) {
+                    sxy[i][j] += (in.get(i) ? 1.0 : 0.0) * (result.get(j) ? 1.0 : 0.0);
+                }
+            }
         }
+
+        final double n = limit.doubleValue();
+        final String correlationFormat = " %4.2f  ";
+        System.out.print("          ");
+        for (int j = 0; j < outputBits; j++) {
+            System.out.printf("out[%,d] ", j);
+        }
+        System.out.println();
+        for (int i = 0; i < inputBits; i++) {
+            System.out.printf("in[%,3d] | ", i);
+            for (int j = 0; j < outputBits; j++) {
+                // covariance/covariation
+                final double cov = sxy[i][j] / n - sx[i] * sy[j] / n / n;
+                // standard error of x
+                final double sigmax = Math.sqrt(sxx[i] / n - sx[i] * sx[i] / n / n);
+                // standard error of y
+                final double sigmay = Math.sqrt(syy[j] / n - sy[j] * sy[j] / n / n);
+
+                // correlation is just a normalized covariation
+                final double corr = cov / sigmax / sigmay;
+
+                if (corr < -0.5) {
+                    System.out.print(TerminalCursor.color(String.format(correlationFormat, corr), TerminalColor.RED));
+                } else if (corr > 0.5) {
+                    System.out.print(TerminalCursor.color(String.format(correlationFormat, corr), TerminalColor.GREEN));
+                } else {
+                    System.out.printf(correlationFormat, corr);
+                }
+            }
+            System.out.println();
+        }
+
+        System.out.println();
     }
 }

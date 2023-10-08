@@ -51,7 +51,7 @@ testlogger {
 	theme 'standard'
 
 	showExceptions true
-	showStackTraces true
+	showStackTraces false
 	showFullStackTraces true
 	showCauses true
 

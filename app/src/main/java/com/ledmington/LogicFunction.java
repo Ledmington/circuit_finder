@@ -19,4 +19,8 @@ package com.ledmington;
 
 import java.util.function.Function;
 
-public interface LogicFunction extends Function<BitArray, BitArray> {}
+public interface LogicFunction extends Function<BitArray, BitArray> {
+    int inputBits(int n);
+
+    int outputBits(int n);
+}
