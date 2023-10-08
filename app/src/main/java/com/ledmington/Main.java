@@ -50,16 +50,15 @@ public final class Main {
     });
 
     private static final String OP_LIST = String.join("\n", new String[] {
-        "   OP_NAME          BITS          DESCRIPTION",
-        "signed_sum        2*N -> N      Sum of signed integers.",
-        "unsigned_sum      2*N -> N      Sum of unsigned integers.",
-        "signed_sum_of     2*N -> N+1    Sum of signed integers with overflow checking.",
-        "unsigned_sum_of   2*N -> N+1    Sum of unsigned integers with overflow checking.",
+        "   OP_NAME            BITS           DESCRIPTION",
+        " logic_not           N -> N      Bitwise NOT.",
+        " signed_sum        2*N -> N      Sum of signed integers.",
         ""
     });
 
     private static final ImmutableMap<String, LogicFunction> nameToOperation =
             ImmutableMap.<String, LogicFunction>builder()
+                    .put("logic_not", new LogicNot())
                     .put("signed_sum", new SignedSum())
                     .build();
 
@@ -156,18 +155,11 @@ public final class Main {
             System.exit(-1);
         }
 
-        // TODO: delete this
-        if (!operation.equals("signed_sum")) {
-            System.err.printf("Operation '%s' not supported at the moment, sorry.\n", operation);
-            System.exit(0);
-        }
-
-        final BigInteger limit = BigInteger.TWO.pow(bits);
-        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", bits, FormatUtils.thousands(limit, ","));
-
         final LogicFunction op = nameToOperation.get(operation);
-        final int inputBits = op.inputBits(bits / 2);
-        final int outputBits = op.outputBits(bits / 2);
+        final int inputBits = op.inputBits(bits);
+        final int outputBits = op.outputBits(bits);
+        final BigInteger limit = BigInteger.TWO.pow(inputBits);
+        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", bits, FormatUtils.thousands(limit, ","));
         System.out.println();
         System.out.printf(
                 "The selected operation requires %,d input bits to produce %,d output bits.", inputBits, outputBits);
@@ -182,11 +174,8 @@ public final class Main {
         final double[] syy = new double[outputBits]; // zero-initialized
         final double[][] sxy = new double[inputBits][outputBits]; // zero-initialized
 
-        final BigInteger mask = BigInteger.ONE.shiftLeft(bits / 2).subtract(BigInteger.ONE);
         for (BigInteger x = BigInteger.ZERO; x.compareTo(limit) < 0; x = x.add(BigInteger.ONE)) {
-            final BitArray a = BitArray.convert(bits / 2, x.shiftRight(bits / 2));
-            final BitArray b = BitArray.convert(bits / 2, x.and(mask));
-            final BitArray in = BitArray.concat(a, b);
+            final BitArray in = BitArray.convert(inputBits, x);
             final BitArray result = op.apply(in);
 
             for (int i = 0; i < inputBits; i++) {

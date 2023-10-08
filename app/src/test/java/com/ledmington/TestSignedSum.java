@@ -27,19 +27,23 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class TestSignedSum {
+public class TestSignedSum extends TestLogicFunction {
 
-    private final SignedSum ss = new SignedSum();
+    @BeforeAll
+    public static void setup() {
+        lf = new SignedSum();
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3, 5, 7, 9})
     public void noSumWithOddNumberOfBits(int n) {
-        assertThrows(IllegalArgumentException.class, () -> ss.apply(new BitArray(n)));
+        assertThrows(IllegalArgumentException.class, () -> lf.apply(new BitArray(n)));
     }
 
     private static Stream<Arguments> signedAdditions() {
@@ -84,7 +88,7 @@ public class TestSignedSum {
     @ParameterizedTest
     @MethodSource("signedAdditions")
     public void correctSignedSum(final BitArray a, final BitArray b, final BitArray out) {
-        final BitArray actual = ss.apply(BitArray.concat(a, b));
+        final BitArray actual = lf.apply(BitArray.concat(a, b));
         assertEquals(
                 out,
                 actual,
@@ -93,7 +97,7 @@ public class TestSignedSum {
 
     @ParameterizedTest
     @MethodSource("signedAdditions")
-    public void commutativity(final BitArray a, final BitArray b, final BitArray out) {
-        assertEquals(ss.apply(BitArray.concat(a, b)), ss.apply(BitArray.concat(b, a)));
+    public void commutativity(final BitArray a, final BitArray b) {
+        assertEquals(lf.apply(BitArray.concat(a, b)), lf.apply(BitArray.concat(b, a)));
     }
 }

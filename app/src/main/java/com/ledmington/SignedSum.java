@@ -17,13 +17,15 @@
 */
 package com.ledmington;
 
-public final class SignedSum implements LogicFunction {
+public final class SignedSum extends AbstractLogicFunction {
 
     public int inputBits(int n) {
+        assertValidBits(n);
         return 2 * n;
     }
 
     public int outputBits(int n) {
+        assertValidBits(n);
         return n;
     }
 
