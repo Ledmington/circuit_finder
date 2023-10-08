@@ -19,15 +19,47 @@ package com.ledmington;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Objects;
 
 public final class BitArray {
 
+    /*
+     * This is the bits array stored in little-endian (or MSB-0).
+     * This means that v[0] is the MSB and
+     * v[v.length-1] is the LSB.
+     */
     private final boolean[] v;
+
+    /*
+     * Little cache utilities to improve performance.
+     */
     private boolean isCachedHashCodeSet = false;
     private int cachedHashCode = -1;
 
     public BitArray(int bits) {
+        if (bits < 1) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid 'bits' value: should have been >=1 but was %,d", bits));
+        }
         this.v = new boolean[bits];
+    }
+
+    public BitArray(final String bits) {
+        Objects.requireNonNull(bits);
+        if (bits.isEmpty()) {
+            throw new IllegalArgumentException("An empty String is not allowed");
+        }
+        this.v = new boolean[bits.length()];
+        for (int i = 0; i < bits.length(); i++) {
+            if (bits.charAt(i) == '0') {
+                this.v[i] = false;
+            } else if (bits.charAt(i) == '1') {
+                this.v[i] = true;
+            } else {
+                throw new IllegalArgumentException(
+                        String.format("Invalid character found at index %,d: was '%c'", i, bits.charAt(i)));
+            }
+        }
     }
 
     public static BitArray convert(int bits, final BigInteger x) {
@@ -38,10 +70,74 @@ public final class BitArray {
         return a;
     }
 
+    public static BitArray concat(final BitArray a, final BitArray b) {
+        final BitArray c = new BitArray(a.length() + b.length());
+
+        for (int i = 0; i < a.length(); i++) {
+            c.v[i] = a.get(i);
+        }
+        for (int i = 0; i < b.length(); i++) {
+            c.v[i + a.length()] = b.get(i);
+        }
+        return c;
+    }
+
+    public int length() {
+        return v.length;
+    }
+
+    private void assertIndexIsValid(int i) {
+        if (i < 0 || i >= v.length) {
+            throw new IllegalArgumentException(String.format(
+                    "Invalid 'index' value: should have been between 0 and %,d but was %,d", v.length, i));
+        }
+    }
+
+    public boolean get(int i) {
+        assertIndexIsValid(i);
+        return v[i];
+    }
+
+    /**
+     * Sets the i-th bit to the given value.
+     *
+     * @param i
+     *      The index of the bit to be set.
+     */
+    public void set(int i, boolean value) {
+        assertIndexIsValid(i);
+        isCachedHashCodeSet = (v[i] == value);
+        v[i] = value;
+    }
+
+    /**
+     * Sets the i-th bit to 1.
+     *
+     * @param i
+     *      The index of the bit to be set to 1.
+     */
+    public void set(int i) {
+        assertIndexIsValid(i);
+        isCachedHashCodeSet = v[i];
+        v[i] = true;
+    }
+
+    /**
+     * Sets the i-th bit to 0.
+     *
+     * @param i
+     *      The index of the bits to be set to 0.
+     */
+    public void reset(int i) {
+        assertIndexIsValid(i);
+        isCachedHashCodeSet = !v[i];
+        v[i] = false;
+    }
+
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        for (int i = v.length - 1; i >= 0; i--) {
-            sb.append(v[i] ? "1" : "0");
+        for (boolean b : v) {
+            sb.append(b ? "1" : "0");
         }
         return sb.toString();
     }
