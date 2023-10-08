@@ -20,6 +20,7 @@ package com.ledmington;
 import java.math.BigInteger;
 
 import com.ledmington.utils.FormatUtils;
+import com.ledmington.utils.Generators;
 import com.ledmington.utils.ImmutableMap;
 import com.ledmington.utils.MiniLogger;
 import com.ledmington.utils.TerminalCursor;
@@ -52,6 +53,7 @@ public final class Main {
     private static final String OP_LIST = String.join("\n", new String[] {
         "   OP_NAME            BITS           DESCRIPTION",
         " logic_not           N -> N      Bitwise NOT.",
+        " logic_and         2*N -> N      Bitwise AND.",
         " signed_sum        2*N -> N      Sum of signed integers.",
         ""
     });
@@ -59,6 +61,7 @@ public final class Main {
     private static final ImmutableMap<String, LogicFunction> nameToOperation =
             ImmutableMap.<String, LogicFunction>builder()
                     .put("logic_not", new LogicNot())
+                    .put("logic_and", new LogicAnd())
                     .put("signed_sum", new SignedSum())
                     .build();
 
@@ -174,8 +177,8 @@ public final class Main {
         final double[] syy = new double[outputBits]; // zero-initialized
         final double[][] sxy = new double[inputBits][outputBits]; // zero-initialized
 
-        for (BigInteger x = BigInteger.ZERO; x.compareTo(limit) < 0; x = x.add(BigInteger.ONE)) {
-            final BitArray in = BitArray.convert(inputBits, x);
+        Generators.bitStrings(inputBits).forEach(x -> {
+            final BitArray in = new BitArray(x);
             final BitArray result = op.apply(in);
 
             for (int i = 0; i < inputBits; i++) {
@@ -191,13 +194,13 @@ public final class Main {
                     sxy[i][j] += (in.get(i) ? 1.0 : 0.0) * (result.get(j) ? 1.0 : 0.0);
                 }
             }
-        }
+        });
 
         final double n = limit.doubleValue();
-        final String correlationFormat = " %4.2f  ";
+        final String correlationFormat = "  %4.2f  ";
         System.out.print("          ");
         for (int j = 0; j < outputBits; j++) {
-            System.out.printf("out[%,d] ", j);
+            System.out.printf("out[%,2d] ", j);
         }
         System.out.println();
         for (int i = 0; i < inputBits; i++) {

@@ -26,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.ledmington.utils.Generators;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -135,25 +137,11 @@ public class TestBitArray {
 
     private static Stream<Arguments> bitStrings() {
         return Stream.of(
-                        // all 1-bit strings
-                        Stream.of("0", "1"),
-                        // all 2-bit strings
-                        Stream.of("0", "1").flatMap(s -> Stream.of(s + "0", s + "1")),
-                        // all 3-bit strings
-                        Stream.of("0", "1")
-                                .flatMap(s -> Stream.of(s + "0", s + "1"))
-                                .flatMap(s -> Stream.of(s + "0", s + "1")),
-                        // all 4-bit strings
-                        Stream.of("0", "1")
-                                .flatMap(s -> Stream.of(s + "0", s + "1"))
-                                .flatMap(s -> Stream.of(s + "0", s + "1"))
-                                .flatMap(s -> Stream.of(s + "0", s + "1")),
-                        // all 5-bit strings
-                        Stream.of("0", "1")
-                                .flatMap(s -> Stream.of(s + "0", s + "1"))
-                                .flatMap(s -> Stream.of(s + "0", s + "1"))
-                                .flatMap(s -> Stream.of(s + "0", s + "1"))
-                                .flatMap(s -> Stream.of(s + "0", s + "1")))
+                        Generators.bitStrings(1),
+                        Generators.bitStrings(2),
+                        Generators.bitStrings(3),
+                        Generators.bitStrings(4),
+                        Generators.bitStrings(5))
                 .flatMap(Function.identity())
                 .map(Arguments::of);
     }
