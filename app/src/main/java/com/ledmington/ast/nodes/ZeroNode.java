@@ -25,4 +25,14 @@ public final class ZeroNode extends Node {
     public int hashCode() {
         return 0;
     }
+
+    public boolean equals(final Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
+        return this.getClass().equals(other.getClass());
+    }
 }

@@ -15,18 +15,11 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington;
+package com.ledmington.ast.nodes;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
-
-import com.ledmington.ast.AndNode;
-import com.ledmington.ast.BracketsNode;
-import com.ledmington.ast.NotNode;
-import com.ledmington.ast.OrNode;
-import com.ledmington.ast.VariableNode;
-import com.ledmington.ast.ZeroNode;
 
 import org.junit.jupiter.api.Test;
 

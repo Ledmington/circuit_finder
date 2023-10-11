@@ -30,11 +30,28 @@ public final class VariableNode extends Node {
         }
     }
 
+    public String name() {
+        return name;
+    }
+
     public String toString() {
         return name;
     }
 
     public int hashCode() {
         return name.hashCode();
+    }
+
+    public boolean equals(final Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
+        if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        return this.name.equals(((VariableNode) other).name);
     }
 }

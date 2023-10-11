@@ -27,11 +27,28 @@ public final class BracketsNode extends Node {
         this.inner = Objects.requireNonNull(inner);
     }
 
+    public Node inner() {
+        return inner;
+    }
+
     public String toString() {
         return "(" + inner.toString() + ")";
     }
 
     public int hashCode() {
         return inner.hashCode();
+    }
+
+    public boolean equals(final Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
+        if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        return this.inner.equals(((BracketsNode) other).inner);
     }
 }

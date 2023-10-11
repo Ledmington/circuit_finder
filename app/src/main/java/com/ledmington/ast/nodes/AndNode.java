@@ -33,11 +33,29 @@ public final class AndNode extends Node {
         }
     }
 
+    public List<Node> nodes() {
+        return nodes;
+    }
+
     public String toString() {
         return nodes.stream().map(Object::toString).collect(Collectors.joining("&"));
     }
 
     public int hashCode() {
         return nodes.hashCode();
+    }
+
+    public boolean equals(final Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
+        if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+
+        return this.nodes.equals(((AndNode) other).nodes);
     }
 }
