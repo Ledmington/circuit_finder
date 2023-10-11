@@ -19,6 +19,7 @@ package com.ledmington.ast;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class OrNode extends Node {
 
@@ -30,5 +31,13 @@ public final class OrNode extends Node {
             throw new IllegalArgumentException(
                     String.format("Invalid list of nodes: should have had >=2 elements but had %,d", nodes.size()));
         }
+    }
+
+    public String toString() {
+        return nodes.stream().map(Object::toString).collect(Collectors.joining("+"));
+    }
+
+    public int hashCode() {
+        return nodes.hashCode();
     }
 }

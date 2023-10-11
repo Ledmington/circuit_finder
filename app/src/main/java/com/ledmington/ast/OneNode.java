@@ -17,4 +17,12 @@
 */
 package com.ledmington.ast;
 
-public final class OneNode extends Node {}
+public final class OneNode extends Node {
+    public String toString() {
+        return "1";
+    }
+
+    public int hashCode() {
+        return 1;
+    }
+}

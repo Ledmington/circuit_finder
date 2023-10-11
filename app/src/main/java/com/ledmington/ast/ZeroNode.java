@@ -17,4 +17,12 @@
 */
 package com.ledmington.ast;
 
-public final class ZeroNode extends Node {}
+public final class ZeroNode extends Node {
+    public String toString() {
+        return "0";
+    }
+
+    public int hashCode() {
+        return 0;
+    }
+}

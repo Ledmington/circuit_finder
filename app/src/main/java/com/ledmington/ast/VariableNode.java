@@ -29,4 +29,12 @@ public final class VariableNode extends Node {
             throw new IllegalArgumentException("Invalid name: cannot be empty or blank");
         }
     }
+
+    public String toString() {
+        return name;
+    }
+
+    public int hashCode() {
+        return name.hashCode();
+    }
 }

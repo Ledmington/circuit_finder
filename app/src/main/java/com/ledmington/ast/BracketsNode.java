@@ -26,4 +26,12 @@ public final class BracketsNode extends Node {
     public BracketsNode(final Node inner) {
         this.inner = Objects.requireNonNull(inner);
     }
+
+    public String toString() {
+        return "(" + inner.toString() + ")";
+    }
+
+    public int hashCode() {
+        return inner.hashCode();
+    }
 }

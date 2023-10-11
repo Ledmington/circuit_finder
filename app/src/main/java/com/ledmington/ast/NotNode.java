@@ -25,4 +25,12 @@ public final class NotNode extends Node {
     public NotNode(final Node inner) {
         this.inner = Objects.requireNonNull(inner);
     }
+
+    public String toString() {
+        return "(" + inner.toString() + ")";
+    }
+
+    public int hashCode() {
+        return inner.hashCode();
+    }
 }
