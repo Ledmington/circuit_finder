@@ -15,26 +15,14 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington.ast;
+package com.ledmington.ast.nodes;
 
-import java.util.Objects;
-
-public final class VariableNode extends Node {
-
-    private final String name;
-
-    public VariableNode(final String name) {
-        this.name = Objects.requireNonNull(name);
-        if (name.isEmpty() || name.isBlank()) {
-            throw new IllegalArgumentException("Invalid name: cannot be empty or blank");
-        }
-    }
-
+public final class OneNode extends Node {
     public String toString() {
-        return name;
+        return "1";
     }
 
     public int hashCode() {
-        return name.hashCode();
+        return 1;
     }
 }

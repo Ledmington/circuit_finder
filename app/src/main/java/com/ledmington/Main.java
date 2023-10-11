@@ -18,7 +18,15 @@
 package com.ledmington;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.ledmington.ast.nodes.AndNode;
+import com.ledmington.ast.nodes.BracketsNode;
+import com.ledmington.ast.nodes.Node;
+import com.ledmington.ast.nodes.NotNode;
+import com.ledmington.ast.nodes.OrNode;
+import com.ledmington.ast.nodes.VariableNode;
 import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.Generators;
 import com.ledmington.utils.ImmutableMap;
@@ -134,6 +142,7 @@ public final class Main {
 
         for (int i = 0; i < outputBits; i++) {
             final StringBuilder sb = new StringBuilder();
+            final List<Node> nodes = new ArrayList<>();
 
             final int finalI = i;
             Generators.bitStrings(inputBits).forEach(s -> {
@@ -145,20 +154,34 @@ public final class Main {
                         sb.append('+');
                     }
                     sb.append('(');
+                    final List<Node> tmp = new ArrayList<>();
                     for (int j = 0; j < inputBits; j++) {
                         if (j > 0) {
                             sb.append('&');
                         }
-                        final char variableName = (char) ('A' + j);
-                        sb.append(in.get(j) ? variableName : "~" + variableName);
+                        final String variableName = String.valueOf('A' + j);
+                        if (in.get(j)) {
+                            sb.append(variableName);
+                            tmp.add(new VariableNode(variableName));
+                        } else {
+                            sb.append("~").append(variableName);
+                            tmp.add(new NotNode(new VariableNode(variableName)));
+                        }
                     }
                     sb.append(')');
+                    nodes.add(new BracketsNode(new AndNode(tmp)));
                 }
             });
 
+            final Node astRoot = new OrNode(nodes);
+
             System.out.printf(
-                    "The boolean expression for bit %d has %,d characters\n",
-                    i, sb.toString().length());
+                    "The boolean expression for bit %d has %,d characters (AST representation: %,d characters)\n",
+                    i, sb.toString().length(), astRoot.toString().length());
+
+            if (!sb.toString().equals(astRoot.toString())) {
+                throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
+            }
         }
     }
 

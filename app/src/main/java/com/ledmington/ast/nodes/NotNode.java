@@ -15,20 +15,19 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington.ast;
+package com.ledmington.ast.nodes;
 
 import java.util.Objects;
 
-public final class BracketsNode extends Node {
-
+public final class NotNode extends Node {
     private final Node inner;
 
-    public BracketsNode(final Node inner) {
+    public NotNode(final Node inner) {
         this.inner = Objects.requireNonNull(inner);
     }
 
     public String toString() {
-        return "(" + inner.toString() + ")";
+        return "~" + inner.toString();
     }
 
     public int hashCode() {

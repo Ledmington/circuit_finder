@@ -15,14 +15,29 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington.ast;
+package com.ledmington.ast.nodes;
 
-public final class OneNode extends Node {
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public final class AndNode extends Node {
+
+    private final List<Node> nodes;
+
+    public AndNode(final List<Node> nodes) {
+        this.nodes = Objects.requireNonNull(nodes);
+        if (nodes.size() < 2) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid list of nodes: should have had >=2 elements but had %,d", nodes.size()));
+        }
+    }
+
     public String toString() {
-        return "1";
+        return nodes.stream().map(Object::toString).collect(Collectors.joining("&"));
     }
 
     public int hashCode() {
-        return 1;
+        return nodes.hashCode();
     }
 }
