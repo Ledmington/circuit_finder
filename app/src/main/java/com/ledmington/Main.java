@@ -22,7 +22,6 @@ import java.math.BigInteger;
 import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.Generators;
 import com.ledmington.utils.ImmutableMap;
-import com.ledmington.utils.MiniLogger;
 import com.ledmington.utils.TerminalCursor;
 import com.ledmington.utils.TerminalCursor.TerminalColor;
 
@@ -37,12 +36,6 @@ public final class Main {
         "     --operation OPNAME   Generates a circuit which computes the operation corresponding to OPNAME",
         "",
         "     --op_list            Prints the list of available operations and exits",
-        "",
-        " --- Output --- ",
-        " -q, --quiet  Sets the verbosity to 0 (only errors)",
-        " -v           Sets the verbosity to 1 (errors and warnings)",
-        " -vv          Sets the verbosity to 2 (errors, warnings and info)",
-        " -vvv         Sets the verbosity to 3 (no output is discarded)",
         "",
         " --- Others --- ",
         " -h, --help     Prints this message and exits.",
@@ -65,108 +58,8 @@ public final class Main {
                     .put("signed_sum", new SignedSum())
                     .build();
 
-    public static void main(final String[] args) {
-        int nJobs = 1;
-        int bits = -1;
-        String operation = "";
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "-h":
-                case "--help":
-                    System.out.println(HELP_MSG);
-                    System.exit(0);
-                    break;
-                case "-j":
-                case "--jobs":
-                    try {
-                        nJobs = Integer.parseInt(args[i + 1]);
-                    } catch (NumberFormatException e) {
-                        System.out.printf("The parameter '--jobs' needs an integer, not '%s'.\n", args[i + 1]);
-                        System.exit(-1);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("The parameter '--jobs' needs an integer, but none was found.");
-                        System.exit(-1);
-                    }
-                    if (nJobs < 1 || nJobs > Runtime.getRuntime().availableProcessors()) {
-                        System.out.printf(
-                                "Invalid value for '--jobs'. Should have been between 1 and %,d, but was %,d.\n",
-                                Runtime.getRuntime().availableProcessors(), nJobs);
-                    }
-                    i++;
-                    break;
-                case "--bits":
-                    try {
-                        bits = Integer.parseInt(args[i + 1]);
-                    } catch (NumberFormatException e) {
-                        System.out.printf("The parameter '--bits' needs an integer, not '%s'.\n", args[i + 1]);
-                        System.exit(-1);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("The parameter '--bits' needs an integer, but none was found.");
-                        System.exit(-1);
-                    }
-                    if (bits < 1 || bits > MAX_BITS_SUPPORTED) {
-                        System.out.printf(
-                                "Invalid value for '--bits'. Should have been between 1 and %,d but was %,d.\n",
-                                MAX_BITS_SUPPORTED, bits);
-                    }
-                    i++;
-                    break;
-                case "--operation":
-                    try {
-                        operation = args[i + 1];
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("The parameter '--operation' needs a string, but none was found.");
-                        System.exit(-1);
-                    }
-                    i++;
-                    break;
-                case "--op_list":
-                    System.out.println(OP_LIST);
-                    System.exit(0);
-                    break;
-                case "-q":
-                case "--quiet":
-                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.ERROR);
-                    break;
-                case "-v":
-                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.WARNING);
-                    break;
-                case "-vv":
-                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.INFO);
-                    break;
-                case "-vvv":
-                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.DEBUG);
-                    break;
-                default:
-                    System.err.printf("\nUnknown parameter '%s'.\nQuitting.\n", args[i]);
-                    System.exit(-1);
-                    break;
-            }
-        }
-
-        if (bits < 1) {
-            System.err.println("Parameter '--bits' was not set.");
-            System.exit(-1);
-        }
-        if (operation.isEmpty()) {
-            System.err.println("Parameter '--operation' was not set.");
-            System.exit(-1);
-        }
-
-        if (!nameToOperation.containsKey(operation)) {
-            System.err.printf("Operation '%s' does not exist.\n", operation);
-            System.exit(-1);
-        }
-
-        final LogicFunction op = nameToOperation.get(operation);
-        final int inputBits = op.inputBits(bits);
-        final int outputBits = op.outputBits(bits);
-        final BigInteger limit = BigInteger.TWO.pow(inputBits);
-        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", bits, FormatUtils.thousands(limit, ","));
-        System.out.println();
-        System.out.printf(
-                "The selected operation requires %,d input bits to produce %,d output bits.", inputBits, outputBits);
-
+    private static void computeCorrelationMatrix(
+            final BigInteger limit, int inputBits, int outputBits, final LogicFunction op) {
         System.out.println();
         System.out.println("Computing correlation matrix...");
 
@@ -228,5 +121,138 @@ public final class Main {
         }
 
         System.out.println();
+    }
+
+    private static void buildCircuit(final BigInteger limit, int inputBits, int outputBits, final LogicFunction op) {
+        System.out.println();
+        System.out.println("Building circuit...\n");
+
+        // FIXME: allow more than 26 variables
+        if (inputBits > 26) {
+            throw new IllegalArgumentException("Currently we do not support more than 26 different variables.");
+        }
+
+        for (int i = 0; i < outputBits; i++) {
+            final StringBuilder sb = new StringBuilder();
+
+            final int finalI = i;
+            Generators.bitStrings(inputBits).forEach(s -> {
+                final BitArray in = new BitArray(s);
+                final BitArray out = op.apply(in);
+
+                if (out.get(finalI)) {
+                    if (!sb.isEmpty()) {
+                        sb.append('+');
+                    }
+                    sb.append('(');
+                    for (int j = 0; j < inputBits; j++) {
+                        if (j > 0) {
+                            sb.append('&');
+                        }
+                        final char variableName = (char) ('A' + j);
+                        sb.append(in.get(j) ? variableName : "~" + variableName);
+                    }
+                    sb.append(')');
+                }
+            });
+
+            System.out.printf(
+                    "The boolean expression for bit %d has %,d characters\n",
+                    i, sb.toString().length());
+        }
+    }
+
+    public static void main(final String[] args) {
+        int nJobs = 1;
+        int bits = -1;
+        String operation = "";
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "-h":
+                case "--help":
+                    System.out.println(HELP_MSG);
+                    System.exit(0);
+                    break;
+                case "-j":
+                case "--jobs":
+                    try {
+                        nJobs = Integer.parseInt(args[i + 1]);
+                    } catch (NumberFormatException e) {
+                        System.out.printf("The parameter '--jobs' needs an integer, not '%s'.\n", args[i + 1]);
+                        System.exit(-1);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("The parameter '--jobs' needs an integer, but none was found.");
+                        System.exit(-1);
+                    }
+                    if (nJobs < 1 || nJobs > Runtime.getRuntime().availableProcessors()) {
+                        System.out.printf(
+                                "Invalid value for '--jobs'. Should have been between 1 and %,d, but was %,d.\n",
+                                Runtime.getRuntime().availableProcessors(), nJobs);
+                    }
+                    i++;
+                    break;
+                case "--bits":
+                    try {
+                        bits = Integer.parseInt(args[i + 1]);
+                    } catch (NumberFormatException e) {
+                        System.out.printf("The parameter '--bits' needs an integer, not '%s'.\n", args[i + 1]);
+                        System.exit(-1);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("The parameter '--bits' needs an integer, but none was found.");
+                        System.exit(-1);
+                    }
+                    if (bits < 1 || bits > MAX_BITS_SUPPORTED) {
+                        System.out.printf(
+                                "Invalid value for '--bits'. Should have been between 1 and %,d but was %,d.\n",
+                                MAX_BITS_SUPPORTED, bits);
+                    }
+                    i++;
+                    break;
+                case "--operation":
+                    try {
+                        operation = args[i + 1];
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("The parameter '--operation' needs a string, but none was found.");
+                        System.exit(-1);
+                    }
+                    i++;
+                    break;
+                case "--op_list":
+                    System.out.println(OP_LIST);
+                    System.exit(0);
+                    break;
+                default:
+                    System.err.printf("\nUnknown parameter '%s'.\nQuitting.\n", args[i]);
+                    System.exit(-1);
+                    break;
+            }
+        }
+
+        if (bits < 1) {
+            System.err.println("Parameter '--bits' was not set.");
+            System.exit(-1);
+        }
+        if (operation.isEmpty()) {
+            System.err.println("Parameter '--operation' was not set.");
+            System.exit(-1);
+        }
+
+        if (!nameToOperation.containsKey(operation)) {
+            System.err.printf("Operation '%s' does not exist.\n", operation);
+            System.exit(-1);
+        }
+
+        final LogicFunction op = nameToOperation.get(operation);
+        final int inputBits = op.inputBits(bits);
+        final int outputBits = op.outputBits(bits);
+        final BigInteger limit = BigInteger.TWO.pow(inputBits);
+        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", bits, FormatUtils.thousands(limit, ","));
+        System.out.println();
+        System.out.printf(
+                "The selected operation requires %,d input bits to produce %,d output bits.\n", inputBits, outputBits);
+
+        // computeCorrelationMatrix(limit, inputBits, outputBits, op);
+
+        buildCircuit(limit, inputBits, outputBits, op);
     }
 }
