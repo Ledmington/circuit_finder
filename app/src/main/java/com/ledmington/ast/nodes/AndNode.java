@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public final class AndNode extends Node {
+public final class AndNode extends MultiNode {
 
     private final List<Node> nodes;
 

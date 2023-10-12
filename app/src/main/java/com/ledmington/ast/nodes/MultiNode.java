@@ -17,10 +17,8 @@
 */
 package com.ledmington.ast.nodes;
 
-public abstract sealed class Node permits BracketsNode, MultiNode, NotNode, OneNode, VariableNode, ZeroNode {
+import java.util.List;
 
-    /**
-     * Computes the size of the AST this Node is root of in terms of number of nodes.
-     */
-    public abstract int size();
+public abstract sealed class MultiNode extends Node permits AndNode, OrNode {
+    public abstract List<Node> nodes();
 }

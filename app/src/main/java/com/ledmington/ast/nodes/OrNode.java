@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public final class OrNode extends Node {
+public final class OrNode extends MultiNode {
 
     private final List<Node> nodes;
 
