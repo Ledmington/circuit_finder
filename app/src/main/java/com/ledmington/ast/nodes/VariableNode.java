@@ -34,6 +34,10 @@ public final class VariableNode extends Node {
         return name;
     }
 
+    public int size() {
+        return 1;
+    }
+
     public String toString() {
         return name;
     }

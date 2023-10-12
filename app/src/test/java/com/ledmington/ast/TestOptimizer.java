@@ -17,7 +17,7 @@
 */
 package com.ledmington.ast;
 
-import java.util.List;
+import java.util.Arrays;
 
 import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.BracketsNode;
@@ -52,11 +52,19 @@ public abstract class TestOptimizer {
         return new VariableNode("A");
     }
 
-    protected static Node or(final Node a, final Node b) {
-        return new OrNode(List.of(a, b));
+    protected static Node B() {
+        return new VariableNode("B");
     }
 
-    protected static Node and(final Node a, final Node b) {
-        return new AndNode(List.of(a, b));
+    protected static Node C() {
+        return new VariableNode("C");
+    }
+
+    protected static Node or(final Node... nodes) {
+        return new OrNode(Arrays.asList(nodes));
+    }
+
+    protected static Node and(final Node... nodes) {
+        return new AndNode(Arrays.asList(nodes));
     }
 }

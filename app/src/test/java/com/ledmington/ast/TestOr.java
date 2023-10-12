@@ -27,23 +27,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class TestBrackets extends TestOptimizer {
-    private static Stream<Arguments> bracketsProperties() {
+public class TestOr extends TestOptimizer {
+
+    private static Stream<Arguments> orProperties() {
         return Stream.of(
-                Arguments.of(A(), A()),
-                Arguments.of(brackets(A()), A()),
-                Arguments.of(brackets(brackets(A())), A()),
-                Arguments.of(brackets(brackets(brackets(A()))), A()),
-                Arguments.of(not(brackets(A())), not(A())),
-                Arguments.of(or(brackets(A()), B()), or(A(), B())),
-                Arguments.of(or(A(), brackets(B())), or(A(), B())),
-                Arguments.of(and(brackets(A()), B()), and(A(), B())),
-                Arguments.of(and(A(), brackets(B())), and(A(), B())));
+                Arguments.of(or(A(), B()), or(A(), B())),
+                Arguments.of(or(A(), brackets(or(B(), C()))), or(A(), B(), C())),
+                Arguments.of(or(brackets(or(A(), B())), C()), or(A(), B(), C())));
     }
 
     @ParameterizedTest
-    @MethodSource("bracketsProperties")
-    public void bracketsProperties(final Node before, final Node expected) {
+    @MethodSource("orProperties")
+    public void orProperties(final Node before, final Node expected) {
         final Node after = Optimizer.optimize(before);
         assertEquals(expected, after);
     }

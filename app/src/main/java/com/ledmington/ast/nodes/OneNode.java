@@ -18,6 +18,10 @@
 package com.ledmington.ast.nodes;
 
 public final class OneNode extends Node {
+    public int size() {
+        return 1;
+    }
+
     public String toString() {
         return "1";
     }

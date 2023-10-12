@@ -34,8 +34,10 @@ public class TestConstants extends TestOptimizer {
                 Arguments.of(zero(), zero()),
                 Arguments.of(not(zero()), one()),
                 Arguments.of(brackets(zero()), zero()),
+                Arguments.of(or(zero(), zero()), zero()),
                 Arguments.of(or(A(), zero()), A()),
                 Arguments.of(or(zero(), A()), A()),
+                Arguments.of(and(zero(), zero()), zero()),
                 Arguments.of(and(A(), zero()), zero()),
                 Arguments.of(and(zero(), A()), zero()));
     }
@@ -52,8 +54,10 @@ public class TestConstants extends TestOptimizer {
                 Arguments.of(one(), one()),
                 Arguments.of(not(one()), zero()),
                 Arguments.of(brackets(one()), one()),
+                Arguments.of(or(one(), one()), one()),
                 Arguments.of(or(A(), one()), one()),
                 Arguments.of(or(one(), A()), one()),
+                Arguments.of(and(one(), one()), one()),
                 Arguments.of(and(A(), one()), A()),
                 Arguments.of(and(one(), A()), A()));
     }

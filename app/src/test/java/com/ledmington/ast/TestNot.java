@@ -32,9 +32,13 @@ public class TestNot extends TestOptimizer {
     private static Stream<Arguments> notProperties() {
         return Stream.of(
                 Arguments.of(A(), A()),
+                Arguments.of(not(A()), not(A())),
                 Arguments.of(not(not(A())), A()),
+                Arguments.of(not(not(not(A()))), not(A())),
                 Arguments.of(not(not(not(not(A())))), A()),
-                Arguments.of(not(not(not(not(not(not(A())))))), A()));
+                Arguments.of(not(not(not(not(not(A()))))), not(A())),
+                Arguments.of(not(not(not(not(not(not(A())))))), A()),
+                Arguments.of(not(not(not(not(not(not(not(A()))))))), not(A())));
     }
 
     @ParameterizedTest

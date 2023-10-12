@@ -30,6 +30,10 @@ public final class NotNode extends Node {
         return inner;
     }
 
+    public int size() {
+        return 1 + inner.size();
+    }
+
     public String toString() {
         return "~" + inner.toString();
     }

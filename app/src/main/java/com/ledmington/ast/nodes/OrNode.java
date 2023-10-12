@@ -19,7 +19,6 @@ package com.ledmington.ast.nodes;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public final class OrNode extends Node {
 
@@ -37,8 +36,21 @@ public final class OrNode extends Node {
         return nodes;
     }
 
+    public int size() {
+        int s = 1;
+        for (final Node n : nodes) {
+            s += n.size();
+        }
+        return s;
+    }
+
     public String toString() {
-        return nodes.stream().map(Object::toString).collect(Collectors.joining("+"));
+        final StringBuilder sb = new StringBuilder(nodes.get(0).toString());
+        for (int i = 1; i < nodes.size(); i++) {
+            sb.append('+');
+            sb.append(nodes.get(i).toString());
+        }
+        return sb.toString();
     }
 
     public int hashCode() {
