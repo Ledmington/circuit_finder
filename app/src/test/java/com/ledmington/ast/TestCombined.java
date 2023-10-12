@@ -35,9 +35,9 @@ public class TestCombined extends TestOptimizer {
                 Arguments.of(and(A(), brackets(or(A(), B()))), A()),
                 // absorption 2
                 Arguments.of(or(A(), brackets(and(A(), B()))), A()),
-                // distributivity of AND over OR
+                // reverse distributivity of AND over OR
                 Arguments.of(or(and(A(), B()), and(A(), C())), and(A(), or(B(), C()))),
-                // distributivity of OR over AND
+                // reverse distributivity of OR over AND
                 Arguments.of(and(or(A(), B()), or(A(), C())), or(A(), and(B(), C()))));
     }
 

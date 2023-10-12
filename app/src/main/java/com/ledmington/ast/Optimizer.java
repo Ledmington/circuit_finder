@@ -170,6 +170,9 @@ public final class Optimizer {
             Arrays.fill(tobeAdded, true);
             for (int i = 0; i < root.nodes().size(); i++) {
                 final Node a = root.nodes().get(i);
+                if (!tobeAdded[i]) {
+                    continue;
+                }
                 for (int j = i + 1; j < root.nodes().size(); j++) {
                     final Node b = root.nodes().get(j);
                     if (!b.getClass().equals(inverseClass)) {
@@ -195,6 +198,26 @@ public final class Optimizer {
             return opConstructor.apply(
                     tmp.stream().map(Optimizer::optimizeActual).toList());
         }
+
+        // (A & B) + (A & C) = A & (B + C)
+        // (A + B) & (A + C) = A + (B & C)
+        // TODO
+        /*if(root.nodes().stream().filter(n->n.getClass().equals(inverseClass)).count()>=2) {
+        final List<Node> tmp= root.nodes().stream().filter(n->n.getClass().equals(inverseClass)).toList();
+        for(int i=0;i<tmp.size();i++){
+            final MultiNode a= (MultiNode) tmp.get(i);
+            for(int j=i+1;j<tmp.size();j++){
+                final MultiNode b=(MultiNode)tmp.get(j);
+                final
+                for(final Node n:a.nodes()){
+                    if(b.nodes().contains(n)){
+                        // n is repeated
+
+                    }
+                }
+            }
+        }
+                }*/
 
         // default behavior: continue exploring down
         return opConstructor.apply(
