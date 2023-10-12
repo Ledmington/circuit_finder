@@ -27,20 +27,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class TestAnd extends TestOptimizer {
+public class TestCombined extends TestOptimizer {
 
-    private static Stream<Arguments> andProperties() {
+    private static Stream<Arguments> booleanLaws() {
         return Stream.of(
-                Arguments.of(and(A(), A()), A()),
-                Arguments.of(and(A(), A(), B()), and(A(), B())),
-                Arguments.of(and(A(), B()), and(A(), B())),
-                Arguments.of(and(A(), brackets(and(B(), C()))), and(A(), B(), C())),
-                Arguments.of(and(brackets(and(A(), B())), C()), and(A(), B(), C())));
+                // absorption 1
+                Arguments.of(and(A(), brackets(or(A(), B()))), A()),
+                // absorption 2
+                Arguments.of(or(A(), brackets(and(A(), B()))), A()),
+                // distributivity of AND over OR
+                Arguments.of(or(and(A(), B()), and(A(), C())), and(A(), or(B(), C()))),
+                // distributivity of OR over AND
+                Arguments.of(and(or(A(), B()), or(A(), C())), or(A(), and(B(), C()))));
     }
 
     @ParameterizedTest
-    @MethodSource("andProperties")
-    public void andProperties(final Node before, final Node expected) {
+    @MethodSource("booleanLaws")
+    public void booleanLaws(final Node before, final Node expected) {
         final Node after = Optimizer.optimize(before);
         assertEquals(expected, after);
     }

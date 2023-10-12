@@ -19,6 +19,7 @@ package com.ledmington.ast.nodes;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class AndNode extends Node {
 
@@ -45,10 +46,18 @@ public final class AndNode extends Node {
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder(nodes.get(0).toString());
+        final StringBuilder sb = new StringBuilder();
+        final Consumer<Node> c = n -> {
+            if (n instanceof OrNode) {
+                sb.append("(").append(n).append(")");
+            } else {
+                sb.append(n.toString());
+            }
+        };
+        c.accept(nodes.get(0));
         for (int i = 1; i < nodes.size(); i++) {
             sb.append('&');
-            sb.append(nodes.get(i).toString());
+            c.accept(nodes.get(i));
         }
         return sb.toString();
     }
