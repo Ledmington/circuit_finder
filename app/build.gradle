@@ -64,7 +64,7 @@ testlogger {
 
 	showSummary true
 	showSimpleNames false
-	showPassed true
+	showPassed false
 	showSkipped true
 	showFailed true
 	showOnlySlow false

@@ -38,7 +38,25 @@ public class TestCombined extends TestOptimizer {
                 // reverse distributivity of AND over OR
                 Arguments.of(or(and(A(), B()), and(A(), C())), and(A(), or(B(), C()))),
                 // reverse distributivity of OR over AND
-                Arguments.of(and(or(A(), B()), or(A(), C())), or(A(), and(B(), C()))));
+                Arguments.of(and(or(A(), B()), or(A(), C())), or(A(), and(B(), C()))),
+                // De Morgan theorem from AND to OR
+                // ~(~A & ~B) = A + B
+                Arguments.of(not(brackets(and(not(A()), not(B())))), or(A(), B())),
+                // ~(A & ~B) = ~A + B
+                Arguments.of(not(brackets(and(A(), not(B())))), or(not(A()), B())),
+                // ~(~A & B) = A + ~B
+                Arguments.of(not(brackets(and(not(A()), B()))), or(A(), not(B()))),
+                // ~A & ~B = ~(A + B)
+                Arguments.of(and(not(A()), not(B())), not(or(A(), B()))),
+                // De Morgan theorem from OR to AND
+                // ~(~A + ~B) = A & B
+                Arguments.of(not(brackets(or(not(A()), not(B())))), and(A(), B())),
+                // ~(A + ~B) = ~A & B
+                Arguments.of(not(brackets(or(A(), not(B())))), and(not(A()), B())),
+                // ~(~A + B) = A & ~B
+                Arguments.of(not(brackets(or(not(A()), B()))), and(A(), not(B()))),
+                // ~A + ~B = ~(A & B)
+                Arguments.of(or(not(A()), not(B())), not(and(A(), B()))));
     }
 
     @ParameterizedTest

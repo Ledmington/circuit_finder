@@ -35,6 +35,9 @@ public final class NotNode extends Node {
     }
 
     public String toString() {
+        if (inner instanceof AndNode || inner instanceof OrNode) {
+            return "~(" + inner.toString() + ")";
+        }
         return "~" + inner.toString();
     }
 

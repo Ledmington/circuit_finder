@@ -40,7 +40,15 @@ public class TestConstants extends TestOptimizer {
                 Arguments.of(and(zero(), zero()), zero()),
                 Arguments.of(and(A(), zero()), zero()),
                 Arguments.of(and(zero(), A()), zero()),
-                Arguments.of(and(A(), not(A())), zero()));
+                Arguments.of(and(A(), not(A())), zero()),
+                Arguments.of(and(brackets(A()), not(A())), zero()),
+                Arguments.of(and(A(), not(brackets(A()))), zero()),
+                Arguments.of(and(A(), brackets(not(A()))), zero()),
+                Arguments.of(and(brackets(A()), not(brackets(A()))), zero()),
+                Arguments.of(and(brackets(A()), brackets(not(A()))), zero()),
+                Arguments.of(and(B(), A(), not(A())), zero()),
+                Arguments.of(and(A(), B(), not(A())), zero()),
+                Arguments.of(and(A(), not(A()), B()), zero()));
     }
 
     @ParameterizedTest
@@ -61,7 +69,15 @@ public class TestConstants extends TestOptimizer {
                 Arguments.of(and(one(), one()), one()),
                 Arguments.of(and(A(), one()), A()),
                 Arguments.of(and(one(), A()), A()),
-                Arguments.of(or(A(), not(A())), one()));
+                Arguments.of(or(A(), not(A())), one()),
+                Arguments.of(or(brackets(A()), not(A())), one()),
+                Arguments.of(or(A(), not(brackets(A()))), one()),
+                Arguments.of(or(A(), brackets(not(A()))), one()),
+                Arguments.of(or(brackets(A()), not(brackets(A()))), one()),
+                Arguments.of(or(A(), brackets(not(A()))), one()),
+                Arguments.of(or(B(), A(), not(A())), one()),
+                Arguments.of(or(A(), B(), not(A())), one()),
+                Arguments.of(or(A(), not(A()), B()), one()));
     }
 
     @ParameterizedTest
