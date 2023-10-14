@@ -32,6 +32,9 @@ import com.ledmington.ast.nodes.ZeroNode;
  * This class exists only to provide common utility methods for testing.
  */
 public abstract class TestOptimizer {
+
+    protected static final Optimizer opt = new Optimizer(1);
+
     protected static Node zero() {
         return new ZeroNode();
     }

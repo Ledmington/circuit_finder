@@ -44,7 +44,7 @@ public class TestNot extends TestOptimizer {
     @ParameterizedTest
     @MethodSource("notProperties")
     public void notProperties(final Node before, final Node expected) {
-        final Node after = Optimizer.optimize(before);
+        final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 }

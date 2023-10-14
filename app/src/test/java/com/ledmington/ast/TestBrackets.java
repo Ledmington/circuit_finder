@@ -44,7 +44,7 @@ public class TestBrackets extends TestOptimizer {
     @ParameterizedTest
     @MethodSource("bracketsProperties")
     public void bracketsProperties(final Node before, final Node expected) {
-        final Node after = Optimizer.optimize(before);
+        final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 }

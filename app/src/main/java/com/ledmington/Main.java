@@ -192,7 +192,8 @@ public final class Main {
                 throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
             }
 
-            final Node optimized = Optimizer.optimize(astRoot);
+            // TODO: set maxDepth as CLI argument
+            final Node optimized = new Optimizer(3).optimize(astRoot);
             System.out.printf("Optimized circuit: '%s'\n", optimized);
         }
     }
@@ -291,6 +292,8 @@ public final class Main {
             System.exit(-1);
         }
 
+        logger.warning("Currently the parameter 'jobs' is not used");
+
         final LogicFunction op = nameToOperation.get(operation);
         final int inputBits = op.inputBits(bits);
         final int outputBits = op.outputBits(bits);
@@ -306,6 +309,7 @@ public final class Main {
             buildCircuit(limit, inputBits, outputBits, op);
         } catch (Throwable t) {
             logger.error(t);
+            System.exit(-1);
         }
     }
 }

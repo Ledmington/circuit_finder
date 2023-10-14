@@ -43,7 +43,7 @@ public class TestAnd extends TestOptimizer {
     @ParameterizedTest
     @MethodSource("andProperties")
     public void andProperties(final Node before, final Node expected) {
-        final Node after = Optimizer.optimize(before);
+        final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 }

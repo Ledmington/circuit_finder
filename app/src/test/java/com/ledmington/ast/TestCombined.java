@@ -81,7 +81,7 @@ public class TestCombined extends TestOptimizer {
     @ParameterizedTest
     @MethodSource("booleanLaws")
     public void booleanLaws(final Node before, final Node expected) {
-        final Node after = Optimizer.optimize(before);
+        final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 }

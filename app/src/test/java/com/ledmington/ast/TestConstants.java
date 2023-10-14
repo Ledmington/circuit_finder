@@ -54,7 +54,7 @@ public class TestConstants extends TestOptimizer {
     @ParameterizedTest
     @MethodSource("zeroProperties")
     public void zeroProperties(final Node before, final Node expected) {
-        final Node after = Optimizer.optimize(before);
+        final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 
@@ -83,7 +83,7 @@ public class TestConstants extends TestOptimizer {
     @ParameterizedTest
     @MethodSource("oneProperties")
     public void oneProperties(final Node before, final Node expected) {
-        final Node after = Optimizer.optimize(before);
+        final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 }
