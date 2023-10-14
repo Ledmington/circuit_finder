@@ -32,19 +32,32 @@ import com.ledmington.ast.nodes.NotNode;
 import com.ledmington.ast.nodes.OneNode;
 import com.ledmington.ast.nodes.OrNode;
 import com.ledmington.ast.nodes.ZeroNode;
+import com.ledmington.utils.MiniLogger;
 
 public final class Optimizer {
+
+    private static final MiniLogger logger = MiniLogger.getLogger("optimizer");
 
     private Optimizer() {}
 
     public static Node optimize(final Node root) {
-        Node current;
-        Node next = root;
+        final int initialSize = root.size();
+        Node current = root;
+        Node next = optimizeActual(current);
 
-        do {
+        logger.info("Initial AST size %,d", initialSize);
+
+        for (int i = 0; next.size() < current.size(); i++) {
+            logger.info(
+                    "Optimization n. %,d: reduced AST size from %,d to %,d (%5.2f%%)",
+                    i, current.size(), next.size(), (double) next.size() / (double) current.size() * 100.0);
             current = next;
             next = optimizeActual(current);
-        } while (next.size() < current.size());
+        }
+
+        logger.info(
+                "Final AST size %,d (%5.2f%% of original size)",
+                current.size(), (double) current.size() / (double) initialSize * 100.0);
 
         return current;
     }
@@ -73,16 +86,19 @@ public final class Optimizer {
     private static Node optimizeNot(final NotNode not) {
         // ~0 = 1
         if (not.inner() instanceof ZeroNode) {
+            logger.debug("Optimizing '%s' to '1'", not);
             return new OneNode();
         }
 
         // ~1 = 0
         if (not.inner() instanceof OneNode) {
+            logger.debug("Optimizing '%s' to '0'", not);
             return new ZeroNode();
         }
 
         // ~~X = X
         if (not.inner() instanceof NotNode notnot) {
+            logger.debug("Optimizing double not '%s' to '%s'", not, notnot.inner());
             return optimizeActual(notnot.inner());
         }
 
@@ -113,6 +129,7 @@ public final class Optimizer {
         // A & 0 = 0
         // A + 1 = 1
         if (root.nodes().contains(annihilator)) {
+            logger.debug("Optimizing annihilator '%s' to '%s'", root, annihilator);
             return annihilator;
         }
 
@@ -122,13 +139,17 @@ public final class Optimizer {
             final List<Node> tmp =
                     root.nodes().stream().filter(n -> !n.equals(identity)).toList();
             if (tmp.isEmpty()) {
+                logger.debug("Optimizing identity '%s' to '%s'", root, identity);
                 return identity;
             }
             if (tmp.size() == 1) {
+                logger.debug("Optimizing identity '%s' to '%s'", root, tmp.get(0));
                 return optimizeActual(tmp.get(0));
             }
-            return opConstructor.apply(
+            final Node toReturn = opConstructor.apply(
                     tmp.stream().map(Optimizer::optimizeActual).toList());
+            logger.debug("Optimizing identity '%s' to '%s'", root, toReturn);
+            return toReturn;
         }
 
         final Class<?> rootClass = (root instanceof AndNode) ? AndNode.class : OrNode.class;
@@ -153,14 +174,16 @@ public final class Optimizer {
         // A + A + B = A + B
         if (new HashSet<>(root.nodes()).size() < root.nodes().size()) {
             final Set<Node> uniques = new HashSet<>(root.nodes());
-            if (uniques.isEmpty()) {
-                return identity;
-            }
             if (uniques.size() == 1) {
+                logger.debug(
+                        "Optimizing repetition '%s' to '%s'",
+                        root, uniques.iterator().next());
                 return optimizeActual(uniques.iterator().next());
             }
-            return opConstructor.apply(
+            final Node toReturn = opConstructor.apply(
                     uniques.stream().map(Optimizer::optimizeActual).toList());
+            logger.debug("Optimizing repetition '%s' to '%s'", root, toReturn);
+            return toReturn;
         }
 
         // A & (A + B) = A
@@ -190,13 +213,17 @@ public final class Optimizer {
                 }
             }
             if (tmp.isEmpty()) {
+                logger.debug("Optimizing absorption '%s' to '%s'", root, identity);
                 return identity;
             }
             if (tmp.size() == 1) {
+                logger.debug("Optimizing absorption '%s' to '%s'", root, tmp.get(0));
                 return optimizeActual(tmp.get(0));
             }
-            return opConstructor.apply(
+            final Node toReturn = opConstructor.apply(
                     tmp.stream().map(Optimizer::optimizeActual).toList());
+            logger.debug("Optimizing absorption '%s' to '%s'", root, toReturn);
+            return toReturn;
         }
 
         // (A & B) + (A & C) = A & (B + C)

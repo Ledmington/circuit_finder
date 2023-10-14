@@ -30,24 +30,32 @@ import com.ledmington.ast.nodes.VariableNode;
 import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.Generators;
 import com.ledmington.utils.ImmutableMap;
+import com.ledmington.utils.MiniLogger;
 import com.ledmington.utils.TerminalCursor;
 import com.ledmington.utils.TerminalCursor.TerminalColor;
 
 public final class Main {
 
+    private static final MiniLogger logger = MiniLogger.getLogger("app");
     private static final int MAX_BITS_SUPPORTED = 64;
 
     private static final String HELP_MSG = String.join("\n", new String[] {
         "",
         " --- Mandatory --- ",
-        "     --bits N             Generates a circuit setting the variable number of bits to N.",
+        "     --bits N             Generates a circuit setting the variable number of bits to N",
         "     --operation OPNAME   Generates a circuit which computes the operation corresponding to OPNAME",
         "",
         "     --op_list            Prints the list of available operations and exits",
         "",
+        " --- Output --- ",
+        " -q, --quiet    Prints only errors",
+        " -v             Prints errors and warnings",
+        " -vv            Prints errors, warnings and info",
+        " -vvv           Prints all the information",
+        "",
         " --- Others --- ",
-        " -h, --help     Prints this message and exits.",
-        " -j, --jobs N   Uses N threads.",
+        " -h, --help     Prints this message and exits",
+        " -j, --jobs N   Uses N threads (default: 1)",
         ""
     });
 
@@ -176,8 +184,8 @@ public final class Main {
             final Node astRoot = new OrNode(nodes);
 
             System.out.printf(
-                    "The boolean expression for bit %d has %,d characters (AST representation: %,d characters)\n",
-                    i, sb.toString().length(), astRoot.toString().length());
+                    "The boolean expression for bit %d has %,d characters (AST representation: %,d nodes)\n",
+                    i, sb.toString().length(), astRoot.size());
 
             if (!sb.toString().equals(astRoot.toString())) {
                 throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
@@ -186,6 +194,7 @@ public final class Main {
     }
 
     public static void main(final String[] args) {
+        MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.WARNING);
         int nJobs = 1;
         int bits = -1;
         String operation = "";
@@ -201,31 +210,44 @@ public final class Main {
                     try {
                         nJobs = Integer.parseInt(args[i + 1]);
                     } catch (NumberFormatException e) {
-                        System.out.printf("The parameter '--jobs' needs an integer, not '%s'.\n", args[i + 1]);
+                        System.err.printf("The parameter '--jobs' needs an integer, not '%s'.\n", args[i + 1]);
                         System.exit(-1);
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("The parameter '--jobs' needs an integer, but none was found.");
+                        System.err.println("The parameter '--jobs' needs an integer, but none was found.");
                         System.exit(-1);
                     }
                     if (nJobs < 1 || nJobs > Runtime.getRuntime().availableProcessors()) {
-                        System.out.printf(
+                        System.err.printf(
                                 "Invalid value for '--jobs'. Should have been between 1 and %,d, but was %,d.\n",
                                 Runtime.getRuntime().availableProcessors(), nJobs);
                     }
                     i++;
                     break;
+                case "-q":
+                case "--quiet":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.ERROR);
+                    break;
+                case "-v":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.WARNING);
+                    break;
+                case "-vv":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.INFO);
+                    break;
+                case "-vvv":
+                    MiniLogger.setMinimumLevel(MiniLogger.LoggingLevel.DEBUG);
+                    break;
                 case "--bits":
                     try {
                         bits = Integer.parseInt(args[i + 1]);
                     } catch (NumberFormatException e) {
-                        System.out.printf("The parameter '--bits' needs an integer, not '%s'.\n", args[i + 1]);
+                        System.err.printf("The parameter '--bits' needs an integer, not '%s'.\n", args[i + 1]);
                         System.exit(-1);
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("The parameter '--bits' needs an integer, but none was found.");
+                        System.err.println("The parameter '--bits' needs an integer, but none was found.");
                         System.exit(-1);
                     }
                     if (bits < 1 || bits > MAX_BITS_SUPPORTED) {
-                        System.out.printf(
+                        System.err.printf(
                                 "Invalid value for '--bits'. Should have been between 1 and %,d but was %,d.\n",
                                 MAX_BITS_SUPPORTED, bits);
                     }
@@ -235,7 +257,7 @@ public final class Main {
                     try {
                         operation = args[i + 1];
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("The parameter '--operation' needs a string, but none was found.");
+                        System.err.println("The parameter '--operation' needs a string, but none was found.");
                         System.exit(-1);
                     }
                     i++;
@@ -274,8 +296,12 @@ public final class Main {
         System.out.printf(
                 "The selected operation requires %,d input bits to produce %,d output bits.\n", inputBits, outputBits);
 
-        // computeCorrelationMatrix(limit, inputBits, outputBits, op);
+        try {
+            // computeCorrelationMatrix(limit, inputBits, outputBits, op);
 
-        buildCircuit(limit, inputBits, outputBits, op);
+            buildCircuit(limit, inputBits, outputBits, op);
+        } catch (Throwable t) {
+            logger.error(t);
+        }
     }
 }
