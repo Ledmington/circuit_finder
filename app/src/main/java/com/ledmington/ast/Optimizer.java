@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.ledmington.ast.nodes.Node;
+import com.ledmington.ast.opt.DoubleNot;
 import com.ledmington.ast.opt.NotConstant;
 import com.ledmington.ast.opt.Optimization;
 import com.ledmington.ast.opt.OptimizationResult;
@@ -30,8 +31,10 @@ import com.ledmington.utils.MiniLogger;
 public final class Optimizer {
 
     private static final MiniLogger logger = MiniLogger.getLogger("optimizer");
-    private static final Set<Optimization> optimizations =
-            ImmutableSet.<Optimization>builder().add(new NotConstant()).build();
+    private static final Set<Optimization> optimizations = ImmutableSet.<Optimization>builder()
+            .add(new NotConstant())
+            .add(new DoubleNot())
+            .build();
     private final int maxDepth;
 
     /**
