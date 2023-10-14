@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.opt.DoubleNot;
+import com.ledmington.ast.opt.NoBrackets;
 import com.ledmington.ast.opt.NotConstant;
 import com.ledmington.ast.opt.Optimization;
 import com.ledmington.ast.opt.OptimizationResult;
@@ -34,6 +35,7 @@ public final class Optimizer {
     private static final Set<Optimization> optimizations = ImmutableSet.<Optimization>builder()
             .add(new NotConstant())
             .add(new DoubleNot())
+            .add(new NoBrackets())
             .build();
     private final int maxDepth;
 
@@ -66,6 +68,11 @@ public final class Optimizer {
                 bestScore = r.orElseThrow().score();
                 bestResult = r.orElseThrow().result();
             }
+        }
+
+        // no optimization was appliable
+        if (bestResult == null) {
+            return root;
         }
 
         return bestResult;
