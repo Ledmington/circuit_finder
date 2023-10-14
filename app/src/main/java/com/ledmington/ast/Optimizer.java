@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.ledmington.ast.nodes.Node;
+import com.ledmington.ast.opt.AndZero;
 import com.ledmington.ast.opt.DoubleNot;
 import com.ledmington.ast.opt.NoBrackets;
 import com.ledmington.ast.opt.NotConstant;
@@ -38,6 +39,7 @@ public final class Optimizer {
             .add(new DoubleNot())
             .add(new NoBrackets())
             .add(new OrOne())
+            .add(new AndZero())
             .build();
     private final int maxDepth;
 
