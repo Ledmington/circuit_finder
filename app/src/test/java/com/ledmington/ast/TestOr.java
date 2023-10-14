@@ -34,6 +34,8 @@ public class TestOr extends TestOptimizer {
                 Arguments.of(or(A(), A()), A()),
                 Arguments.of(or(A(), A(), B()), or(A(), B())),
                 Arguments.of(or(A(), B()), or(A(), B())),
+                Arguments.of(or(or(A(), B()), C()), or(A(), B(), C())),
+                Arguments.of(or(A(), or(B(), C())), or(A(), B(), C())),
                 Arguments.of(or(A(), brackets(or(B(), C()))), or(A(), B(), C())),
                 Arguments.of(or(brackets(or(A(), B())), C()), or(A(), B(), C())));
     }

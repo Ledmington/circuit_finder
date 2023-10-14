@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -102,6 +103,27 @@ public final class Optimizer {
             return optimizeActual(notnot.inner());
         }
 
+        // De Morgan
+        // ~(~A & ~B) = A + B
+        // ~(A & ~B) = ~A + B
+        // ~(~A & B) = A + ~B
+        if (not.inner() instanceof MultiNode multi) {
+            final Optional<Node> firstOpt =
+                    multi.nodes().stream().filter(n -> n instanceof NotNode).findAny();
+            if (firstOpt.isPresent()) {
+                final NotNode first = (NotNode) firstOpt.orElseThrow();
+                final Optional<Node> second = multi.nodes().stream()
+                        .filter(n -> n instanceof NotNode && !n.equals(first))
+                        .findAny();
+                if (second.isPresent()) {
+                    // we are in the case ~(~A & ~B) = A + B
+
+                } else {
+                    //
+                }
+            }
+        }
+
         return new NotNode(optimizeActual(not.inner()));
     }
 
@@ -154,6 +176,26 @@ public final class Optimizer {
 
         final Class<?> rootClass = (root instanceof AndNode) ? AndNode.class : OrNode.class;
         final Class<?> inverseClass = (root instanceof AndNode) ? OrNode.class : AndNode.class;
+
+        // A + ~A = 1
+        // A & ~A = 0
+        {
+            final Set<Node> uniques = new HashSet<>();
+            for (final Node n : root.nodes()) {
+                if (n instanceof NotNode) {
+                    if (uniques.contains(((NotNode) n).inner())) {
+                        logger.debug("Optimizing annihilator '%s' to '%s'", root, annihilator);
+                        return annihilator;
+                    }
+                } else {
+                    if (uniques.contains(new NotNode(n))) {
+                        logger.debug("Optimizing annihilator '%s' to '%s'", root, annihilator);
+                        return annihilator;
+                    }
+                }
+                uniques.add(n);
+            }
+        }
 
         // A & (B & C) = A & B & C
         // A + (B + C) = A + B + C

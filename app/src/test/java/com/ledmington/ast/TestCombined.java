@@ -56,7 +56,26 @@ public class TestCombined extends TestOptimizer {
                 // ~(~A + B) = A & ~B
                 Arguments.of(not(brackets(or(not(A()), B()))), and(A(), not(B()))),
                 // ~A + ~B = ~(A & B)
-                Arguments.of(or(not(A()), not(B())), not(and(A(), B()))));
+                Arguments.of(or(not(A()), not(B())), not(and(A(), B()))),
+
+                // three-variables De Morgan theorem from AND to OR
+                // ~(~A & ~B & ~C) = A + B + C
+                Arguments.of(not(brackets(and(not(A()), not(B()), not(C())))), or(A(), B(), C())),
+                // ~(A & ~B & ~C) = ~A + B + C
+                Arguments.of(not(brackets(and(A(), not(B()), not(C())))), or(not(A()), B(), C())),
+                // ~(~A & B & ~C) = A + ~B + C
+                Arguments.of(not(brackets(and(not(A()), B(), not(C())))), or(A(), not(B()), C())),
+                // ~(~A & ~B & C) = A + B + ~C
+                Arguments.of(not(brackets(and(not(A()), not(B()), C()))), or(A(), B(), not(C()))),
+                // three-variables De Morgan theorem from OR to AND
+                // ~(~A + ~B + ~C) = A & B & C
+                Arguments.of(not(brackets(or(not(A()), not(B()), not(C())))), and(A(), B(), C())),
+                // ~(A + ~B + ~C) = ~A & B & C
+                Arguments.of(not(brackets(or(A(), not(B()), not(C())))), and(not(A()), B(), C())),
+                // ~(~A + B + ~C) = A & ~B & C
+                Arguments.of(not(brackets(or(not(A()), B(), not(C())))), and(A(), not(B()), C())),
+                // ~(~A + ~B + C) = A & B & ~C
+                Arguments.of(not(brackets(or(not(A()), not(B()), C()))), and(A(), B(), not(C()))));
     }
 
     @ParameterizedTest

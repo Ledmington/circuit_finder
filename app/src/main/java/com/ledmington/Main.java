@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ledmington.ast.Optimizer;
 import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.BracketsNode;
 import com.ledmington.ast.nodes.Node;
@@ -167,7 +168,7 @@ public final class Main {
                         if (j > 0) {
                             sb.append('&');
                         }
-                        final String variableName = String.valueOf('A' + j);
+                        final String variableName = String.valueOf((char) ('A' + j));
                         if (in.get(j)) {
                             sb.append(variableName);
                             tmp.add(new VariableNode(variableName));
@@ -190,6 +191,9 @@ public final class Main {
             if (!sb.toString().equals(astRoot.toString())) {
                 throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
             }
+
+            final Node optimized = Optimizer.optimize(astRoot);
+            System.out.printf("Optimized circuit: '%s'\n", optimized);
         }
     }
 
