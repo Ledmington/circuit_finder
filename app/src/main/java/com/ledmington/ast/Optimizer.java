@@ -17,17 +17,21 @@
 */
 package com.ledmington.ast;
 
-import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import com.ledmington.ast.nodes.Node;
+import com.ledmington.ast.opt.NotConstant;
 import com.ledmington.ast.opt.Optimization;
+import com.ledmington.ast.opt.OptimizationResult;
+import com.ledmington.utils.ImmutableSet;
 import com.ledmington.utils.MiniLogger;
 
 public final class Optimizer {
 
     private static final MiniLogger logger = MiniLogger.getLogger("optimizer");
-    private static final Set<Optimization> optimizations = new HashSet<>();
+    private static final Set<Optimization> optimizations =
+            ImmutableSet.<Optimization>builder().add(new NotConstant()).build();
     private final int maxDepth;
 
     /**
@@ -50,6 +54,17 @@ public final class Optimizer {
         // TODO: remove this warning when finished
         logger.warning("The Optimizer class is currently the core of a heavy rework.");
 
-        return root;
+        int bestScore = Integer.MAX_VALUE;
+        Node bestResult = null;
+
+        for (final Optimization opt : optimizations) {
+            final Optional<OptimizationResult> r = opt.check(root);
+            if (r.isPresent() && r.orElseThrow().score() < bestScore) {
+                bestScore = r.orElseThrow().score();
+                bestResult = r.orElseThrow().result();
+            }
+        }
+
+        return bestResult;
     }
 }
