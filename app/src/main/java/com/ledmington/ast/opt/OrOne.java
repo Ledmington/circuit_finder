@@ -24,6 +24,11 @@ import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.OneNode;
 import com.ledmington.ast.nodes.OrNode;
 
+/**
+ * This class covers the following cases:
+ *  1 + 1 = 1
+ *  A + 1 = 1
+ */
 public final class OrOne implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);

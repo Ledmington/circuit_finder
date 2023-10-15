@@ -25,6 +25,11 @@ import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.OrNode;
 import com.ledmington.ast.nodes.ZeroNode;
 
+/**
+ * This class covers the following cases:
+ *  1 + 0 = 1
+ *  A + 0 = A
+ */
 public final class OrZero implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);

@@ -24,6 +24,11 @@ import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.ZeroNode;
 
+/**
+ * This class covers the following cases:
+ *  1 & 0 = 0
+ *  A & 0 = 0
+ */
 public final class AndZero implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);

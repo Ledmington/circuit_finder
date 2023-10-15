@@ -25,6 +25,11 @@ import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.OneNode;
 
+/**
+ * This class covers the following cases:
+ *  1 & 1 = 1
+ *  A & 1 = A
+ */
 public final class AndOne implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);

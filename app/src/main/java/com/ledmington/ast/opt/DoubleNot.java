@@ -23,6 +23,10 @@ import java.util.Optional;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.NotNode;
 
+/**
+ * This class covers the following cases:
+ *  ~~A = A
+ */
 public final class DoubleNot implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
