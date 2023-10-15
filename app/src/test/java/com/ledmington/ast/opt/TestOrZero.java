@@ -50,9 +50,15 @@ public final class TestOrZero extends TestOptimizer {
                 Arguments.of(or(zero(), one()), -2, one()),
                 Arguments.of(or(A(), zero()), -2, A()),
                 Arguments.of(or(zero(), A()), -2, A()),
-                Arguments.of(or(A(), B(), zero()), -3, or(A(), B())),
-                Arguments.of(or(A(), zero(), B()), -3, or(A(), B())),
-                Arguments.of(or(zero(), A(), B()), -3, or(A(), B())));
+                Arguments.of(or(A(), B(), zero()), -1, or(A(), B())),
+                Arguments.of(or(A(), zero(), B()), -1, or(A(), B())),
+                Arguments.of(or(zero(), A(), B()), -1, or(A(), B())),
+                Arguments.of(or(A(), B(), zero(), zero()), -2, or(A(), B())),
+                Arguments.of(or(A(), zero(), B(), zero()), -2, or(A(), B())),
+                Arguments.of(or(zero(), A(), B(), zero()), -2, or(A(), B())),
+                Arguments.of(or(A(), zero(), zero(), B()), -2, or(A(), B())),
+                Arguments.of(or(zero(), A(), zero(), B()), -2, or(A(), B())),
+                Arguments.of(or(zero(), zero(), A(), B()), -2, or(A(), B())));
     }
 
     @ParameterizedTest

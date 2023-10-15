@@ -35,8 +35,7 @@ public final class OrZero implements Optimization {
             if (tmp.size() == 1) {
                 return Optional.of(new OptimizationResult(-root.size() + 1, tmp.get(0)));
             }
-            return Optional.of(
-                    new OptimizationResult(-root.size() + (or.nodes().size() - tmp.size()), new OrNode(tmp)));
+            return Optional.of(new OptimizationResult(-root.size() + (tmp.size() + 1), new OrNode(tmp)));
         }
 
         return Optional.empty();
