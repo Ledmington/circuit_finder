@@ -17,6 +17,7 @@
 */
 package com.ledmington.ast.nodes;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -77,6 +78,32 @@ public final class AndNode extends MultiNode {
             return false;
         }
 
-        return this.nodes.equals(((AndNode) other).nodes);
+        // Checking equals ignoring order of elements
+        final List<Node> mynodes = this.nodes;
+        final List<Node> othernodes = ((AndNode) other).nodes;
+        if (mynodes.size() != othernodes.size()) {
+            return false;
+        }
+
+        final boolean[] visited = new boolean[mynodes.size()];
+        Arrays.fill(visited, false);
+        for (final Node mynode : mynodes) {
+            for (int j = 0; j < othernodes.size(); j++) {
+                if (visited[j]) {
+                    continue;
+                }
+                if (mynode.equals(othernodes.get(j))) {
+                    visited[j] = true;
+                    break;
+                }
+            }
+        }
+
+        for (final boolean b : visited) {
+            if (!b) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -17,6 +17,7 @@
 */
 package com.ledmington.ast.nodes;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
@@ -54,5 +55,18 @@ public class TestNodes {
         assertThrows(NullPointerException.class, () -> new VariableNode(null));
         assertThrows(IllegalArgumentException.class, () -> new VariableNode(""));
         assertThrows(IllegalArgumentException.class, () -> new VariableNode(" "));
+    }
+
+    @Test
+    public void andEqualsIgnoreOrder() {
+        assertEquals(
+                new AndNode(List.of(new ZeroNode(), new OneNode())),
+                new AndNode(List.of(new OneNode(), new ZeroNode())));
+    }
+
+    @Test
+    public void orEqualsIgnoreOrder() {
+        assertEquals(
+                new OrNode(List.of(new ZeroNode(), new OneNode())), new OrNode(List.of(new OneNode(), new ZeroNode())));
     }
 }
