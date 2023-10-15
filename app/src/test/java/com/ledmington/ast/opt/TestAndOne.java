@@ -48,6 +48,7 @@ public final class TestAndOne extends TestOptimizer {
     private static Stream<Arguments> validCases() {
         return Stream.of(
                 Arguments.of(and(zero(), one()), -2, zero()),
+                Arguments.of(and(one(), one()), -2, one()),
                 Arguments.of(and(A(), one()), -2, A()),
                 Arguments.of(and(one(), A()), -2, A()),
                 Arguments.of(and(A(), B(), one()), -1, and(A(), B())),

@@ -32,6 +32,9 @@ public final class OrZero implements Optimization {
         if (root instanceof OrNode or && or.nodes().contains(new ZeroNode())) {
             final List<Node> tmp =
                     or.nodes().stream().filter(n -> !(n instanceof ZeroNode)).toList();
+            if (tmp.isEmpty()) {
+                return Optional.of(new OptimizationResult(-root.size() + 1, new ZeroNode()));
+            }
             if (tmp.size() == 1) {
                 return Optional.of(new OptimizationResult(-root.size() + 1, tmp.get(0)));
             }

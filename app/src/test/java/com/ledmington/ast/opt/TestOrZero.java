@@ -48,6 +48,7 @@ public final class TestOrZero extends TestOptimizer {
     private static Stream<Arguments> validCases() {
         return Stream.of(
                 Arguments.of(or(zero(), one()), -2, one()),
+                Arguments.of(or(zero(), zero()), -2, zero()),
                 Arguments.of(or(A(), zero()), -2, A()),
                 Arguments.of(or(zero(), A()), -2, A()),
                 Arguments.of(or(A(), B(), zero()), -1, or(A(), B())),
