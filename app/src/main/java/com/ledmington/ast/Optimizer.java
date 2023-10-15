@@ -42,6 +42,7 @@ import com.ledmington.ast.opt.NotConstant;
 import com.ledmington.ast.opt.Optimization;
 import com.ledmington.ast.opt.OptimizationResult;
 import com.ledmington.ast.opt.OrComplementation;
+import com.ledmington.ast.opt.OrIdempotence;
 import com.ledmington.ast.opt.OrOne;
 import com.ledmington.ast.opt.OrZero;
 import com.ledmington.utils.ImmutableSet;
@@ -61,6 +62,7 @@ public final class Optimizer {
             .add(new OrComplementation())
             .add(new AndComplementation())
             .add(new AndIdempotence())
+            .add(new OrIdempotence())
             .build();
     private final int maxDepth;
 
