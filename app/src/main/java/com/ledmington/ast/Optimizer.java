@@ -28,6 +28,7 @@ import com.ledmington.ast.opt.NoBrackets;
 import com.ledmington.ast.opt.NotConstant;
 import com.ledmington.ast.opt.Optimization;
 import com.ledmington.ast.opt.OptimizationResult;
+import com.ledmington.ast.opt.OrComplementation;
 import com.ledmington.ast.opt.OrOne;
 import com.ledmington.ast.opt.OrZero;
 import com.ledmington.utils.ImmutableSet;
@@ -44,6 +45,7 @@ public final class Optimizer {
             .add(new AndZero())
             .add(new OrZero())
             .add(new AndOne())
+            .add(new OrComplementation())
             .build();
     private final int maxDepth;
 
