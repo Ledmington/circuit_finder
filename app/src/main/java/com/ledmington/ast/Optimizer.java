@@ -38,6 +38,7 @@ import com.ledmington.ast.opt.AndIdempotence;
 import com.ledmington.ast.opt.AndOne;
 import com.ledmington.ast.opt.AndZero;
 import com.ledmington.ast.opt.DeMorganAnd;
+import com.ledmington.ast.opt.DeMorganOr;
 import com.ledmington.ast.opt.DoubleNot;
 import com.ledmington.ast.opt.MergeAnd;
 import com.ledmington.ast.opt.MergeOr;
@@ -73,6 +74,7 @@ public final class Optimizer {
             .add(new AndAbsorption())
             .add(new OrAbsorption())
             .add(new DeMorganAnd())
+            .add(new DeMorganOr())
             .build();
     private final int maxDepth;
 
@@ -158,14 +160,14 @@ public final class Optimizer {
             if (br.inner().equals(optimizationRoot)) {
                 return new BracketsNode(optimizedAST);
             }
-            return applyOptimization(br.inner(), optimizationRoot, optimizedAST);
+            return new BracketsNode(applyOptimization(br.inner(), optimizationRoot, optimizedAST));
         }
 
         if (astRoot instanceof NotNode not) {
             if (not.inner().equals(optimizationRoot)) {
                 return new NotNode(optimizedAST);
             }
-            return applyOptimization(not.inner(), optimizationRoot, optimizedAST);
+            return new NotNode(applyOptimization(not.inner(), optimizationRoot, optimizedAST));
         }
 
         if (astRoot instanceof AndNode and) {
