@@ -32,6 +32,7 @@ import com.ledmington.ast.nodes.OneNode;
 import com.ledmington.ast.nodes.OrNode;
 import com.ledmington.ast.nodes.VariableNode;
 import com.ledmington.ast.nodes.ZeroNode;
+import com.ledmington.ast.opt.AndAbsorption;
 import com.ledmington.ast.opt.AndComplementation;
 import com.ledmington.ast.opt.AndIdempotence;
 import com.ledmington.ast.opt.AndOne;
@@ -67,6 +68,7 @@ public final class Optimizer {
             .add(new OrIdempotence())
             .add(new MergeAnd())
             .add(new MergeOr())
+            .add(new AndAbsorption())
             .build();
     private final int maxDepth;
 
