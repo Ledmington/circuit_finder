@@ -44,6 +44,7 @@ import com.ledmington.ast.opt.NoBrackets;
 import com.ledmington.ast.opt.NotConstant;
 import com.ledmington.ast.opt.Optimization;
 import com.ledmington.ast.opt.OptimizationResult;
+import com.ledmington.ast.opt.OrAbsorption;
 import com.ledmington.ast.opt.OrComplementation;
 import com.ledmington.ast.opt.OrIdempotence;
 import com.ledmington.ast.opt.OrOne;
@@ -69,6 +70,7 @@ public final class Optimizer {
             .add(new MergeAnd())
             .add(new MergeOr())
             .add(new AndAbsorption())
+            .add(new OrAbsorption())
             .build();
     private final int maxDepth;
 
