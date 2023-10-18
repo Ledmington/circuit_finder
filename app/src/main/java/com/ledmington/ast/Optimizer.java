@@ -51,6 +51,7 @@ import com.ledmington.ast.opt.OrComplementation;
 import com.ledmington.ast.opt.OrIdempotence;
 import com.ledmington.ast.opt.OrOne;
 import com.ledmington.ast.opt.OrZero;
+import com.ledmington.ast.opt.ReverseAndDistributivity;
 import com.ledmington.utils.ImmutableSet;
 import com.ledmington.utils.MiniLogger;
 
@@ -75,6 +76,7 @@ public final class Optimizer {
             .add(new OrAbsorption())
             .add(new DeMorganAnd())
             .add(new DeMorganOr())
+            .add(new ReverseAndDistributivity())
             .build();
     private final int maxDepth;
 
