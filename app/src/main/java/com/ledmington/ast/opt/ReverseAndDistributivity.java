@@ -18,7 +18,9 @@
 package com.ledmington.ast.opt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,6 +28,11 @@ import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.OrNode;
 
+/**
+ * This class covers the following cases:
+ * (A & B) + (A & C) = A & (B + C)
+ * (A & B) + (A & C) + D = (A & (B + C)) + D
+ */
 public final class ReverseAndDistributivity implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
@@ -43,72 +50,66 @@ public final class ReverseAndDistributivity implements Optimization {
                 return Optional.empty();
             }
 
-            List<Node> maxCommon = List.of();
-            int maxCommonSize = 0;
-            AndNode first = null;
-            AndNode second = null;
-            for (int i = 0; i < ands.size(); i++) {
-                final AndNode a = ands.get(i);
-                for (int j = i + 1; j < ands.size(); j++) {
-                    final AndNode b = ands.get(j);
-
-                    // here we count how many common nodes A and B have
-                    final List<Node> commonNodes = new ArrayList<>();
-                    int commonNodeSize = 0;
-                    for (final Node n : a.nodes()) {
-                        if (b.nodes().contains(n)) {
-                            commonNodes.add(n);
-                            commonNodeSize += n.size();
-                        }
-                    }
-
-                    if (commonNodes.size() > maxCommon.size()) {
-                        maxCommon = commonNodes;
-                        maxCommonSize = commonNodeSize;
-                        first = a;
-                        second = b;
+            // we need to find a single Node that is common to most of the inner nodes
+            final Map<Node, Integer> counts = new HashMap<>();
+            for (final AndNode and : ands) {
+                for (final Node n : and.nodes()) {
+                    if (counts.containsKey(n)) {
+                        counts.put(n, counts.get(n) + 1);
+                    } else {
+                        counts.put(n, 1);
                     }
                 }
             }
 
-            // if no common parts are found, this optimization can not be applied
-            if (maxCommon.isEmpty()) {
+            final Node maxCommonNode = counts.entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElseThrow();
+            if (counts.get(maxCommonNode) == 1) {
                 return Optional.empty();
             }
 
-            final List<Node> tmp = new ArrayList<>(maxCommon);
-            final List<Node> innerOr = new ArrayList<>();
-            final List<Node> finalMaxCommon = maxCommon;
-            int score = 0;
-            if (maxCommon.size() - first.nodes().size() > 1) {
-                innerOr.add(new AndNode(first.nodes().stream()
-                        .filter(n -> !finalMaxCommon.contains(n))
-                        .toList()));
-                score -= maxCommonSize;
-            } else {
-                innerOr.add(first.nodes().stream()
-                        .filter(n -> !finalMaxCommon.contains(n))
-                        .findFirst()
-                        .orElseThrow());
-                // we also need to remove the parent AndNode
-                score -= maxCommonSize - 1;
+            final List<AndNode> nodesWithCommon = new ArrayList<>();
+            final List<Node> nodesWithoutCommon = new ArrayList<>();
+            for (final Node n : or.nodes()) {
+                if (n instanceof AndNode and && and.nodes().contains(maxCommonNode)) {
+                    nodesWithCommon.add(and);
+                } else {
+                    nodesWithoutCommon.add(n);
+                }
             }
-            if (maxCommon.size() - second.nodes().size() > 1) {
-                innerOr.add(new AndNode(second.nodes().stream()
-                        .filter(n -> !finalMaxCommon.contains(n))
-                        .toList()));
-                score -= maxCommonSize;
-            } else {
-                innerOr.add(second.nodes().stream()
-                        .filter(n -> !finalMaxCommon.contains(n))
-                        .findFirst()
-                        .orElseThrow());
-                // we also need to remove the parent AndNode
-                score -= maxCommonSize - 1;
-            }
-            tmp.add(new OrNode(innerOr));
 
-            return Optional.of(new OptimizationResult(score + maxCommonSize, new AndNode(tmp)));
+            // we need to re-add one CommonNode because we are grouping it outside
+            // we need to also add a new AndNode outside
+            int score = 2;
+
+            final List<Node> tmp = new ArrayList<>();
+            for (final AndNode and : nodesWithCommon) {
+                // from each of these nodes we remove the common node
+                score--;
+                if (and.nodes().size() == 2) {
+                    // from AndNodes with two inners we also remove the parent AndNode
+                    score--;
+                    if (and.nodes().get(0).equals(maxCommonNode)) {
+                        tmp.add(and.nodes().get(1));
+                    } else {
+                        tmp.add(and.nodes().get(0));
+                    }
+                } else {
+                    tmp.add(new AndNode(and.nodes().stream()
+                            .filter(n -> !n.equals(maxCommonNode))
+                            .toList()));
+                }
+            }
+
+            if (nodesWithoutCommon.isEmpty()) {
+                // if no other Node is left, we can also remove the parent OrNode
+                return Optional.of(new OptimizationResult(score, new AndNode(List.of(maxCommonNode, new OrNode(tmp)))));
+            } else {
+                nodesWithoutCommon.add(new AndNode(List.of(maxCommonNode, new OrNode(tmp))));
+                return Optional.of(new OptimizationResult(score + 1, new OrNode(nodesWithoutCommon)));
+            }
         }
 
         return Optional.empty();

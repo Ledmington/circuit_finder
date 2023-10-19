@@ -67,6 +67,10 @@ public abstract class TestOptimizer {
         return new VariableNode("D");
     }
 
+    protected static Node E() {
+        return new VariableNode("E");
+    }
+
     protected static Node or(final Node... nodes) {
         return new OrNode(Arrays.asList(nodes));
     }

@@ -51,11 +51,16 @@ public final class TestReverseAndDistributivity extends TestOptimizer {
                 Arguments.of(or(and(A(), B()), and(A(), C())), -2, and(A(), or(B(), C()))),
                 Arguments.of(or(and(A(), B()), and(A(), C(), D())), -1, and(A(), or(B(), and(C(), D())))),
                 Arguments.of(or(and(A(), B()), and(A(), or(C(), D()))), -2, and(A(), or(B(), or(C(), D())))),
-                Arguments.of(or(and(A(), B(), C()), and(A(), B(), D())), -3, and(A(), B(), or(C(), D()))),
+                Arguments.of(or(and(A(), B(), C()), and(A(), B(), D())), 0, and(A(), or(and(B(), C()), and(B(), D())))),
                 Arguments.of(or(and(A(), B()), and(A(), C()), and(A(), D())), -4, and(A(), or(B(), C(), D()))),
                 Arguments.of(
                         or(and(A(), B()), and(B(), C()), and(C(), D())), -1, or(and(B(), or(A(), C())), and(C(), D()))),
-                Arguments.of(or(and(A(), B()), and(A(), C()), D()), -1, or(and(A(), or(B(), C())), D())));
+                Arguments.of(or(and(A(), B()), and(A(), C()), D()), -1, or(and(A(), or(B(), C())), D())),
+                Arguments.of(or(A(), and(B(), C()), and(C(), D()), E()), -1, or(A(), and(C(), or(B(), D())), E())),
+                Arguments.of(
+                        or(and(A(), B()), and(A(), C(), D()), and(A(), C(), E())),
+                        -2,
+                        and(A(), or(B(), and(C(), D()), and(C(), E())))));
     }
 
     @ParameterizedTest
