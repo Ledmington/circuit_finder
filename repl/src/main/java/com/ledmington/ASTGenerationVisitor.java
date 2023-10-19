@@ -50,14 +50,14 @@ public final class ASTGenerationVisitor extends BooleanBaseVisitor<Node> {
         if (ctx.NOT() != null) {
             return new NotNode(visit(ctx.expr(0)));
         }
-        if (ctx.OR() != null) {
+        if (ctx.OR(0) != null) {
             final List<Node> tmp = new ArrayList<>();
             for (int i = 0; i < ctx.OR().size() + 1; i++) {
                 tmp.add(visit(ctx.expr(i)));
             }
             return new OrNode(tmp);
         }
-        if (ctx.AND() != null) {
+        if (ctx.AND(0) != null) {
             final List<Node> tmp = new ArrayList<>();
             for (int i = 0; i < ctx.AND().size() + 1; i++) {
                 tmp.add(visit(ctx.expr(i)));
@@ -68,6 +68,6 @@ public final class ASTGenerationVisitor extends BooleanBaseVisitor<Node> {
             return visit(ctx.expr(0));
         }
 
-        throw new RuntimeException(String.format("Unknown context '%s'", ctx));
+        throw new RuntimeException(String.format("Unknown context '%s'", ctx.getText()));
     }
 }
