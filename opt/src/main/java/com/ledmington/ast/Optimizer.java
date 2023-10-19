@@ -99,9 +99,6 @@ public final class Optimizer {
     public Node optimize(final Node root) {
         Objects.requireNonNull(root);
 
-        // TODO: remove this warning when finished
-        logger.warning("The Optimizer class is currently the core of a heavy rework.");
-
         final int initialSize = root.size();
         Node current = root;
         Node next = optimizeIteration(root);
@@ -139,7 +136,7 @@ public final class Optimizer {
             }
         }
 
-        // no optimization was appliable
+        // no optimization was applicable
         if (bestResult == null) {
             return root;
         }

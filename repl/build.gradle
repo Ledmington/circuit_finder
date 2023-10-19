@@ -1,0 +1,130 @@
+plugins {
+	id 'java'
+	id 'application'
+	id 'antlr'
+	id 'com.diffplug.spotless' version '6.19.0'
+	id 'com.github.ben-manes.versions' version '0.46.0'
+}
+
+repositories {
+	mavenCentral()
+}
+
+static def path(String... args) {
+	return String.join(File.separator, args)
+}
+
+
+String appName = 'circuit-finder'
+String appNameLowercase = 'circuit-finder'
+String version = '0.1.0'
+String appDescription = 'A search algorithm to find optimal logic circuits.'
+String author = 'Filippo Barbari'
+String authorMail = 'filippo.barbari@gmail.com'
+String basePackage = "com.ledmington"
+String fatJarBaseName = "${appNameLowercase}"
+String fatJarName = "${fatJarBaseName}.jar"
+String fatJarPath = path("${buildDir}", "libs", "${fatJarName}")
+String mainClassName = "${basePackage}.Main"
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+dependencies {
+	implementation project(':opt')
+	implementation project(':utils')
+	antlr "org.antlr:antlr4:4.13.1"
+}
+
+application {
+	mainClass = 'com.ledmington.Main'
+}
+
+generateGrammarSource {
+	maxHeapSize = "64m"
+	arguments += ["-visitor", "-long-messages", "-package","com.ledmington.gen"]
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs << '-Xdiags:verbose'
+	options.compilerArgs << '-Xlint:all'
+	options.compilerArgs << '-Werror'
+	options.deprecation = true
+	options.encoding = 'UTF-8'
+}
+
+spotless {
+	format 'misc', {
+		target '*.gradle', '*.md', '.gitignore'
+		trimTrailingWhitespace()
+		indentWithTabs()
+		endWithNewline()
+		setEncoding('utf-8')
+	}
+
+	java {
+		target fileTree('.') {
+			include path('**', '*.java')
+			exclude path('**', 'build', '**'), path('**', 'build-*', '**'), path('**', 'bin', '**')
+		}
+		removeUnusedImports()
+		formatAnnotations()
+		trimTrailingWhitespace()
+		endWithNewline()
+		setEncoding('utf-8')
+		palantirJavaFormat('2.26.0')
+
+		// check https://javadoc.io/doc/com.diffplug.spotless/spotless-plugin-gradle/latest/com/diffplug/gradle/spotless/JavaExtension.html
+		importOrder('java', 'javax', 'javafx', 'com', 'org', group as String)
+
+		licenseHeader String.join("\n",
+				"/*",
+				"* ${appName} - ${appDescription}",
+				"* Copyright (C) 2023-${new Date().format('yyyy')} ${author} <${authorMail}>",
+				"*",
+				"* This program is free software: you can redistribute it and/or modify",
+				"* it under the terms of the GNU General Public License as published by",
+				"* the Free Software Foundation, either version 3 of the License, or",
+				"* (at your option) any later version.",
+				"*",
+				"* This program is distributed in the hope that it will be useful,",
+				"* but WITHOUT ANY WARRANTY; without even the implied warranty of",
+				"* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
+				"* GNU General Public License for more details.",
+				"*",
+				"* You should have received a copy of the GNU General Public License",
+				"* along with this program.  If not, see <http://www.gnu.org/licenses/>.",
+				"*/",
+		)
+	}
+}
+
+tasks.compileJava.dependsOn(spotlessApply)
+
+tasks.register('fatJar', Jar) {
+	group 'distribution'
+	description 'Builds the fat jar of the application'
+	from sourceSets.main.output
+	dependsOn configurations.runtimeClasspath
+	from {
+		configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+	}
+	duplicatesStrategy = 'include'
+	manifest {
+		archiveBaseName = appNameLowercase
+		attributes(
+				//"Implementation-Title": "Gradle",
+				"Implementation-Version": version,
+				"Main-Class": "$mainClassName"
+		)
+	}
+	archiveBaseName = "${fatJarBaseName}"
+
+	doLast {
+		println "The fat jar is ${fatJarPath}"
+		println String.format("Fat jar size: %.3f MB", new File(fatJarPath).length() / 1_000_000)
+	}
+}
