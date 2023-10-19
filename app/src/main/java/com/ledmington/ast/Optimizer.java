@@ -52,6 +52,7 @@ import com.ledmington.ast.opt.OrIdempotence;
 import com.ledmington.ast.opt.OrOne;
 import com.ledmington.ast.opt.OrZero;
 import com.ledmington.ast.opt.ReverseAndDistributivity;
+import com.ledmington.ast.opt.ReverseOrDistributivity;
 import com.ledmington.utils.ImmutableSet;
 import com.ledmington.utils.MiniLogger;
 
@@ -77,7 +78,9 @@ public final class Optimizer {
             .add(new DeMorganAnd())
             .add(new DeMorganOr())
             .add(new ReverseAndDistributivity())
+            .add(new ReverseOrDistributivity())
             .build();
+
     private final int maxDepth;
 
     /**
@@ -86,7 +89,7 @@ public final class Optimizer {
      * to less optimized results.
      *
      * @param maxDepth
-     *      Maximum optimization search depth.
+     *                 Maximum optimization search depth.
      */
     public Optimizer(int maxDepth) {
         if (maxDepth < 1) {
@@ -179,7 +182,8 @@ public final class Optimizer {
                 tmp.add(optimizedAST);
                 return new AndNode(tmp);
             }
-            // currently the optimization goes on exploring all the nodes in the AST even if not needed
+            // currently the optimization goes on exploring all the nodes in the AST even if
+            // not needed
             return new AndNode(and.nodes().stream()
                     .map(n -> applyOptimization(n, optimizationRoot, optimizedAST))
                     .toList());
@@ -192,7 +196,8 @@ public final class Optimizer {
                 tmp.add(optimizedAST);
                 return new OrNode(tmp);
             }
-            // currently the optimization goes on exploring all the nodes in the AST even if not needed
+            // currently the optimization goes on exploring all the nodes in the AST even if
+            // not needed
             return new OrNode(or.nodes().stream()
                     .map(n -> applyOptimization(n, optimizationRoot, optimizedAST))
                     .toList());
