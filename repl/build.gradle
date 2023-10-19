@@ -16,7 +16,7 @@ static def path(String... args) {
 
 
 String appName = 'circuit-finder'
-String appNameLowercase = 'circuit-finder'
+String appNameLowercase = 'cf-repl'
 String version = '0.1.0'
 String appDescription = 'A search algorithm to find optimal logic circuits.'
 String author = 'Filippo Barbari'
@@ -45,7 +45,7 @@ application {
 
 generateGrammarSource {
 	maxHeapSize = "64m"
-	arguments += ["-visitor", "-long-messages", "-package","com.ledmington.gen"]
+	arguments += ["-visitor", "-long-messages", "-package", "com.ledmington.gen"]
 }
 
 tasks.withType(JavaCompile).configureEach {

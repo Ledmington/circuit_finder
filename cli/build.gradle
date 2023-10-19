@@ -20,7 +20,7 @@ static def getDate() {
 }
 
 String appName = 'circuit-finder'
-String appNameLowercase = 'circuit-finder'
+String appNameLowercase = 'cf-cli'
 String version = '0.1.0'
 String appDescription = 'A search algorithm to find optimal logic circuits.'
 String author = 'Filippo Barbari'
