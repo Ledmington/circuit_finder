@@ -17,7 +17,7 @@
 */
 package com.ledmington.ast.nodes;
 
-public abstract sealed class Node permits BracketsNode, MultiNode, NotNode, OneNode, VariableNode, ZeroNode {
+public abstract sealed class Node permits MultiNode, NotNode, OneNode, VariableNode, ZeroNode {
 
     /**
      * Computes the size of the AST this Node is root of in terms of number of nodes.

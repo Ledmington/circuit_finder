@@ -27,11 +27,6 @@ import org.junit.jupiter.api.Test;
 public class TestNodes {
 
     @Test
-    public void invalidBrackets() {
-        assertThrows(NullPointerException.class, () -> new BracketsNode(null));
-    }
-
-    @Test
     public void invalidNot() {
         assertThrows(NullPointerException.class, () -> new NotNode(null));
     }

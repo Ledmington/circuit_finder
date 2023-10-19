@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.ledmington.ast.nodes.AndNode;
-import com.ledmington.ast.nodes.BracketsNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.NotNode;
 import com.ledmington.ast.nodes.OneNode;
@@ -42,7 +41,6 @@ import com.ledmington.ast.opt.DeMorganOr;
 import com.ledmington.ast.opt.DoubleNot;
 import com.ledmington.ast.opt.MergeAnd;
 import com.ledmington.ast.opt.MergeOr;
-import com.ledmington.ast.opt.NoBrackets;
 import com.ledmington.ast.opt.NotConstant;
 import com.ledmington.ast.opt.Optimization;
 import com.ledmington.ast.opt.OptimizationResult;
@@ -62,7 +60,6 @@ public final class Optimizer {
     private static final Set<Optimization> optimizations = ImmutableSet.<Optimization>builder()
             .add(new NotConstant())
             .add(new DoubleNot())
-            .add(new NoBrackets())
             .add(new OrOne())
             .add(new AndZero())
             .add(new OrZero())
@@ -161,13 +158,6 @@ public final class Optimizer {
             return optimizedAST;
         }
 
-        if (astRoot instanceof BracketsNode br) {
-            if (br.inner().equals(optimizationRoot)) {
-                return new BracketsNode(optimizedAST);
-            }
-            return new BracketsNode(applyOptimization(br.inner(), optimizationRoot, optimizedAST));
-        }
-
         if (astRoot instanceof NotNode not) {
             if (not.inner().equals(optimizationRoot)) {
                 return new NotNode(optimizedAST);
@@ -212,9 +202,6 @@ public final class Optimizer {
             return Stream.of(root);
         }
 
-        if (root instanceof BracketsNode br) {
-            return Stream.concat(Stream.of(root), getStream(br.inner()));
-        }
         if (root instanceof NotNode not) {
             return Stream.concat(Stream.of(root), getStream(not.inner()));
         }

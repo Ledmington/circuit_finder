@@ -35,9 +35,7 @@ public class TestAnd extends TestOptimizer {
                 Arguments.of(and(A(), A(), B()), and(A(), B())),
                 Arguments.of(and(A(), B()), and(A(), B())),
                 Arguments.of(and(and(A(), B()), C()), and(A(), B(), C())),
-                Arguments.of(and(A(), and(B(), C())), and(A(), B(), C())),
-                Arguments.of(and(A(), brackets(and(B(), C()))), and(A(), B(), C())),
-                Arguments.of(and(brackets(and(A(), B())), C()), and(A(), B(), C())));
+                Arguments.of(and(A(), and(B(), C())), and(A(), B(), C())));
     }
 
     @ParameterizedTest

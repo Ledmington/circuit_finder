@@ -23,7 +23,6 @@ import java.util.List;
 
 import com.ledmington.ast.Optimizer;
 import com.ledmington.ast.nodes.AndNode;
-import com.ledmington.ast.nodes.BracketsNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.NotNode;
 import com.ledmington.ast.nodes.OrNode;
@@ -178,7 +177,7 @@ public final class Main {
                         }
                     }
                     sb.append(')');
-                    nodes.add(new BracketsNode(new AndNode(tmp)));
+                    nodes.add(new AndNode(tmp));
                 }
             });
 

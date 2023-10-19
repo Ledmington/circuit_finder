@@ -20,7 +20,6 @@ package com.ledmington.ast;
 import java.util.Arrays;
 
 import com.ledmington.ast.nodes.AndNode;
-import com.ledmington.ast.nodes.BracketsNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.NotNode;
 import com.ledmington.ast.nodes.OneNode;
@@ -41,10 +40,6 @@ public abstract class TestOptimizer {
 
     protected static Node one() {
         return new OneNode();
-    }
-
-    protected static Node brackets(final Node n) {
-        return new BracketsNode(n);
     }
 
     protected static Node not(final Node n) {

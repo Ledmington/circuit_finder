@@ -33,7 +33,6 @@ public class TestConstants extends TestOptimizer {
         return Stream.of(
                 Arguments.of(zero(), zero()),
                 Arguments.of(not(zero()), one()),
-                Arguments.of(brackets(zero()), zero()),
                 Arguments.of(or(zero(), zero()), zero()),
                 Arguments.of(or(A(), zero()), A()),
                 Arguments.of(or(zero(), A()), A()),
@@ -41,11 +40,6 @@ public class TestConstants extends TestOptimizer {
                 Arguments.of(and(A(), zero()), zero()),
                 Arguments.of(and(zero(), A()), zero()),
                 Arguments.of(and(A(), not(A())), zero()),
-                Arguments.of(and(brackets(A()), not(A())), zero()),
-                Arguments.of(and(A(), not(brackets(A()))), zero()),
-                Arguments.of(and(A(), brackets(not(A()))), zero()),
-                Arguments.of(and(brackets(A()), not(brackets(A()))), zero()),
-                Arguments.of(and(brackets(A()), brackets(not(A()))), zero()),
                 Arguments.of(and(B(), A(), not(A())), zero()),
                 Arguments.of(and(A(), B(), not(A())), zero()),
                 Arguments.of(and(A(), not(A()), B()), zero()));
@@ -62,7 +56,6 @@ public class TestConstants extends TestOptimizer {
         return Stream.of(
                 Arguments.of(one(), one()),
                 Arguments.of(not(one()), zero()),
-                Arguments.of(brackets(one()), one()),
                 Arguments.of(or(one(), one()), one()),
                 Arguments.of(or(A(), one()), one()),
                 Arguments.of(or(one(), A()), one()),
@@ -70,11 +63,6 @@ public class TestConstants extends TestOptimizer {
                 Arguments.of(and(A(), one()), A()),
                 Arguments.of(and(one(), A()), A()),
                 Arguments.of(or(A(), not(A())), one()),
-                Arguments.of(or(brackets(A()), not(A())), one()),
-                Arguments.of(or(A(), not(brackets(A()))), one()),
-                Arguments.of(or(A(), brackets(not(A()))), one()),
-                Arguments.of(or(brackets(A()), not(brackets(A()))), one()),
-                Arguments.of(or(A(), brackets(not(A()))), one()),
                 Arguments.of(or(B(), A(), not(A())), one()),
                 Arguments.of(or(A(), B(), not(A())), one()),
                 Arguments.of(or(A(), not(A()), B()), one()));
