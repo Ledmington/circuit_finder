@@ -4,3 +4,6 @@ plugins {
 
 rootProject.name = 'circuit_finder'
 include('cli')
+include('opt')
+include('utils')
+
