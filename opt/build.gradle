@@ -3,6 +3,7 @@ plugins {
 	id 'com.diffplug.spotless' version '6.19.0'
 	id 'com.github.ben-manes.versions' version '0.46.0'
 	id 'com.adarshr.test-logger' version '3.2.0'
+	id 'info.solidsoft.pitest' version '1.9.11'
 }
 
 repositories {
@@ -31,6 +32,9 @@ dependencies {
 	testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 	testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher") {
+		because("required for pitest")
+	}
 }
 
 test {
@@ -58,6 +62,17 @@ testlogger {
 	showPassedStandardStreams false
 	showSkippedStandardStreams false
 	showFailedStandardStreams true
+}
+
+pitest {
+	targetClasses.set(['com.ledmington.*'])
+	targetTests.set(['com.ledmington.*'])
+	pitestVersion = '1.14.4' //not needed when a default PIT version should be used
+	junit5PluginVersion = '1.2.0'
+	threads = 4
+	outputFormats.set(['HTML'])
+	verbose = true
+	timestampedReports = false
 }
 
 tasks.withType(JavaCompile).configureEach {
