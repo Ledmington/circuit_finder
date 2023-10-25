@@ -18,8 +18,19 @@
 package com.ledmington.ast.nodes;
 
 public final class OneNode extends Node {
+
     public int size() {
         return 1;
+    }
+
+    public int compareTo(final Node other) {
+        if (other instanceof ZeroNode) {
+            return 1;
+        }
+        if (other instanceof OneNode) {
+            return 0;
+        }
+        return -1;
     }
 
     public String toString() {

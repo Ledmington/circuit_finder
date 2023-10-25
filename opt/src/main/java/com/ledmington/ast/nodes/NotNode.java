@@ -50,6 +50,16 @@ public final class NotNode extends Node {
         return cachedSize;
     }
 
+    public int compareTo(final Node other) {
+        if (other instanceof ZeroNode || other instanceof OneNode || other instanceof VariableNode) {
+            return 1;
+        }
+        if (other instanceof MultiNode) {
+            return -1;
+        }
+        return 0;
+    }
+
     public String toString() {
         if (isStringSet) {
             return cachedString;

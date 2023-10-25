@@ -44,6 +44,16 @@ public final class VariableNode extends Node {
         return 1;
     }
 
+    public int compareTo(final Node other) {
+        if (other instanceof ZeroNode || other instanceof OneNode) {
+            return 1;
+        }
+        if (other instanceof VariableNode v) {
+            return this.name.compareTo(v.name);
+        }
+        return -1;
+    }
+
     public String toString() {
         return name;
     }

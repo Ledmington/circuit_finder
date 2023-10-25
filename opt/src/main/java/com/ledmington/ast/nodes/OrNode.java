@@ -61,6 +61,10 @@ public final class OrNode extends MultiNode {
         return s;
     }
 
+    public int compareTo(final Node other) {
+        return 0;
+    }
+
     public String toString() {
         if (isStringSet) {
             return cachedString;
