@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import com.ledmington.ast.nodes.Node;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,5 +47,10 @@ public class TestNot extends TestOptimizer {
     public void notProperties(final Node before, final Node expected) {
         final Node after = opt.optimize(before);
         assertEquals(expected, after);
+    }
+
+    @Test
+    public void stringRepresentation() {
+        assertEquals("~A", not(A()).toString());
     }
 }
