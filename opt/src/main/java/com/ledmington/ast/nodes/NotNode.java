@@ -20,7 +20,18 @@ package com.ledmington.ast.nodes;
 import java.util.Objects;
 
 public final class NotNode extends Node {
+
     private final Node inner;
+
+    /*
+    Since all Nodes are immutable, we can cache the size, the hashCode and the String representation.
+     */
+    private boolean isSizeSet = false;
+    private int cachedSize = -1;
+    private boolean isHashCodeSet = false;
+    private int cachedHashCode = -1;
+    private boolean isStringSet = false;
+    private String cachedString = null;
 
     public NotNode(final Node inner) {
         this.inner = Objects.requireNonNull(inner);
@@ -31,18 +42,34 @@ public final class NotNode extends Node {
     }
 
     public int size() {
-        return 1 + inner.size();
+        if (isSizeSet) {
+            return cachedSize;
+        }
+        cachedSize = 1 + inner.size();
+        isSizeSet = true;
+        return cachedSize;
     }
 
     public String toString() {
-        if (inner instanceof AndNode || inner instanceof OrNode) {
-            return "~(" + inner.toString() + ")";
+        if (isStringSet) {
+            return cachedString;
         }
-        return "~" + inner.toString();
+        if (inner instanceof AndNode || inner instanceof OrNode) {
+            cachedString = "~(" + inner.toString() + ")";
+        } else {
+            cachedString = "~" + inner.toString();
+        }
+        isStringSet = true;
+        return cachedString;
     }
 
     public int hashCode() {
-        return inner.hashCode();
+        if (isHashCodeSet) {
+            return cachedHashCode;
+        }
+        cachedHashCode = inner.hashCode();
+        isHashCodeSet = true;
+        return cachedHashCode;
     }
 
     public boolean equals(final Object other) {

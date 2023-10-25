@@ -23,6 +23,12 @@ public final class VariableNode extends Node {
 
     private final String name;
 
+    /*
+    Since the String is immutable, we can cache the hashCode.
+     */
+    private boolean isHashCodeSet = false;
+    private int cachedHashCode = -1;
+
     public VariableNode(final String name) {
         this.name = Objects.requireNonNull(name);
         if (name.isEmpty() || name.isBlank()) {
@@ -43,7 +49,12 @@ public final class VariableNode extends Node {
     }
 
     public int hashCode() {
-        return name.hashCode();
+        if (isHashCodeSet) {
+            return cachedHashCode;
+        }
+        cachedHashCode = name.hashCode();
+        isHashCodeSet = true;
+        return cachedHashCode;
     }
 
     public boolean equals(final Object other) {

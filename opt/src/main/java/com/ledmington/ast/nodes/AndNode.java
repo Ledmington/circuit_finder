@@ -26,6 +26,16 @@ public final class AndNode extends MultiNode {
 
     private final List<Node> nodes;
 
+    /*
+    Since all Nodes are immutable, we can cache the size, the hashCode and the String representation.
+     */
+    private boolean isSizeSet = false;
+    private int cachedSize = -1;
+    private boolean isHashCodeSet = false;
+    private int cachedHashCode = -1;
+    private boolean isStringSet = false;
+    private String cachedString = null;
+
     public AndNode(final List<Node> nodes) {
         this.nodes = Objects.requireNonNull(nodes);
         if (nodes.size() < 2) {
@@ -39,14 +49,22 @@ public final class AndNode extends MultiNode {
     }
 
     public int size() {
+        if (isSizeSet) {
+            return cachedSize;
+        }
         int s = 1;
         for (final Node n : nodes) {
             s += n.size();
         }
+        cachedSize = s;
+        isSizeSet = true;
         return s;
     }
 
     public String toString() {
+        if (isStringSet) {
+            return cachedString;
+        }
         final StringBuilder sb = new StringBuilder();
         final Consumer<Node> c = n -> {
             if (n instanceof OrNode) {
@@ -60,11 +78,18 @@ public final class AndNode extends MultiNode {
             sb.append('&');
             c.accept(nodes.get(i));
         }
-        return sb.toString();
+        cachedString = sb.toString();
+        isStringSet = true;
+        return cachedString;
     }
 
     public int hashCode() {
-        return nodes.hashCode();
+        if (isHashCodeSet) {
+            return cachedHashCode;
+        }
+        cachedHashCode = nodes.hashCode();
+        isHashCodeSet = true;
+        return cachedHashCode;
     }
 
     public boolean equals(final Object other) {
