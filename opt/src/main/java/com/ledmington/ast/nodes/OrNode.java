@@ -78,10 +78,10 @@ public final class OrNode extends MultiNode {
             }
         }
         if (i < this.nodes.size()) {
-            return -1;
+            return 1;
         }
         if (i < or.nodes.size()) {
-            return 1;
+            return -1;
         }
         return 0;
     }

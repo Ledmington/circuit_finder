@@ -133,7 +133,9 @@ public class TestNodeOrder extends TestOptimizer {
                 Arguments.of(A(), and(A(), B())),
                 Arguments.of(not(A()), and(A(), B())),
                 Arguments.of(and(A(), B()), and(B(), C())),
-                Arguments.of(and(A(), B()), or(A(), B())));
+                Arguments.of(and(A(), B()), or(A(), B())),
+                Arguments.of(and(A(), B()), and(A(), B(), C())),
+                Arguments.of(and(A(), B()), and(B(), B())));
     }
 
     @ParameterizedTest
@@ -150,7 +152,9 @@ public class TestNodeOrder extends TestOptimizer {
                 Arguments.of(A(), or(A(), B())),
                 Arguments.of(not(A()), or(A(), B())),
                 Arguments.of(or(A(), B()), or(B(), C())),
-                Arguments.of(and(A(), B()), or(A(), B())));
+                Arguments.of(and(A(), B()), or(A(), B())),
+                Arguments.of(or(A(), B()), or(A(), B(), C())),
+                Arguments.of(or(A(), B()), or(B(), B())));
     }
 
     @ParameterizedTest

@@ -80,10 +80,10 @@ public final class AndNode extends MultiNode {
             }
         }
         if (i < this.nodes.size()) {
-            return -1;
+            return 1;
         }
         if (i < and.nodes.size()) {
-            return 1;
+            return -1;
         }
         return 0;
     }
