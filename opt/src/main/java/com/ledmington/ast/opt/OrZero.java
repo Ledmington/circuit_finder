@@ -34,7 +34,7 @@ public final class OrZero implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 
-        if (root instanceof OrNode or && or.nodes().contains(new ZeroNode())) {
+        if (root instanceof OrNode or && or.contains(new ZeroNode())) {
             final List<Node> tmp =
                     or.nodes().stream().filter(n -> !(n instanceof ZeroNode)).toList();
             if (tmp.isEmpty()) {

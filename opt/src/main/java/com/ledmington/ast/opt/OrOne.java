@@ -33,7 +33,7 @@ public final class OrOne implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 
-        if (root instanceof OrNode or && or.nodes().contains(new OneNode())) {
+        if (root instanceof OrNode or && or.contains(new OneNode())) {
             return Optional.of(new OptimizationResult(-root.size() + 1, new OneNode()));
         }
 

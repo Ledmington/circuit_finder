@@ -34,7 +34,7 @@ public final class AndOne implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 
-        if (root instanceof AndNode and && and.nodes().contains(new OneNode())) {
+        if (root instanceof AndNode and && and.contains(new OneNode())) {
             final List<Node> tmp =
                     and.nodes().stream().filter(n -> !(n instanceof OneNode)).toList();
             if (tmp.isEmpty()) {

@@ -60,7 +60,7 @@ public final class AndAbsorption implements Optimization {
                     if (n == or) {
                         continue;
                     }
-                    if (or.nodes().contains(n)) {
+                    if (or.contains(n)) {
                         valid = false;
                         break;
                     }

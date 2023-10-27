@@ -17,7 +17,9 @@
 */
 package com.ledmington.ast.nodes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -37,7 +39,8 @@ public final class OrNode extends MultiNode {
     private String cachedString = null;
 
     public OrNode(final List<Node> nodes) {
-        this.nodes = Objects.requireNonNull(nodes);
+        this.nodes = new ArrayList<>(Objects.requireNonNull(nodes));
+        Collections.sort(this.nodes);
         if (nodes.size() < 2) {
             throw new IllegalArgumentException(
                     String.format("Invalid list of nodes: should have had >=2 elements but had %,d", nodes.size()));
@@ -46,6 +49,11 @@ public final class OrNode extends MultiNode {
 
     public List<Node> nodes() {
         return nodes;
+    }
+
+    public boolean contains(final Node n) {
+        final int idx = Collections.binarySearch(this.nodes, n);
+        return idx >= 0 && idx < this.nodes.size() && n.equals(this.nodes.get(idx));
     }
 
     public int size() {

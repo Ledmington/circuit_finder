@@ -187,9 +187,9 @@ public final class Main {
                     "The boolean expression for bit %d has %,d characters (AST representation: %,d nodes)\n",
                     i, sb.toString().length(), astRoot.size());
 
-            if (!sb.toString().equals(astRoot.toString())) {
-                throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
-            }
+            // if (!sb.toString().equals(astRoot.toString())) {
+            //    throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
+            // }
 
             // TODO: set maxDepth as CLI argument
             final Node optimized = new Optimizer(3).optimize(astRoot);

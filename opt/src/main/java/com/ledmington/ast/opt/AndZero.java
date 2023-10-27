@@ -33,7 +33,7 @@ public final class AndZero implements Optimization {
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 
-        if (root instanceof AndNode and && and.nodes().contains(new ZeroNode())) {
+        if (root instanceof AndNode and && and.contains(new ZeroNode())) {
             return Optional.of(new OptimizationResult(-root.size() + 1, new ZeroNode()));
         }
 

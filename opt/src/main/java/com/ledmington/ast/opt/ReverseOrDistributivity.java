@@ -73,7 +73,7 @@ public final class ReverseOrDistributivity implements Optimization {
             final List<OrNode> nodesWithCommon = new ArrayList<>();
             final List<Node> nodesWithoutCommon = new ArrayList<>();
             for (final Node n : and.nodes()) {
-                if (n instanceof OrNode or && or.nodes().contains(maxCommonNode)) {
+                if (n instanceof OrNode or && or.contains(maxCommonNode)) {
                     nodesWithCommon.add(or);
                 } else {
                     nodesWithoutCommon.add(n);

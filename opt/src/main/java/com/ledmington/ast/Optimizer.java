@@ -163,7 +163,7 @@ public final class Optimizer {
         }
 
         if (astRoot instanceof AndNode and) {
-            if (and.nodes().contains(optimizationRoot)) {
+            if (and.contains(optimizationRoot)) {
                 final List<Node> tmp = new ArrayList<>(and.nodes());
                 tmp.remove(optimizationRoot);
                 tmp.add(optimizedAST);
@@ -177,7 +177,7 @@ public final class Optimizer {
         }
 
         if (astRoot instanceof OrNode or) {
-            if (or.nodes().contains(optimizationRoot)) {
+            if (or.contains(optimizationRoot)) {
                 final List<Node> tmp = new ArrayList<>(or.nodes());
                 tmp.remove(optimizationRoot);
                 tmp.add(optimizedAST);
