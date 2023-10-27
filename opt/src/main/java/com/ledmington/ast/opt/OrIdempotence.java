@@ -18,10 +18,10 @@
 package com.ledmington.ast.opt;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.OrNode;
@@ -35,7 +35,7 @@ public final class OrIdempotence implements Optimization {
         Objects.requireNonNull(root);
 
         if (root instanceof OrNode or) {
-            final List<Node> tmp = new ArrayList<>(new HashSet<>(or.nodes()));
+            final List<Node> tmp = new ArrayList<>(new TreeSet<>(or.nodes()));
 
             if (tmp.size() < or.nodes().size()) {
                 if (tmp.size() == 1) {

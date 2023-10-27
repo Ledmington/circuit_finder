@@ -18,10 +18,10 @@
 package com.ledmington.ast.opt;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
@@ -35,7 +35,7 @@ public final class AndIdempotence implements Optimization {
         Objects.requireNonNull(root);
 
         if (root instanceof AndNode and) {
-            final List<Node> tmp = new ArrayList<>(new HashSet<>(and.nodes()));
+            final List<Node> tmp = new ArrayList<>(new TreeSet<>(and.nodes()));
 
             if (tmp.size() < and.nodes().size()) {
                 if (tmp.size() == 1) {
