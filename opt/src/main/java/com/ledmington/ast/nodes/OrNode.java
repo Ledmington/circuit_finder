@@ -62,6 +62,27 @@ public final class OrNode extends MultiNode {
     }
 
     public int compareTo(final Node other) {
+        if (other instanceof ZeroNode
+                || other instanceof OneNode
+                || other instanceof VariableNode
+                || other instanceof NotNode
+                || other instanceof AndNode) {
+            return 1;
+        }
+        final OrNode or = (OrNode) other;
+        int i = 0;
+        for (; i < this.nodes.size() && i < or.nodes().size(); i++) {
+            final int r = this.nodes.get(i).compareTo(or.nodes().get(i));
+            if (r != 0) {
+                return r;
+            }
+        }
+        if (i < this.nodes.size()) {
+            return -1;
+        }
+        if (i < or.nodes.size()) {
+            return 1;
+        }
         return 0;
     }
 

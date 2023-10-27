@@ -62,6 +62,29 @@ public final class AndNode extends MultiNode {
     }
 
     public int compareTo(final Node other) {
+        if (other instanceof ZeroNode
+                || other instanceof OneNode
+                || other instanceof VariableNode
+                || other instanceof NotNode) {
+            return 1;
+        }
+        if (other instanceof OrNode) {
+            return -1;
+        }
+        final AndNode and = (AndNode) other;
+        int i = 0;
+        for (; i < this.nodes.size() && i < and.nodes().size(); i++) {
+            final int r = this.nodes.get(i).compareTo(and.nodes().get(i));
+            if (r != 0) {
+                return r;
+            }
+        }
+        if (i < this.nodes.size()) {
+            return -1;
+        }
+        if (i < and.nodes.size()) {
+            return 1;
+        }
         return 0;
     }
 

@@ -57,7 +57,7 @@ public final class NotNode extends Node {
         if (other instanceof MultiNode) {
             return -1;
         }
-        return 0;
+        return inner.compareTo(((NotNode) other).inner);
     }
 
     public String toString() {

@@ -108,4 +108,55 @@ public class TestNodeOrder extends TestOptimizer {
         assertTrue(before.compareTo(after) < 0, String.format("Node %s should come before node %s", before, after));
         assertTrue(after.compareTo(before) > 0, String.format("Node %s should come after node %s", after, before));
     }
+
+    private static Stream<Arguments> notOrdering() {
+        return Stream.of(
+                Arguments.of(zero(), not(zero())),
+                Arguments.of(one(), not(one())),
+                Arguments.of(A(), not(A())),
+                Arguments.of(not(A()), not(not(A()))),
+                Arguments.of(not(A()), and(A(), B())),
+                Arguments.of(not(A()), or(A(), B())));
+    }
+
+    @ParameterizedTest
+    @MethodSource("notOrdering")
+    public void notOrdering(final Node before, final Node after) {
+        assertTrue(before.compareTo(after) < 0, String.format("Node %s should come before node %s", before, after));
+        assertTrue(after.compareTo(before) > 0, String.format("Node %s should come after node %s", after, before));
+    }
+
+    private static Stream<Arguments> andOrdering() {
+        return Stream.of(
+                Arguments.of(zero(), and(A(), B())),
+                Arguments.of(one(), and(A(), B())),
+                Arguments.of(A(), and(A(), B())),
+                Arguments.of(not(A()), and(A(), B())),
+                Arguments.of(and(A(), B()), and(B(), C())),
+                Arguments.of(and(A(), B()), or(A(), B())));
+    }
+
+    @ParameterizedTest
+    @MethodSource("andOrdering")
+    public void andOrdering(final Node before, final Node after) {
+        assertTrue(before.compareTo(after) < 0, String.format("Node %s should come before node %s", before, after));
+        assertTrue(after.compareTo(before) > 0, String.format("Node %s should come after node %s", after, before));
+    }
+
+    private static Stream<Arguments> orOrdering() {
+        return Stream.of(
+                Arguments.of(zero(), or(A(), B())),
+                Arguments.of(one(), or(A(), B())),
+                Arguments.of(A(), or(A(), B())),
+                Arguments.of(not(A()), or(A(), B())),
+                Arguments.of(or(A(), B()), or(B(), C())),
+                Arguments.of(and(A(), B()), or(A(), B())));
+    }
+
+    @ParameterizedTest
+    @MethodSource("orOrdering")
+    public void orOrdering(final Node before, final Node after) {
+        assertTrue(before.compareTo(after) < 0, String.format("Node %s should come before node %s", before, after));
+        assertTrue(after.compareTo(before) > 0, String.format("Node %s should come after node %s", after, before));
+    }
 }
