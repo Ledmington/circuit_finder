@@ -18,6 +18,7 @@
 package com.ledmington.ast;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.ledmington.utils.MiniLogger;
@@ -87,7 +88,7 @@ public final class QMC16 {
         List<MaskedShort> base =
                 new ArrayList<>(ones.stream().map(s -> new MaskedShort(s, mask)).toList());
         List<MaskedShort> next;
-        final List<MaskedShort> result = new ArrayList<>();
+        List<MaskedShort> result = new ArrayList<>();
 
         for (int it = 0; it < nBits; it++) {
             logger.debug("Computing size-%,d prime implicants", 1 << it);
@@ -141,6 +142,8 @@ public final class QMC16 {
 
             base = next;
         }
+
+        result = new ArrayList<>(new HashSet<>(result));
 
         System.out.print("result: ");
         for (final MaskedShort ms : result) {

@@ -38,7 +38,16 @@ public final class TestQMC extends TestOptimizer {
     private static Stream<Arguments> fourVariableCircuits() {
         return Stream.of(
                 Arguments.of(and(A(), B(), C(), D()), and(A(), B(), C(), D())),
-                Arguments.of(or(and(A(), B(), C(), D()), and(A(), B(), C(), not(D()))), and(A(), B(), C())));
+                Arguments.of(or(and(A(), B(), C(), D()), and(A(), B(), C(), not(D()))), and(A(), B(), C())),
+                Arguments.of(or(and(A(), B(), C(), D()), and(not(A()), B(), C(), D())), and(B(), C(), D())),
+                Arguments.of(or(A(), and(A(), B())), A()),
+                Arguments.of(and(A(), or(A(), B())), A()),
+                Arguments.of(or(A(), B(), and(B(), C(), D())), or(A(), B())),
+                Arguments.of(
+                        or(and(A(), not(B())), and(not(A()), B())),
+                        or(and(A(), not(B())), and(not(A()), B()))), // XOR cannot be simplified
+                Arguments.of(and(A(), or(B(), and(C(), D()))), or(and(A(), B()), and(A(), C(), D()))),
+                Arguments.of(not(and(A(), not(B()), C(), not(D()))), or(not(A()), B(), not(C()), D())));
     }
 
     @ParameterizedTest
@@ -76,7 +85,7 @@ public final class TestQMC extends TestOptimizer {
             if (ms.isRelevant(3)) {
                 ttmp.add(ms.isSet(3) ? D() : not(D()));
             }
-            tmp.add(new AndNode(ttmp));
+            tmp.add(ttmp.size() == 1 ? ttmp.get(0) : new AndNode(ttmp));
         }
         final Node ast = tmp.size() == 1 ? tmp.get(0) : new OrNode(tmp);
         assertEquals(after, ast);
