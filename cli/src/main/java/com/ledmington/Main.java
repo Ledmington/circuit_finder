@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ledmington.ast.Optimizer;
+import com.ledmington.ast.QMC16;
 import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.NotNode;
@@ -139,7 +140,7 @@ public final class Main {
         System.out.println();
     }
 
-    private static void buildCircuit(final BigInteger limit, int inputBits, int outputBits, final LogicFunction op) {
+    private static void buildCircuit(int inputBits, int outputBits, final LogicFunction op) {
         System.out.println();
         System.out.println("Building circuit...\n");
 
@@ -148,52 +149,78 @@ public final class Main {
             throw new IllegalArgumentException("Currently we do not support more than 26 different variables.");
         }
 
-        for (int i = 0; i < outputBits; i++) {
-            final StringBuilder sb = new StringBuilder();
-            final List<Node> nodes = new ArrayList<>();
+        boolean useQMC = true;
+        if (useQMC) {
+            if (inputBits <= 16) {
+                for (int i = 0; i < outputBits; i++) {
+                    // Inputs for which the i-th output bit is 1
+                    final List<Short> ones = new ArrayList<>();
 
-            final int finalI = i;
-            Generators.bitStrings(inputBits).forEach(s -> {
-                final BitArray in = new BitArray(s);
-                final BitArray out = op.apply(in);
-
-                if (out.get(finalI)) {
-                    if (!sb.isEmpty()) {
-                        sb.append('+');
-                    }
-                    sb.append('(');
-                    final List<Node> tmp = new ArrayList<>();
-                    for (int j = 0; j < inputBits; j++) {
-                        if (j > 0) {
-                            sb.append('&');
+                    for (int j = 0; j < 1 << inputBits; j++) {
+                        final BitArray in = new BitArray(inputBits);
+                        for (int k = 0; k < inputBits; k++) {
+                            in.set(k, (j & (1 << i)) != 0);
                         }
-                        final String variableName = String.valueOf((char) ('A' + j));
-                        if (in.get(j)) {
-                            sb.append(variableName);
-                            tmp.add(new VariableNode(variableName));
-                        } else {
-                            sb.append("~").append(variableName);
-                            tmp.add(new NotNode(new VariableNode(variableName)));
+                        final BitArray out = op.apply(in);
+
+                        if (out.get(i)) {
+                            ones.add((short) j);
                         }
                     }
-                    sb.append(')');
-                    nodes.add(new AndNode(tmp));
+
+                    QMC16.minimize(inputBits, ones);
                 }
-            });
+            } else {
+                logger.warning("Not yet available Quine-McCluskey for more than 16 bits");
+            }
+        } else {
+            for (int i = 0; i < outputBits; i++) {
+                final StringBuilder sb = new StringBuilder();
+                final List<Node> nodes = new ArrayList<>();
 
-            final Node astRoot = new OrNode(nodes);
+                final int finalI = i;
+                Generators.bitStrings(inputBits).forEach(s -> {
+                    final BitArray in = new BitArray(s);
+                    final BitArray out = op.apply(in);
 
-            System.out.printf(
-                    "The boolean expression for bit %d has %,d characters (AST representation: %,d nodes)\n",
-                    i, sb.toString().length(), astRoot.size());
+                    if (out.get(finalI)) {
+                        if (!sb.isEmpty()) {
+                            sb.append('+');
+                        }
+                        sb.append('(');
+                        final List<Node> tmp = new ArrayList<>();
+                        for (int j = 0; j < inputBits; j++) {
+                            if (j > 0) {
+                                sb.append('&');
+                            }
+                            final String variableName = String.valueOf((char) ('A' + j));
+                            if (in.get(j)) {
+                                sb.append(variableName);
+                                tmp.add(new VariableNode(variableName));
+                            } else {
+                                sb.append("~").append(variableName);
+                                tmp.add(new NotNode(new VariableNode(variableName)));
+                            }
+                        }
+                        sb.append(')');
+                        nodes.add(new AndNode(tmp));
+                    }
+                });
 
-            // if (!sb.toString().equals(astRoot.toString())) {
-            //    throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
-            // }
+                final Node astRoot = new OrNode(nodes);
 
-            // TODO: set maxDepth as CLI argument
-            final Node optimized = new Optimizer(3).optimize(astRoot);
-            System.out.printf("Optimized circuit: '%s'\n", optimized);
+                System.out.printf(
+                        "The boolean expression for bit %d has %,d characters (AST representation: %,d nodes)\n",
+                        i, sb.toString().length(), astRoot.size());
+
+                // if (!sb.toString().equals(astRoot.toString())) {
+                //    throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
+                // }
+
+                // TODO: set maxDepth as CLI argument
+                final Node optimized = new Optimizer(3).optimize(astRoot);
+                System.out.printf("Optimized circuit: '%s'\n", optimized);
+            }
         }
     }
 
@@ -305,7 +332,7 @@ public final class Main {
         try {
             // computeCorrelationMatrix(limit, inputBits, outputBits, op);
 
-            buildCircuit(limit, inputBits, outputBits, op);
+            buildCircuit(inputBits, outputBits, op);
         } catch (Throwable t) {
             logger.error(t);
             System.exit(-1);
