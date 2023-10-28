@@ -17,6 +17,8 @@
 */
 package com.ledmington.ast.nodes;
 
+import java.util.Map;
+
 public abstract sealed class Node implements Comparable<Node>
         permits MultiNode, NotNode, OneNode, VariableNode, ZeroNode {
 
@@ -24,4 +26,6 @@ public abstract sealed class Node implements Comparable<Node>
      * Computes the size of the AST this Node is root of in terms of number of nodes.
      */
     public abstract int size();
+
+    public abstract boolean evaluate(final Map<String, Boolean> values);
 }

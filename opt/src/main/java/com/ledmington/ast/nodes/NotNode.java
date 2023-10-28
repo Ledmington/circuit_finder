@@ -17,6 +17,7 @@
 */
 package com.ledmington.ast.nodes;
 
+import java.util.Map;
 import java.util.Objects;
 
 public final class NotNode extends Node {
@@ -48,6 +49,11 @@ public final class NotNode extends Node {
         cachedSize = 1 + inner.size();
         isSizeSet = true;
         return cachedSize;
+    }
+
+    public boolean evaluate(final Map<String, Boolean> values) {
+        Objects.requireNonNull(values);
+        return !inner.evaluate(values);
     }
 
     public int compareTo(final Node other) {

@@ -17,10 +17,18 @@
 */
 package com.ledmington.ast.nodes;
 
+import java.util.Map;
+import java.util.Objects;
+
 public final class OneNode extends Node {
 
     public int size() {
         return 1;
+    }
+
+    public boolean evaluate(final Map<String, Boolean> values) {
+        Objects.requireNonNull(values);
+        return true;
     }
 
     public int compareTo(final Node other) {

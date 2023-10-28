@@ -17,6 +17,7 @@
 */
 package com.ledmington.ast.nodes;
 
+import java.util.Map;
 import java.util.Objects;
 
 public final class VariableNode extends Node {
@@ -42,6 +43,15 @@ public final class VariableNode extends Node {
 
     public int size() {
         return 1;
+    }
+
+    public boolean evaluate(final Map<String, Boolean> values) {
+        Objects.requireNonNull(values);
+        if (!values.containsKey(this.name)) {
+            throw new IllegalArgumentException(
+                    String.format("Cannot evaluate without value of variable '%s'", this.name));
+        }
+        return values.get(this.name);
     }
 
     public int compareTo(final Node other) {

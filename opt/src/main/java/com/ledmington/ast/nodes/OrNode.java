@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -67,6 +68,16 @@ public final class OrNode extends MultiNode {
         cachedSize = s;
         isSizeSet = true;
         return s;
+    }
+
+    public boolean evaluate(final Map<String, Boolean> values) {
+        Objects.requireNonNull(values);
+        for (final Node n : nodes) {
+            if (n.evaluate(values)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int compareTo(final Node other) {
