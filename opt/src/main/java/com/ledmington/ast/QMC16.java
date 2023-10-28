@@ -20,6 +20,7 @@ package com.ledmington.ast;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.ledmington.utils.MiniLogger;
 
@@ -29,11 +30,28 @@ import com.ledmington.utils.MiniLogger;
  */
 public final class QMC16 {
 
-    private static final MiniLogger logger = MiniLogger.getLogger("qmc");
+    private static final MiniLogger logger = MiniLogger.getLogger("qmc16");
 
     private QMC16() {}
 
-    public record MaskedShort(short value, short mask) {
+    public static final class MaskedShort {
+
+        private final short value;
+        private final short mask;
+
+        public MaskedShort(final short v, final short m) {
+            this.value = v;
+            this.mask = m;
+        }
+
+        public short value() {
+            return value;
+        }
+
+        public short mask() {
+            return mask;
+        }
+
         /**
          * Returns true is the i-th bit of the value is set.
          * 0-indexed.
@@ -51,20 +69,42 @@ public final class QMC16 {
         }
 
         public String toString() {
+            return toString(16);
+        }
+
+        public String toString(final int nBits) {
             StringBuilder s = new StringBuilder();
-            for (int i = 0; i < 16; i++) {
-                final short tmp = (short) (1 << (15 - i));
+            for (int i = 0; i < nBits; i++) {
+                final short tmp = (short) (1 << (nBits - 1 - i));
                 if ((mask & tmp) == 0) {
-                    s.append("-");
+                    s.append('-');
                 } else {
-                    s.append((value & tmp) != 0 ? "1" : "0");
+                    s.append((value & tmp) != 0 ? '1' : '0');
                 }
             }
             return s.toString();
         }
+
+        public int hashCode() {
+            return 17 + 31 * this.value + 31 * 31 * this.mask;
+        }
+
+        public boolean equals(final Object other) {
+            if (other == null) {
+                return false;
+            }
+            if (this == other) {
+                return true;
+            }
+            if (!this.getClass().equals(other.getClass())) {
+                return false;
+            }
+            final MaskedShort ms = (MaskedShort) other;
+            return (value & mask) == (ms.value & ms.mask);
+        }
     }
 
-    private static int popcount(short in) {
+    private static int popcount(final short in) {
         int x = in & 0xffff;
         x = (x & 0x5555) + ((x >> 1) & 0x5555);
         x = (x & 0x3333) + ((x >> 2) & 0x3333);
@@ -89,24 +129,16 @@ public final class QMC16 {
 
         List<MaskedShort> base =
                 new ArrayList<>(ones.stream().map(s -> new MaskedShort(s, mask)).toList());
-        List<MaskedShort> next;
+        List<MaskedShort> next = new ArrayList<>();
         List<MaskedShort> result = new ArrayList<>();
 
         for (int it = 0; it < nBits; it++) {
             logger.debug("Computing size-%,d prime implicants", 1 << it);
 
             final int length = base.size();
-            // final int maxNextLength = (length * (length - 1)) / 2;
-
-            // next = new ArrayList<>(maxNextLength);
-            next = new ArrayList<>();
 
             logger.debug("Initial size: %,d", base.size());
-            System.out.print("base: ");
-            for (final MaskedShort ms : base) {
-                System.out.printf("%s, ", ms.toString());
-            }
-            System.out.println();
+            // logger.debug("base: %s", base.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
             // TODO: divide inputs based on number of 1s and check only successive groups
             final boolean[] used = new boolean[length];
@@ -135,24 +167,20 @@ public final class QMC16 {
                 }
             }
 
-            for (final MaskedShort ms : next) {
-                System.out.printf("%s, ", ms.toString());
-            }
-            System.out.println();
-
-            logger.debug("Final size: %,d", next.size());
+            // logger.debug("next: %s", next.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
+            logger.debug("next size: %,d", next.size());
             logger.debug("Result size: %,d", result.size());
+            logger.debug(
+                    "result: %s", result.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
-            base = next;
+            base = new ArrayList<>(new HashSet<>(next));
+            next = new ArrayList<>();
         }
 
         result = new ArrayList<>(new HashSet<>(result));
 
-        System.out.print("result: ");
-        for (final MaskedShort ms : result) {
-            System.out.printf("%s, ", ms.toString());
-        }
-        System.out.println();
+        logger.debug("Result size: %,d", result.size());
+        logger.debug("result: %s", result.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
         return result;
     }

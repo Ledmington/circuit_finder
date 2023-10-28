@@ -170,7 +170,7 @@ public final class Main {
 
                     final List<VariableNode> variables = new ArrayList<>();
                     for (int k = 0; k < inputBits; k++) {
-                        variables.add(new VariableNode(String.valueOf('A' + k)));
+                        variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
                     }
 
                     final List<QMC16.MaskedShort> result = QMC16.minimize(inputBits, ones);
@@ -341,7 +341,7 @@ public final class Main {
         final int inputBits = op.inputBits(bits);
         final int outputBits = op.outputBits(bits);
         final BigInteger limit = BigInteger.TWO.pow(inputBits);
-        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", bits, FormatUtils.thousands(limit, ","));
+        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", inputBits, FormatUtils.thousands(limit, ","));
         System.out.println();
         System.out.printf(
                 "The selected operation requires %,d input bits to produce %,d output bits.\n", inputBits, outputBits);

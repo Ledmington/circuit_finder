@@ -48,6 +48,11 @@ dependencies {
 
 application {
 	mainClass = 'com.ledmington.Main'
+	applicationDefaultJvmArgs = [
+			//"-XX:+UnlockDiagnosticVMOptions",
+			//"-XX:+PrintCompilation",
+			//"-XX:LogFile=jvm_compilation_log"
+	]
 }
 
 test {
