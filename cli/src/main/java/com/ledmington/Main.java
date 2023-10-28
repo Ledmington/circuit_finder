@@ -31,6 +31,7 @@ import com.ledmington.ast.nodes.VariableNode;
 import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.Generators;
 import com.ledmington.utils.ImmutableMap;
+import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
 import com.ledmington.utils.TerminalCursor;
 import com.ledmington.utils.TerminalCursor.TerminalColor;
@@ -173,9 +174,9 @@ public final class Main {
                         variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
                     }
 
-                    final List<QMC16.MaskedShort> result = QMC16.minimize(inputBits, ones);
+                    final List<MaskedShort> result = QMC16.minimize(inputBits, ones);
                     final List<Node> tmp = new ArrayList<>();
-                    for (final QMC16.MaskedShort ms : result) {
+                    for (final MaskedShort ms : result) {
                         final List<Node> ttmp = new ArrayList<>();
                         for (int k = 0; k < inputBits; k++) {
                             if (ms.isRelevant(k)) {

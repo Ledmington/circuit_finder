@@ -28,6 +28,7 @@ import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.OrNode;
 import com.ledmington.utils.ImmutableMap;
+import com.ledmington.utils.MaskedShort;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -67,11 +68,11 @@ public final class TestQMC extends TestOptimizer {
             }
         }
 
-        final List<QMC16.MaskedShort> result = QMC16.minimize(4, truthTable);
+        final List<MaskedShort> result = QMC16.minimize(4, truthTable);
 
         // re-converting the result back to an AST
         final List<Node> tmp = new ArrayList<>();
-        for (final QMC16.MaskedShort ms : result) {
+        for (final MaskedShort ms : result) {
             final List<Node> ttmp = new ArrayList<>();
             if (ms.isRelevant(0)) {
                 ttmp.add(ms.isSet(0) ? A() : not(A()));

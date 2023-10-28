@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
 
 /**
@@ -33,76 +34,6 @@ public final class QMC16 {
     private static final MiniLogger logger = MiniLogger.getLogger("qmc16");
 
     private QMC16() {}
-
-    public static final class MaskedShort {
-
-        private final short value;
-        private final short mask;
-
-        public MaskedShort(final short v, final short m) {
-            this.value = v;
-            this.mask = m;
-        }
-
-        public short value() {
-            return value;
-        }
-
-        public short mask() {
-            return mask;
-        }
-
-        /**
-         * Returns true is the i-th bit of the value is set.
-         * 0-indexed.
-         */
-        public boolean isSet(int i) {
-            return (value & (1 << i)) != 0;
-        }
-
-        /**
-         * Returns true if the i-th bit of the value is relevant.
-         * 0-indexed.
-         */
-        public boolean isRelevant(int i) {
-            return (mask & (1 << i)) != 0;
-        }
-
-        public String toString() {
-            return toString(16);
-        }
-
-        public String toString(final int nBits) {
-            StringBuilder s = new StringBuilder();
-            for (int i = 0; i < nBits; i++) {
-                final short tmp = (short) (1 << (nBits - 1 - i));
-                if ((mask & tmp) == 0) {
-                    s.append('-');
-                } else {
-                    s.append((value & tmp) != 0 ? '1' : '0');
-                }
-            }
-            return s.toString();
-        }
-
-        public int hashCode() {
-            return 17 + 31 * this.value + 31 * 31 * this.mask;
-        }
-
-        public boolean equals(final Object other) {
-            if (other == null) {
-                return false;
-            }
-            if (this == other) {
-                return true;
-            }
-            if (!this.getClass().equals(other.getClass())) {
-                return false;
-            }
-            final MaskedShort ms = (MaskedShort) other;
-            return (value & mask) == (ms.value & ms.mask);
-        }
-    }
 
     private static int popcount(final short in) {
         int x = in & 0xffff;
