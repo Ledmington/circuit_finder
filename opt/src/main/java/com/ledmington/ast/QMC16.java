@@ -64,6 +64,15 @@ public final class QMC16 {
         }
     }
 
+    private static int popcount(short in) {
+        int x = in & 0xffff;
+        x = (x & 0x5555) + ((x >> 1) & 0x5555);
+        x = (x & 0x3333) + ((x >> 2) & 0x3333);
+        x = (x & 0x0f0f) + ((x >> 4) & 0x0f0f);
+        x = (x & 0x00ff) + ((x >> 8) & 0x00ff);
+        return x;
+    }
+
     public static List<MaskedShort> minimize(final int nBits, final List<Short> ones) {
         if (nBits < 1 || nBits > 16) {
             throw new IllegalArgumentException(
@@ -73,16 +82,9 @@ public final class QMC16 {
         // placing a 0 where the bits are not relevant
         final short mask = (short) (0xffff >> (16 - nBits));
         logger.debug("nBits: %,d -> mask: 0x%04x", nBits, mask);
-        if (Integer.bitCount(mask) != nBits) {
-            throw new RuntimeException(String.format(
-                    "Wrong mask created: should have had %,d 1 bits but had %,d", nBits, Integer.bitCount(mask)));
-        }
-
-        for (final Short s : ones) {
-            if (s < 0 || s >= (1 << nBits)) {
-                throw new IllegalArgumentException(
-                        String.format("%,d is not a valid index for Quine-McCluskey algorithm", s));
-            }
+        if (popcount(mask) != nBits) {
+            throw new RuntimeException(
+                    String.format("Wrong mask created: should have had %,d 1s but had %,d", nBits, popcount(mask)));
         }
 
         List<MaskedShort> base =
@@ -94,9 +96,10 @@ public final class QMC16 {
             logger.debug("Computing size-%,d prime implicants", 1 << it);
 
             final int length = base.size();
-            final int maxNextLength = (length * (length - 1)) / 2;
+            // final int maxNextLength = (length * (length - 1)) / 2;
 
-            next = new ArrayList<>(maxNextLength);
+            // next = new ArrayList<>(maxNextLength);
+            next = new ArrayList<>();
 
             logger.debug("Initial size: %,d", base.size());
             System.out.print("base: ");
