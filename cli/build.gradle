@@ -51,6 +51,8 @@ application {
 	applicationDefaultJvmArgs = [
 			//"-XX:+UnlockDiagnosticVMOptions",
 			//"-XX:+PrintCompilation",
+			//"-XX:+PrintInlining",
+			//"-XX:+LogCompilation",
 			//"-XX:LogFile=jvm_compilation_log"
 	]
 }

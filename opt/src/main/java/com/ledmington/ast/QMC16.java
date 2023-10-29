@@ -69,7 +69,7 @@ public final class QMC16 {
             final int length = base.size();
 
             logger.debug("Initial size: %,d", base.size());
-            // logger.debug("base: %s", base.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
+            logger.debug("base: %s", base.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
             // TODO: divide inputs based on number of 1s and check only successive groups
             final boolean[] used = new boolean[length];
@@ -85,8 +85,13 @@ public final class QMC16 {
 
                     final short diff = (short) ((first & firstMask) ^ (second & secondMask));
                     if (Integer.bitCount(diff) == 1 && !next.contains(base.get(i))) {
+
                         // only one bit of difference
-                        next.add(new MaskedShort(first, (short) (firstMask & (~diff))));
+                        final MaskedShort toBeAdded = new MaskedShort(first, (short) (firstMask & (~diff)));
+                        logger.debug(
+                                "Compared %s and %s: adding %s",
+                                base.get(i).toString(nBits), base.get(j).toString(nBits), toBeAdded.toString(nBits));
+                        next.add(toBeAdded);
                         used[i] = true;
                         used[j] = true;
                     }
@@ -94,11 +99,14 @@ public final class QMC16 {
 
                 if (!used[i]) {
                     // this implicant was not used to compute the "next size" implicants
+                    logger.debug(
+                            "%s was not used in this iteration, adding it as is",
+                            base.get(i).toString(nBits));
                     result.add(base.get(i));
                 }
             }
 
-            // logger.debug("next: %s", next.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
+            logger.debug("next: %s", next.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
             logger.debug("next size: %,d", next.size());
             logger.debug("Result size: %,d", result.size());
             logger.debug(
@@ -113,6 +121,83 @@ public final class QMC16 {
         logger.debug("Result size: %,d", result.size());
         logger.debug("result: %s", result.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
-        return result;
+        // Building prime implicant chart
+        // a big boolean table: one row for each final minterm and one column for each of the starting input 1s
+        final boolean[][] chart = new boolean[result.size()][ones.size()];
+        logger.debug(
+                "The prime implicant chart is %,dx%,d: %,d bytes",
+                result.size(), ones.size(), result.size() * ones.size());
+        for (int i = 0; i < result.size(); i++) {
+            for (int j = 0; j < ones.size(); j++) {
+                chart[i][j] = ((result.get(i).value() & result.get(i).mask()) & ones.get(j))
+                        == result.get(i).mask();
+                logger.debug(
+                        "Comparing %s and %s -> %d",
+                        result.get(i).toString(nBits),
+                        new MaskedShort(ones.get(j), (short) 0xffff).toString(nBits),
+                        chart[i][j] ? 1 : 0);
+            }
+        }
+
+        // useful for debugging
+        printChart(chart, result.size(), ones.size());
+
+        final List<MaskedShort> finalResult = new ArrayList<>();
+
+        // Choosing the essential prime implicants: rows of the chart with only one true value
+        int epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
+        while (epiIdx != -1) {
+            logger.debug("Essential prime implicant chosen: row %,d", epiIdx);
+            finalResult.add(result.get(epiIdx));
+
+            // zero-ing the selected row and all the columns where the selected row is true
+            for (int c = 0; c < ones.size(); c++) {
+                if (chart[epiIdx][c]) {
+                    for (int r = 0; r < result.size(); r++) {
+                        chart[r][c] = false;
+                    }
+                }
+                chart[epiIdx][c] = false;
+            }
+
+            printChart(chart, result.size(), ones.size());
+
+            epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
+        }
+
+        return finalResult;
+    }
+
+    private static void printChart(final boolean[][] chart, final int rows, final int columns) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                sb.append(chart[i][j] ? '1' : '0');
+            }
+            if (i != rows - 1) {
+                sb.append('\n');
+            }
+        }
+        logger.debug(sb.toString());
+    }
+
+    private static int findEssentialPrimeImplicant(final boolean[][] chart, final int rows, final int columns) {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < columns; c++) {
+                if (!chart[r][c]) {
+                    continue;
+                }
+
+                int count = 0;
+                for (int i = 0; i < rows; i++) {
+                    count += chart[i][c] ? 1 : 0;
+                }
+
+                if (count == 1) {
+                    return r;
+                }
+            }
+        }
+        return -1;
     }
 }
