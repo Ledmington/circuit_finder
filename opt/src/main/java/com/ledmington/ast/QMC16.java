@@ -20,7 +20,6 @@ package com.ledmington.ast;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
@@ -69,9 +68,10 @@ public final class QMC16 {
             final int length = base.size();
 
             logger.debug("Initial size: %,d", base.size());
-            logger.debug("base: %s", base.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
             // TODO: divide inputs based on number of 1s and check only successive groups
+            //  (helps only in the first iterations)
+            // TODO 2: divide inputs in groups with the same mask to greatly reduce checks
             final boolean[] used = new boolean[length];
             for (int i = 0; i < length; i++) {
                 final short first = base.get(i).value();
@@ -84,24 +84,22 @@ public final class QMC16 {
                     }
 
                     final short diff = (short) ((first & firstMask) ^ (second & secondMask));
-                    if (Integer.bitCount(diff) == 1 && !next.contains(base.get(i))) {
-
-                        // only one bit of difference
-                        final MaskedShort toBeAdded = new MaskedShort(first, (short) (firstMask & (~diff)));
-                        logger.debug(
-                                "Compared %s and %s: adding %s",
-                                base.get(i).toString(nBits), base.get(j).toString(nBits), toBeAdded.toString(nBits));
-                        next.add(toBeAdded);
+                    // only one bit of difference
+                    if (Integer.bitCount(diff) == 1) {
+                        final short newMask = (short) (firstMask & (~diff));
+                        final MaskedShort toBeAdded = new MaskedShort((short) (first & newMask), newMask);
+                        if (!next.contains(toBeAdded)) {
+                            next.add(toBeAdded);
+                        }
                         used[i] = true;
                         used[j] = true;
                     }
                 }
+            }
 
+            for (int i = 0; i < length; i++) {
                 if (!used[i]) {
                     // this implicant was not used to compute the "next size" implicants
-                    logger.debug(
-                            "%s was not used in this iteration, adding it as is",
-                            base.get(i).toString(nBits));
                     // apply the mask before adding
                     result.add(new MaskedShort(
                             (short) (base.get(i).value() & base.get(i).mask()),
@@ -109,11 +107,8 @@ public final class QMC16 {
                 }
             }
 
-            logger.debug("next: %s", next.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
             logger.debug("next size: %,d", next.size());
             logger.debug("Result size: %,d", result.size());
-            logger.debug(
-                    "result: %s", result.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
             base = new ArrayList<>(new HashSet<>(next));
             next = new ArrayList<>();
@@ -122,7 +117,6 @@ public final class QMC16 {
         result = new ArrayList<>(new HashSet<>(result));
 
         logger.debug("Result size: %,d", result.size());
-        logger.debug("result: %s", result.stream().map(ms -> ms.toString(nBits)).collect(Collectors.joining(", ")));
 
         // Building prime implicant chart
         // a big boolean table: one row for each final minterm and one column for each of the starting input 1s
@@ -141,23 +135,17 @@ public final class QMC16 {
                                 (~(~result.get(i).value() & result.get(i).mask() & ~ones.get(j))
                                                 & result.get(i).mask())
                                         == result.get(i).value();
-                logger.debug(
-                        "Comparing %s and %s -> %d",
-                        result.get(i).toString(nBits),
-                        new MaskedShort(ones.get(j), (short) 0xffff).toString(nBits),
-                        chart[i][j] ? 1 : 0);
             }
         }
 
         // useful for debugging
-        printChart(chart, result.size(), ones.size());
+        // printChart(chart, result.size(), ones.size());
 
         final List<MaskedShort> finalResult = new ArrayList<>();
 
         // Choosing the essential prime implicants: rows of the chart with only one true value
         int epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
         while (epiIdx != -1) {
-            logger.debug("Essential prime implicant chosen: row %,d", epiIdx);
             finalResult.add(result.get(epiIdx));
 
             // zero-ing the selected row and all the columns where the selected row is true
@@ -170,7 +158,7 @@ public final class QMC16 {
                 chart[epiIdx][c] = false;
             }
 
-            printChart(chart, result.size(), ones.size());
+            // printChart(chart, result.size(), ones.size());
 
             epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
         }

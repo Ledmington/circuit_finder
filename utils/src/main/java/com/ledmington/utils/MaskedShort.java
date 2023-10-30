@@ -83,6 +83,7 @@ public final class MaskedShort {
             return false;
         }
         final MaskedShort ms = (MaskedShort) other;
-        return (value & mask) == (ms.value & ms.mask);
+        // FIXME: avoid having to rely on toString
+        return this.toString().equals(ms.toString());
     }
 }
