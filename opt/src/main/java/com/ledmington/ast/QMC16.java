@@ -102,7 +102,10 @@ public final class QMC16 {
                     logger.debug(
                             "%s was not used in this iteration, adding it as is",
                             base.get(i).toString(nBits));
-                    result.add(base.get(i));
+                    // apply the mask before adding
+                    result.add(new MaskedShort(
+                            (short) (base.get(i).value() & base.get(i).mask()),
+                            base.get(i).mask()));
                 }
             }
 
@@ -129,8 +132,15 @@ public final class QMC16 {
                 result.size(), ones.size(), result.size() * ones.size());
         for (int i = 0; i < result.size(); i++) {
             for (int j = 0; j < ones.size(); j++) {
-                chart[i][j] = ((result.get(i).value() & result.get(i).mask()) & ones.get(j))
-                        == result.get(i).mask();
+                chart[i][j] =
+                        // checking that the 1s are in the right place
+                        (result.get(i).value() & result.get(i).mask() & ones.get(j))
+                                        == result.get(i).value()
+                                &&
+                                // checking that the 0s are in the right place
+                                (~(~result.get(i).value() & result.get(i).mask() & ~ones.get(j))
+                                                & result.get(i).mask())
+                                        == result.get(i).value();
                 logger.debug(
                         "Comparing %s and %s -> %d",
                         result.get(i).toString(nBits),

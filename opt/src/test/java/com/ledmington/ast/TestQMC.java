@@ -48,7 +48,10 @@ public final class TestQMC extends TestOptimizer {
                         or(and(A(), not(B())), and(not(A()), B())),
                         or(and(A(), not(B())), and(not(A()), B()))), // XOR cannot be simplified
                 Arguments.of(and(A(), or(B(), and(C(), D()))), or(and(A(), B()), and(A(), C(), D()))),
-                Arguments.of(not(and(A(), not(B()), C(), not(D()))), or(not(A()), B(), not(C()), D())));
+                Arguments.of(not(and(A(), not(B()), C(), not(D()))), or(not(A()), B(), not(C()), D())),
+                Arguments.of(
+                        or(and(B(), not(C()), not(D())), and(A(), not(B())), and(A(), C())),
+                        or(and(B(), not(C()), not(D())), and(A(), not(B())), and(A(), C()))));
     }
 
     @ParameterizedTest
