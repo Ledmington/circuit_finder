@@ -9,8 +9,10 @@
 package com.ledmington.ast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
@@ -42,67 +44,81 @@ public final class QMC16 {
 
         // placing a 0 where the bits are not relevant
         final short mask = (short) (0xffff >> (16 - nBits));
-        logger.debug("nBits: %,d -> mask: 0x%04x", nBits, mask);
+        logger.debug("nBits: %,d -> initial mask: 0x%04x", nBits, mask);
         if (popcount(mask) != nBits) {
             throw new RuntimeException(
                     String.format("Wrong mask created: should have had %,d 1s but had %,d", nBits, popcount(mask)));
         }
 
-        List<MaskedShort> base =
-                new ArrayList<>(ones.stream().map(s -> new MaskedShort(s, mask)).toList());
-        List<MaskedShort> next = new ArrayList<>();
+        Map<Short, List<Short>> base = new HashMap<>();
+        base.put(mask, new ArrayList<>());
+        for (final short s : ones) {
+            base.get(mask).add((short) (s & mask));
+        }
+        Map<Short, List<Short>> next = new HashMap<>();
         List<MaskedShort> result = new ArrayList<>();
 
         for (int it = 0; it < nBits; it++) {
             logger.debug("Computing size-%,d prime implicants", 1 << it);
 
-            final int length = base.size();
+            logger.debug(
+                    "Initial size: %,d divided into %,d groups",
+                    base.values().stream().mapToInt(List::size).sum(), base.size());
 
-            logger.debug("Initial size: %,d", base.size());
+            for (final short m : base.keySet()) {
+                final List<Short> elementsWithSameMask = base.get(m);
+                final int length = elementsWithSameMask.size();
+                final boolean[] used = new boolean[length];
 
-            // TODO: divide inputs based on number of 1s and check only successive groups
-            //  (helps only in the first iterations)
-            // TODO 2: divide inputs in groups with the same mask to greatly reduce checks
-            final boolean[] used = new boolean[length];
-            for (int i = 0; i < length; i++) {
-                final short first = base.get(i).value();
-                final short firstMask = base.get(i).mask();
-                for (int j = i + 1; j < length; j++) {
-                    final short second = base.get(j).value();
-                    final short secondMask = base.get(j).mask();
-                    if (firstMask != secondMask) {
-                        continue;
-                    }
+                for (int i = 0; i < length; i++) {
+                    final short first = elementsWithSameMask.get(i);
+                    for (int j = i + 1; j < length; j++) {
+                        final short second = elementsWithSameMask.get(j);
 
-                    final short diff = (short) ((first & firstMask) ^ (second & secondMask));
-                    // only one bit of difference
-                    if (Integer.bitCount(diff) == 1) {
-                        final short newMask = (short) (firstMask & (~diff));
-                        final MaskedShort toBeAdded = new MaskedShort((short) (first & newMask), newMask);
-                        if (!next.contains(toBeAdded)) {
-                            next.add(toBeAdded);
+                        final short diff = (short) (first ^ second);
+
+                        if (popcount(diff) == 1) {
+                            final short newMask = (short) (m & (~diff));
+                            final short newValue = (short) (first & newMask);
+
+                            if (!next.containsKey(newMask)) {
+                                next.put(newMask, new ArrayList<>());
+                            }
+                            if (!next.get(newMask).contains(newValue)) {
+                                next.get(newMask).add(newValue);
+                            }
+
+                            used[i] = true;
+                            used[j] = true;
                         }
-                        used[i] = true;
-                        used[j] = true;
+                    }
+                }
+
+                for (int i = 0; i < length; i++) {
+                    if (!used[i]) {
+                        // This implicant was not used to compute the "next size" implicants.
+                        // Apply the mask before adding.
+                        final MaskedShort toBeAdded =
+                                new MaskedShort((short) (base.get(m).get(i) & m), m);
+                        result.add(toBeAdded);
+                        logger.debug(
+                                "The value 0x%04x with mask 0x%04x was not used, adding %s to the result",
+                                base.get(m).get(i), m, toBeAdded);
                     }
                 }
             }
 
-            for (int i = 0; i < length; i++) {
-                if (!used[i]) {
-                    // this implicant was not used to compute the "next size" implicants
-                    // apply the mask before adding
-                    result.add(new MaskedShort(
-                            (short) (base.get(i).value() & base.get(i).mask()),
-                            base.get(i).mask()));
-                }
-            }
-
-            logger.debug("next size: %,d", next.size());
+            logger.debug(
+                    "next size: %,d",
+                    next.values().stream().mapToInt(List::size).sum());
             logger.debug("Result size: %,d", result.size());
 
-            base = new ArrayList<>(new HashSet<>(next));
-            next = new ArrayList<>();
+            base = new HashMap<>();
+            for (final short m : next.keySet()) {
+                // TODO: check if the HashSet is useful
+                base.put(m, new ArrayList<>(new HashSet<>(next.get(m))));
+            }
+            next = new HashMap<>();
         }
 
         result = new ArrayList<>(new HashSet<>(result));
