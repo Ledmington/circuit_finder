@@ -116,25 +116,14 @@ spotless {
 		// check https://javadoc.io/doc/com.diffplug.spotless/spotless-plugin-gradle/latest/com/diffplug/gradle/spotless/JavaExtension.html
 		importOrder('java', 'javax', 'javafx', 'com', 'org', group as String)
 
-		licenseHeader String.join("\n",
-				"/*",
-				"* ${appName} - ${appDescription}",
-				"* Copyright (C) 2023-${new Date().format('yyyy')} ${author} <${authorMail}>",
-				"*",
-				"* This program is free software: you can redistribute it and/or modify",
-				"* it under the terms of the GNU General Public License as published by",
-				"* the Free Software Foundation, either version 3 of the License, or",
-				"* (at your option) any later version.",
-				"*",
-				"* This program is distributed in the hope that it will be useful,",
-				"* but WITHOUT ANY WARRANTY; without even the implied warranty of",
-				"* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
-				"* GNU General Public License for more details.",
-				"*",
-				"* You should have received a copy of the GNU General Public License",
-				"* along with this program.  If not, see <http://www.gnu.org/licenses/>.",
-				"*/",
-		)
+		licenseHeader String.join("\n", "/*",
+				" * Copyright (C) 2023-${new Date().format('yyyy')} ${author} <${authorMail}>",
+				" *",
+				" * This file is part of ${appName}.",
+				" *",
+				" * ${appName} can not be copied and/or distributed without",
+				" * the explicit permission of ${author}.",
+				" */")
 	}
 }
 
