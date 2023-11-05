@@ -14,10 +14,8 @@ import java.util.List;
 
 import com.ledmington.ast.Optimizer;
 import com.ledmington.ast.QMC16;
-import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.NotNode;
-import com.ledmington.ast.nodes.OrNode;
 import com.ledmington.ast.nodes.VariableNode;
 import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.Generators;
@@ -141,98 +139,57 @@ public final class Main {
             throw new IllegalArgumentException("Currently we do not support more than 26 different variables.");
         }
 
-        boolean useQMC = true;
-        if (useQMC) {
-            if (inputBits > 16) {
-                logger.error("Not yet available Quine-McCluskey for more than 16 bits");
-                System.exit(-1);
-            }
+        if (inputBits > 16) {
+            logger.error("Not yet available Quine-McCluskey for more than 16 bits");
+            System.exit(-1);
+        }
 
-            for (int i = 0; i < outputBits; i++) {
-                // Inputs for which the i-th output bit is 1
-                final List<Short> ones = new ArrayList<>();
-                final int limit = 1 << inputBits;
+        for (int i = 0; i < outputBits; i++) {
+            // Inputs for which the i-th output bit is 1
+            final List<Short> ones = new ArrayList<>();
+            final int limit = 1 << inputBits;
 
-                for (int j = 0; j < limit; j++) {
-                    final BitArray in = new BitArray(inputBits);
-                    for (int k = 0; k < inputBits; k++) {
-                        in.set(k, (j & (1 << k)) != 0);
-                    }
-                    final BitArray out = op.apply(in);
-
-                    if (out.get(i)) {
-                        ones.add((short) j);
-                    }
-                }
-
-                final List<VariableNode> variables = new ArrayList<>();
+            for (int j = 0; j < limit; j++) {
+                final BitArray in = new BitArray(inputBits);
                 for (int k = 0; k < inputBits; k++) {
-                    variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
+                    in.set(k, (j & (1 << k)) != 0);
                 }
+                final BitArray out = op.apply(in);
 
-                final QMC16 qmc = new QMC16(nJobs);
-                final List<MaskedShort> result = qmc.minimize(inputBits, ones);
-
-                final List<Node> tmp = new ArrayList<>();
-                for (final MaskedShort ms : result) {
-                    final List<Node> ttmp = new ArrayList<>();
-                    for (int k = 0; k < inputBits; k++) {
-                        if (ms.isRelevant(k)) {
-                            ttmp.add(ms.isSet(k) ? variables.get(k) : new NotNode(variables.get(k)));
-                        }
-                    }
-                    tmp.add(Node.and(ttmp));
+                if (out.get(i)) {
+                    ones.add((short) j);
                 }
-                final Node ast = Node.or(tmp);
-                System.out.printf("Bit n.%,d optimized circuit: '%s'\n", i, ast);
             }
-        } else {
-            for (int i = 0; i < outputBits; i++) {
-                final StringBuilder sb = new StringBuilder();
-                final List<Node> nodes = new ArrayList<>();
 
-                final int finalI = i;
-                Generators.bitStrings(inputBits).forEach(s -> {
-                    final BitArray in = new BitArray(s);
-                    final BitArray out = op.apply(in);
+            final List<VariableNode> variables = new ArrayList<>();
+            for (int k = 0; k < inputBits; k++) {
+                variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
+            }
 
-                    if (out.get(finalI)) {
-                        if (!sb.isEmpty()) {
-                            sb.append('+');
-                        }
-                        sb.append('(');
-                        final List<Node> tmp = new ArrayList<>();
-                        for (int j = 0; j < inputBits; j++) {
-                            if (j > 0) {
-                                sb.append('&');
-                            }
-                            final String variableName = String.valueOf((char) ('A' + j));
-                            if (in.get(j)) {
-                                sb.append(variableName);
-                                tmp.add(new VariableNode(variableName));
-                            } else {
-                                sb.append("~").append(variableName);
-                                tmp.add(new NotNode(new VariableNode(variableName)));
-                            }
-                        }
-                        sb.append(')');
-                        nodes.add(new AndNode(tmp));
+            final QMC16 qmc = new QMC16(nJobs);
+            final List<MaskedShort> result = qmc.minimize(inputBits, ones);
+
+            final List<Node> tmp = new ArrayList<>();
+            for (final MaskedShort ms : result) {
+                final List<Node> ttmp = new ArrayList<>();
+                for (int k = 0; k < inputBits; k++) {
+                    if (ms.isRelevant(k)) {
+                        ttmp.add(ms.isSet(k) ? variables.get(k) : new NotNode(variables.get(k)));
                     }
-                });
-
-                final Node astRoot = new OrNode(nodes);
-
-                System.out.printf(
-                        "The boolean expression for bit %d has %,d characters (AST representation: %,d nodes)\n",
-                        i, sb.toString().length(), astRoot.size());
-
-                // if (!sb.toString().equals(astRoot.toString())) {
-                //    throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
-                // }
-
-                final Node optimized = new Optimizer().optimize(astRoot);
-                System.out.printf("Optimized circuit: '%s'\n", optimized);
+                }
+                tmp.add(Node.and(ttmp));
             }
+            final Node ast = Node.or(tmp);
+
+            logger.info("Bit n.%,d qmc16 optimized circuit: '%s'\n", i, ast);
+
+            logger.info(
+                    "The boolean expression for bit %,d has %,d characters (AST representation: %,d nodes)\n",
+                    i, ast.toString().length(), ast.size());
+
+            final Node optimized = new Optimizer().optimize(ast);
+
+            logger.info("Bit n.%,d ast optimized circuit: '%s'\n", i, optimized);
         }
     }
 

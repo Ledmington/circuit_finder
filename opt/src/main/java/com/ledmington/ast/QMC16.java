@@ -76,7 +76,7 @@ public final class QMC16 {
                     "Initial size: %,d divided into %,d groups",
                     base.values().stream().mapToInt(List::size).sum(), base.size());
 
-            final List<Future<?>> tasks = new ArrayList<>();
+            final List<Future<List<MaskedShort>>> tasks = new ArrayList<>();
 
             for (final short m : base.keySet()) {
                 final List<Short> elementsWithSameMask = base.get(m);
@@ -85,9 +85,9 @@ public final class QMC16 {
 
                 final Map<Short, List<Short>> finalNext = next;
                 final Map<Short, List<Short>> finalBase = base;
-                final List<MaskedShort> finalResult = result;
 
-                final Future<?> task = executor.submit(() -> {
+                final Future<List<MaskedShort>> task = executor.submit(() -> {
+                    final List<MaskedShort> myResult = new ArrayList<>();
                     for (int i = 0; i < length; i++) {
                         final short first = elementsWithSameMask.get(i);
                         for (int j = i + 1; j < length; j++) {
@@ -120,24 +120,28 @@ public final class QMC16 {
                             // Apply the mask before adding.
                             final MaskedShort toBeAdded =
                                     new MaskedShort((short) (finalBase.get(m).get(i) & m), m);
-                            finalResult.add(toBeAdded);
+                            myResult.add(toBeAdded);
                             logger.debug(
                                     "The value 0x%04x with mask 0x%04x was not used, adding %s to the result",
                                     finalBase.get(m).get(i), m, toBeAdded);
                         }
                     }
+
+                    return myResult;
                 });
 
                 tasks.add(task);
             }
 
-            tasks.forEach(t -> {
+            for (final Future<List<MaskedShort>> t : tasks) {
+                final List<MaskedShort> localResult;
                 try {
-                    t.get();
+                    localResult = t.get();
                 } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                 }
-            });
+                result.addAll(localResult);
+            }
             tasks.clear();
 
             logger.debug(
