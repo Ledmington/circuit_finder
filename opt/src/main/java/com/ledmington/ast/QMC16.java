@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.ledmington.utils.BitUtils;
 import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
 
@@ -27,15 +28,6 @@ public final class QMC16 {
 
     private QMC16() {}
 
-    private static int popcount(final short in) {
-        int x = in & 0xffff;
-        x = (x & 0x5555) + ((x >> 1) & 0x5555);
-        x = (x & 0x3333) + ((x >> 2) & 0x3333);
-        x = (x & 0x0f0f) + ((x >> 4) & 0x0f0f);
-        x = (x & 0x00ff) + ((x >> 8) & 0x00ff);
-        return x;
-    }
-
     public static List<MaskedShort> minimize(final int nBits, final List<Short> ones) {
         if (nBits < 1 || nBits > 16) {
             throw new IllegalArgumentException(
@@ -45,9 +37,9 @@ public final class QMC16 {
         // placing a 0 where the bits are not relevant
         final short mask = (short) (0xffff >> (16 - nBits));
         logger.debug("nBits: %,d -> initial mask: 0x%04x", nBits, mask);
-        if (popcount(mask) != nBits) {
-            throw new RuntimeException(
-                    String.format("Wrong mask created: should have had %,d 1s but had %,d", nBits, popcount(mask)));
+        if (BitUtils.popcount(mask) != nBits) {
+            throw new RuntimeException(String.format(
+                    "Wrong mask created: should have had %,d 1s but had %,d", nBits, BitUtils.popcount(mask)));
         }
 
         Map<Short, List<Short>> base = new HashMap<>();
@@ -77,7 +69,7 @@ public final class QMC16 {
 
                         final short diff = (short) (first ^ second);
 
-                        if (popcount(diff) == 1) {
+                        if (BitUtils.has_one_bit(diff)) {
                             final short newMask = (short) (m & (~diff));
                             final short newValue = (short) (first & newMask);
 

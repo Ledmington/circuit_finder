@@ -80,13 +80,14 @@ public class PopCountBench {
 
     @Benchmark
     public void standard_two_power_check(final Blackhole bh) {
-        boolean r = Integer.bitCount(x) == 1;
+        boolean r = Integer.bitCount(((int) x) & 0x0000ffff) == 1;
         bh.consume(r);
     }
 
     @Benchmark
     public void fast_two_power_check(final Blackhole bh) {
-        boolean r = (x & (x - 1)) == 0x00000000;
+        short y = (short) (x - 1);
+        boolean r = (x & y) == 0;
         bh.consume(r);
     }
 
