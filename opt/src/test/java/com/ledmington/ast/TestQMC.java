@@ -60,7 +60,7 @@ public final class TestQMC extends TestOptimizer {
             }
         }
 
-        final QMC16 qmc = new QMC16();
+        final QMC16 qmc = new QMC16(1);
         final List<MaskedShort> result = qmc.minimize(4, truthTable);
 
         // re-converting the result back to an AST

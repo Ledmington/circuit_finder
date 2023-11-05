@@ -132,7 +132,7 @@ public final class Main {
         System.out.println();
     }
 
-    private static void buildCircuit(int inputBits, int outputBits, final LogicFunction op) {
+    private static void buildCircuit(int inputBits, int outputBits, final LogicFunction op, int nJobs) {
         System.out.println();
         System.out.println("Building circuit...\n");
 
@@ -170,7 +170,7 @@ public final class Main {
                     variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
                 }
 
-                final QMC16 qmc = new QMC16();
+                final QMC16 qmc = new QMC16(nJobs);
                 final List<MaskedShort> result = qmc.minimize(inputBits, ones);
 
                 final List<Node> tmp = new ArrayList<>();
@@ -259,10 +259,8 @@ public final class Main {
                         System.err.println("The parameter '--jobs' needs an integer, but none was found.");
                         System.exit(-1);
                     }
-                    if (nJobs < 1 || nJobs > Runtime.getRuntime().availableProcessors()) {
-                        System.err.printf(
-                                "Invalid value for '--jobs'. Should have been between 1 and %,d, but was %,d.\n",
-                                Runtime.getRuntime().availableProcessors(), nJobs);
+                    if (nJobs < 1) {
+                        System.err.printf("Invalid value for '--jobs'. Should have been >= 1, but was %,d.\n", nJobs);
                     }
                     i++;
                     break;
@@ -330,7 +328,11 @@ public final class Main {
             System.exit(-1);
         }
 
-        logger.warning("Currently the parameter 'jobs' is not used");
+        if (nJobs > Runtime.getRuntime().availableProcessors()) {
+            logger.warning(
+                    "Using more threads than available: %,d instead of %,d",
+                    nJobs, Runtime.getRuntime().availableProcessors());
+        }
 
         final LogicFunction op = nameToOperation.get(operation);
         final int inputBits = op.inputBits(bits);
@@ -344,7 +346,7 @@ public final class Main {
         try {
             // computeCorrelationMatrix(limit, inputBits, outputBits, op);
 
-            buildCircuit(inputBits, outputBits, op);
+            buildCircuit(inputBits, outputBits, op, nJobs);
         } catch (Throwable t) {
             logger.error(t);
             System.exit(-1);

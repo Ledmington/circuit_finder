@@ -9,10 +9,17 @@
 package com.ledmington.ast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import com.ledmington.utils.BitUtils;
 import com.ledmington.utils.MaskedShort;
@@ -25,8 +32,20 @@ import com.ledmington.utils.MiniLogger;
 public final class QMC16 {
 
     private static final MiniLogger logger = MiniLogger.getLogger("qmc16");
+    private final ExecutorService executor;
 
-    public QMC16() {}
+    public QMC16(int nThreads) {
+        final ThreadFactory customTF = new ThreadFactory() {
+            private int n = 0;
+
+            @Override
+            public Thread newThread(final Runnable r) {
+                return new Thread(r, String.format("qmc16-th%d", n++));
+            }
+        };
+
+        this.executor = Executors.newFixedThreadPool(nThreads, customTF);
+    }
 
     public List<MaskedShort> minimize(final int nBits, final List<Short> ones) {
         if (nBits < 1 || nBits > 16) {
@@ -42,13 +61,13 @@ public final class QMC16 {
                     "Wrong mask created: should have had %,d 1s but had %,d", nBits, BitUtils.popcount(mask)));
         }
 
-        Map<Short, List<Short>> base = new HashMap<>();
-        base.put(mask, new ArrayList<>());
+        Map<Short, List<Short>> base = new ConcurrentHashMap<>();
+        base.put(mask, Collections.synchronizedList(new ArrayList<>()));
         for (final short s : ones) {
             base.get(mask).add((short) (s & mask));
         }
-        Map<Short, List<Short>> next = new HashMap<>();
-        List<MaskedShort> result = new ArrayList<>();
+        Map<Short, List<Short>> next = new ConcurrentHashMap<>();
+        List<MaskedShort> result = Collections.synchronizedList(new ArrayList<>());
 
         for (int it = 0; it < nBits; it++) {
             logger.debug("Computing size-%,d prime implicants", 1 << it);
@@ -57,63 +76,82 @@ public final class QMC16 {
                     "Initial size: %,d divided into %,d groups",
                     base.values().stream().mapToInt(List::size).sum(), base.size());
 
+            final List<Future<?>> tasks = new ArrayList<>();
+
             for (final short m : base.keySet()) {
                 final List<Short> elementsWithSameMask = base.get(m);
                 final int length = elementsWithSameMask.size();
                 final boolean[] used = new boolean[length];
 
-                for (int i = 0; i < length; i++) {
-                    final short first = elementsWithSameMask.get(i);
-                    for (int j = i + 1; j < length; j++) {
-                        final short second = elementsWithSameMask.get(j);
+                final Map<Short, List<Short>> finalNext = next;
+                final Map<Short, List<Short>> finalBase = base;
+                final List<MaskedShort> finalResult = result;
 
-                        final short diff = (short) (first ^ second);
+                final Future<?> task = executor.submit(() -> {
+                    for (int i = 0; i < length; i++) {
+                        final short first = elementsWithSameMask.get(i);
+                        for (int j = i + 1; j < length; j++) {
+                            final short second = elementsWithSameMask.get(j);
 
-                        if (BitUtils.has_one_bit(diff)) {
-                            final short newMask = (short) (m & (~diff));
-                            final short newValue = (short) (first & newMask);
+                            final short diff = (short) (first ^ second);
 
-                            if (!next.containsKey(newMask)) {
-                                next.put(newMask, new ArrayList<>());
+                            if (BitUtils.has_one_bit(diff)) {
+                                final short newMask = (short) (m & (~diff));
+                                final short newValue = (short) (first & newMask);
+
+                                if (!finalNext.containsKey(newMask)) {
+                                    finalNext.put(newMask, Collections.synchronizedList(new ArrayList<>()));
+                                }
+                                if (!finalNext.get(newMask).contains(newValue)) {
+                                    finalNext.get(newMask).add(newValue);
+                                }
+
+                                used[i] = true;
+                                used[j] = true;
                             }
-                            if (!next.get(newMask).contains(newValue)) {
-                                next.get(newMask).add(newValue);
-                            }
-
-                            used[i] = true;
-                            used[j] = true;
                         }
                     }
-                }
 
-                for (int i = 0; i < length; i++) {
-                    if (!used[i]) {
-                        // This implicant was not used to compute the "next size" implicants.
-                        // Apply the mask before adding.
-                        final MaskedShort toBeAdded =
-                                new MaskedShort((short) (base.get(m).get(i) & m), m);
-                        result.add(toBeAdded);
-                        logger.debug(
-                                "The value 0x%04x with mask 0x%04x was not used, adding %s to the result",
-                                base.get(m).get(i), m, toBeAdded);
+                    for (int i = 0; i < length; i++) {
+                        if (!used[i]) {
+                            // This implicant was not used to compute the "next size" implicants.
+                            // Apply the mask before adding.
+                            final MaskedShort toBeAdded =
+                                    new MaskedShort((short) (finalBase.get(m).get(i) & m), m);
+                            finalResult.add(toBeAdded);
+                            logger.debug(
+                                    "The value 0x%04x with mask 0x%04x was not used, adding %s to the result",
+                                    finalBase.get(m).get(i), m, toBeAdded);
+                        }
                     }
-                }
+                });
+
+                tasks.add(task);
             }
+
+            tasks.forEach(t -> {
+                try {
+                    t.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            tasks.clear();
 
             logger.debug(
                     "next size: %,d",
                     next.values().stream().mapToInt(List::size).sum());
             logger.debug("Result size: %,d", result.size());
 
-            base = new HashMap<>();
+            base = new ConcurrentHashMap<>();
             for (final short m : next.keySet()) {
                 // TODO: check if the HashSet is useful
-                base.put(m, new ArrayList<>(new HashSet<>(next.get(m))));
+                base.put(m, Collections.synchronizedList(new ArrayList<>(new HashSet<>(next.get(m)))));
             }
-            next = new HashMap<>();
+            next = new ConcurrentHashMap<>();
         }
 
-        result = new ArrayList<>(new HashSet<>(result));
+        result = Collections.synchronizedList(new ArrayList<>(new HashSet<>(result)));
 
         logger.debug("Result size: %,d", result.size());
 
@@ -160,6 +198,18 @@ public final class QMC16 {
             // printChart(chart, result.size(), ones.size());
 
             epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
+        }
+
+        // executors uglyness
+        if (!executor.isShutdown()) {
+            executor.shutdown();
+            while (true) {
+                try {
+                    if (executor.awaitTermination(1, TimeUnit.SECONDS)) break;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         return finalResult;
