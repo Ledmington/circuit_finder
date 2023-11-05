@@ -145,17 +145,18 @@ public final class Main {
         if (useQMC) {
             if (inputBits > 16) {
                 logger.error("Not yet available Quine-McCluskey for more than 16 bits");
-                return;
+                System.exit(-1);
             }
 
             for (int i = 0; i < outputBits; i++) {
                 // Inputs for which the i-th output bit is 1
                 final List<Short> ones = new ArrayList<>();
+                final int limit = 1 << inputBits;
 
-                for (int j = 0; j < 1 << inputBits; j++) {
+                for (int j = 0; j < limit; j++) {
                     final BitArray in = new BitArray(inputBits);
                     for (int k = 0; k < inputBits; k++) {
-                        in.set(k, (j & (1 << i)) != 0);
+                        in.set(k, (j & (1 << k)) != 0);
                     }
                     final BitArray out = op.apply(in);
 
@@ -171,6 +172,7 @@ public final class Main {
 
                 final QMC16 qmc = new QMC16();
                 final List<MaskedShort> result = qmc.minimize(inputBits, ones);
+
                 final List<Node> tmp = new ArrayList<>();
                 for (final MaskedShort ms : result) {
                     final List<Node> ttmp = new ArrayList<>();
@@ -182,7 +184,7 @@ public final class Main {
                     tmp.add(Node.and(ttmp));
                 }
                 final Node ast = Node.or(tmp);
-                System.out.printf("Optimized circuit: '%s'\n", ast);
+                System.out.printf("Bit n.%,d optimized circuit: '%s'\n", i, ast);
             }
         } else {
             for (int i = 0; i < outputBits; i++) {

@@ -27,6 +27,9 @@ public final class BitArray {
     private boolean isCachedHashCodeSet = false;
     private int cachedHashCode = -1;
 
+    /**
+     * Creates a new immutable BitArray with space for the given number of bits.
+     */
     public BitArray(int bits) {
         if (bits < 1) {
             throw new IllegalArgumentException(
