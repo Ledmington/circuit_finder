@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.ledmington.ast.nodes.AndNode;
 import com.ledmington.ast.nodes.Node;
-import com.ledmington.ast.nodes.OrNode;
 import com.ledmington.utils.ImmutableMap;
 import com.ledmington.utils.MaskedShort;
 
@@ -81,9 +79,9 @@ public final class TestQMC extends TestOptimizer {
             if (ms.isRelevant(3)) {
                 ttmp.add(ms.isSet(3) ? D() : not(D()));
             }
-            tmp.add(ttmp.size() == 1 ? ttmp.get(0) : new AndNode(ttmp));
+            tmp.add(Node.and(ttmp));
         }
-        final Node ast = tmp.size() == 1 ? tmp.get(0) : new OrNode(tmp);
+        final Node ast = Node.or(tmp);
         assertEquals(after, ast);
     }
 }

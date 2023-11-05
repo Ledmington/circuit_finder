@@ -8,6 +8,7 @@
  */
 package com.ledmington.ast.nodes;
 
+import java.util.List;
 import java.util.Map;
 
 public abstract sealed class Node implements Comparable<Node>
@@ -19,4 +20,30 @@ public abstract sealed class Node implements Comparable<Node>
     public abstract int size();
 
     public abstract boolean evaluate(final Map<String, Boolean> values);
+
+    /**
+     * Utility method to create an AndNode only when there are >= 2 nodes.
+     * If an empty List is passed, a OneNode is returned.
+     * If a List with one element is passed, the single element is returned.
+     */
+    public static Node and(final List<Node> nodes) {
+        return switch (nodes.size()) {
+            case 0 -> new OneNode();
+            case 1 -> nodes.get(0);
+            default -> new AndNode(nodes);
+        };
+    }
+
+    /**
+     * Utility method to create an OrNode only when there are >= 2 nodes.
+     * If an empty List is passed, a ZeroNode is returned.
+     * If a List with one element is passed, the single element is returned.
+     */
+    public static Node or(final List<Node> nodes) {
+        return switch (nodes.size()) {
+            case 0 -> new ZeroNode();
+            case 1 -> nodes.get(0);
+            default -> new OrNode(nodes);
+        };
+    }
 }

@@ -179,9 +179,9 @@ public final class Main {
                             ttmp.add(ms.isSet(k) ? variables.get(k) : new NotNode(variables.get(k)));
                         }
                     }
-                    tmp.add(ttmp.size() == 1 ? ttmp.get(0) : new AndNode(ttmp));
+                    tmp.add(Node.and(ttmp));
                 }
-                final Node ast = tmp.size() == 1 ? tmp.get(0) : new OrNode(tmp);
+                final Node ast = Node.or(tmp);
                 System.out.printf("Optimized circuit: '%s'\n", ast);
             }
         } else {

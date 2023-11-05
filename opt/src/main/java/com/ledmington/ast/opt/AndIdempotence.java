@@ -29,10 +29,8 @@ public final class AndIdempotence implements Optimization {
             final List<Node> tmp = new ArrayList<>(new TreeSet<>(and.nodes()));
 
             if (tmp.size() < and.nodes().size()) {
-                if (tmp.size() == 1) {
-                    return Optional.of(new OptimizationResult(-and.size() + 1, tmp.get(0)));
-                }
-                return Optional.of(new OptimizationResult(-and.size() + (tmp.size() + 1), new AndNode(tmp)));
+                final Node result = Node.and(tmp);
+                return Optional.of(new OptimizationResult(-and.size() + result.size(), result));
             }
         }
 

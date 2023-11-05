@@ -50,11 +50,12 @@ public final class OrComplementation implements Optimization {
 
             if (found) {
                 tmp.addAll(nots);
-                tmp.add(new OneNode());
 
-                if (tmp.size() == 1) {
+                if (tmp.isEmpty()) {
                     return Optional.of(new OptimizationResult(score, new OneNode()));
                 }
+
+                tmp.add(new OneNode());
                 return Optional.of(new OptimizationResult(score + 1, new OrNode(tmp)));
             }
         }

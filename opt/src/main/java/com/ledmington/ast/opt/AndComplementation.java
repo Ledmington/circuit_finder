@@ -50,11 +50,12 @@ public final class AndComplementation implements Optimization {
 
             if (found) {
                 tmp.addAll(nots);
-                tmp.add(new ZeroNode());
 
-                if (tmp.size() == 1) {
+                if (tmp.isEmpty()) {
                     return Optional.of(new OptimizationResult(score, new ZeroNode()));
                 }
+
+                tmp.add(new ZeroNode());
                 return Optional.of(new OptimizationResult(score + 1, new AndNode(tmp)));
             }
         }

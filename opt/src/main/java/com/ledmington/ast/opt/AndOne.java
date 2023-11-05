@@ -28,13 +28,8 @@ public final class AndOne implements Optimization {
         if (root instanceof AndNode and && and.contains(new OneNode())) {
             final List<Node> tmp =
                     and.nodes().stream().filter(n -> !(n instanceof OneNode)).toList();
-            if (tmp.isEmpty()) {
-                return Optional.of(new OptimizationResult(-root.size() + 1, new OneNode()));
-            }
-            if (tmp.size() == 1) {
-                return Optional.of(new OptimizationResult(-root.size() + 1, tmp.get(0)));
-            }
-            return Optional.of(new OptimizationResult(-root.size() + (tmp.size() + 1), new AndNode(tmp)));
+            final Node result = Node.and(tmp);
+            return Optional.of(new OptimizationResult(-root.size() + result.size(), result));
         }
 
         return Optional.empty();

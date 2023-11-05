@@ -29,10 +29,8 @@ public final class OrIdempotence implements Optimization {
             final List<Node> tmp = new ArrayList<>(new TreeSet<>(or.nodes()));
 
             if (tmp.size() < or.nodes().size()) {
-                if (tmp.size() == 1) {
-                    return Optional.of(new OptimizationResult(-or.size() + 1, tmp.get(0)));
-                }
-                return Optional.of(new OptimizationResult(-or.size() + (tmp.size() + 1), new OrNode(tmp)));
+                final Node result = Node.or(tmp);
+                return Optional.of(new OptimizationResult(-or.size() + result.size(), result));
             }
         }
 
