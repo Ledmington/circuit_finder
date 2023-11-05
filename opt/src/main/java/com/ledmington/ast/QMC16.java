@@ -100,10 +100,12 @@ public final class QMC16 {
                                 final short newValue = (short) (first & newMask);
 
                                 if (!finalNext.containsKey(newMask)) {
-                                    finalNext.put(newMask, Collections.synchronizedList(new ArrayList<>()));
-                                }
-                                if (!finalNext.get(newMask).contains(newValue)) {
-                                    finalNext.get(newMask).add(newValue);
+                                    final List<Short> newList = Collections.synchronizedList(new ArrayList<>());
+                                    newList.add(newValue);
+                                    finalNext.put(newMask, newList);
+                                } else {
+                                    final List<Short> ls = finalNext.get(newMask);
+                                    ls.add(newValue);
                                 }
 
                                 used[i] = true;
