@@ -143,44 +143,46 @@ public final class Main {
 
         boolean useQMC = true;
         if (useQMC) {
-            if (inputBits <= 16) {
-                for (int i = 0; i < outputBits; i++) {
-                    // Inputs for which the i-th output bit is 1
-                    final List<Short> ones = new ArrayList<>();
-
-                    for (int j = 0; j < 1 << inputBits; j++) {
-                        final BitArray in = new BitArray(inputBits);
-                        for (int k = 0; k < inputBits; k++) {
-                            in.set(k, (j & (1 << i)) != 0);
-                        }
-                        final BitArray out = op.apply(in);
-
-                        if (out.get(i)) {
-                            ones.add((short) j);
-                        }
-                    }
-
-                    final List<VariableNode> variables = new ArrayList<>();
-                    for (int k = 0; k < inputBits; k++) {
-                        variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
-                    }
-
-                    final List<MaskedShort> result = QMC16.minimize(inputBits, ones);
-                    final List<Node> tmp = new ArrayList<>();
-                    for (final MaskedShort ms : result) {
-                        final List<Node> ttmp = new ArrayList<>();
-                        for (int k = 0; k < inputBits; k++) {
-                            if (ms.isRelevant(k)) {
-                                ttmp.add(ms.isSet(k) ? variables.get(k) : new NotNode(variables.get(k)));
-                            }
-                        }
-                        tmp.add(ttmp.size() == 1 ? ttmp.get(0) : new AndNode(ttmp));
-                    }
-                    final Node ast = tmp.size() == 1 ? tmp.get(0) : new OrNode(tmp);
-                    System.out.printf("Optimized circuit: '%s'\n", ast);
-                }
-            } else {
+            if (inputBits > 16) {
                 logger.error("Not yet available Quine-McCluskey for more than 16 bits");
+                return;
+            }
+
+            for (int i = 0; i < outputBits; i++) {
+                // Inputs for which the i-th output bit is 1
+                final List<Short> ones = new ArrayList<>();
+
+                for (int j = 0; j < 1 << inputBits; j++) {
+                    final BitArray in = new BitArray(inputBits);
+                    for (int k = 0; k < inputBits; k++) {
+                        in.set(k, (j & (1 << i)) != 0);
+                    }
+                    final BitArray out = op.apply(in);
+
+                    if (out.get(i)) {
+                        ones.add((short) j);
+                    }
+                }
+
+                final List<VariableNode> variables = new ArrayList<>();
+                for (int k = 0; k < inputBits; k++) {
+                    variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
+                }
+
+                final QMC16 qmc = new QMC16();
+                final List<MaskedShort> result = qmc.minimize(inputBits, ones);
+                final List<Node> tmp = new ArrayList<>();
+                for (final MaskedShort ms : result) {
+                    final List<Node> ttmp = new ArrayList<>();
+                    for (int k = 0; k < inputBits; k++) {
+                        if (ms.isRelevant(k)) {
+                            ttmp.add(ms.isSet(k) ? variables.get(k) : new NotNode(variables.get(k)));
+                        }
+                    }
+                    tmp.add(ttmp.size() == 1 ? ttmp.get(0) : new AndNode(ttmp));
+                }
+                final Node ast = tmp.size() == 1 ? tmp.get(0) : new OrNode(tmp);
+                System.out.printf("Optimized circuit: '%s'\n", ast);
             }
         } else {
             for (int i = 0; i < outputBits; i++) {

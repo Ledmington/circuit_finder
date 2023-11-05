@@ -26,9 +26,9 @@ public final class QMC16 {
 
     private static final MiniLogger logger = MiniLogger.getLogger("qmc16");
 
-    private QMC16() {}
+    public QMC16() {}
 
-    public static List<MaskedShort> minimize(final int nBits, final List<Short> ones) {
+    public List<MaskedShort> minimize(final int nBits, final List<Short> ones) {
         if (nBits < 1 || nBits > 16) {
             throw new IllegalArgumentException(
                     String.format("Illegal number of bits: should have been between 1 and 16 but was %,d", nBits));

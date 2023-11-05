@@ -62,7 +62,8 @@ public final class TestQMC extends TestOptimizer {
             }
         }
 
-        final List<MaskedShort> result = QMC16.minimize(4, truthTable);
+        final QMC16 qmc = new QMC16();
+        final List<MaskedShort> result = qmc.minimize(4, truthTable);
 
         // re-converting the result back to an AST
         final List<Node> tmp = new ArrayList<>();
