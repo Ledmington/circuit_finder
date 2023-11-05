@@ -180,7 +180,7 @@ public final class Main {
                     System.out.printf("Optimized circuit: '%s'\n", ast);
                 }
             } else {
-                logger.warning("Not yet available Quine-McCluskey for more than 16 bits");
+                logger.error("Not yet available Quine-McCluskey for more than 16 bits");
             }
         } else {
             for (int i = 0; i < outputBits; i++) {
@@ -226,8 +226,7 @@ public final class Main {
                 //    throw new RuntimeException("The 'hand-built' String does not correspond to the AST");
                 // }
 
-                // TODO: set maxDepth as CLI argument
-                final Node optimized = new Optimizer(3).optimize(astRoot);
+                final Node optimized = new Optimizer().optimize(astRoot);
                 System.out.printf("Optimized circuit: '%s'\n", optimized);
             }
         }
@@ -333,9 +332,9 @@ public final class Main {
         final int inputBits = op.inputBits(bits);
         final int outputBits = op.outputBits(bits);
         final BigInteger limit = BigInteger.TWO.pow(inputBits);
-        System.out.printf("Size of the dataset: 2^%,d (%s) elements\n", inputBits, FormatUtils.thousands(limit, ","));
-        System.out.println();
-        System.out.printf(
+
+        logger.info("Size of the dataset: 2^%,d (%s) elements\n", inputBits, FormatUtils.thousands(limit, ","));
+        logger.info(
                 "The selected operation requires %,d input bits to produce %,d output bits.\n", inputBits, outputBits);
 
         try {

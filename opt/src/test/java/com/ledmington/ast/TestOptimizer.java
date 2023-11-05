@@ -23,7 +23,7 @@ import com.ledmington.ast.nodes.ZeroNode;
  */
 public abstract class TestOptimizer {
 
-    protected static final Optimizer opt = new Optimizer(1);
+    protected static final Optimizer opt = new Optimizer();
 
     protected static Node zero() {
         return new ZeroNode();

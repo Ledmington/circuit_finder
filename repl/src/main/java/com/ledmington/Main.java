@@ -39,7 +39,7 @@ public final class Main {
             final Node ast = new ASTGenerationVisitor().visit(tree);
 
             System.out.printf("Parsed: '%s' (size: %,d)\n", ast, ast.size());
-            final Optimizer opt = new Optimizer(3);
+            final Optimizer opt = new Optimizer();
             final Node optimized = opt.optimize(ast);
             System.out.printf("Optimized: '%s' (size: %,d)\n", optimized, optimized.size());
             System.out.println();

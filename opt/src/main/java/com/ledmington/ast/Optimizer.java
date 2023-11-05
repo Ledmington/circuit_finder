@@ -69,24 +69,6 @@ public final class Optimizer {
             .add(new ReverseOrDistributivity())
             .build();
 
-    private final int maxDepth;
-
-    /**
-     * Creates a new Optimizer with the given max optimization depth.
-     * A lower maxDepth value provides better performance but may lead
-     * to less optimized results.
-     *
-     * @param maxDepth
-     *                 Maximum optimization search depth.
-     */
-    public Optimizer(int maxDepth) {
-        if (maxDepth < 1) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid maximum optimization depth: should have been >=1 but was %,d", maxDepth));
-        }
-        this.maxDepth = maxDepth;
-    }
-
     public Node optimize(final Node root) {
         Objects.requireNonNull(root);
 
