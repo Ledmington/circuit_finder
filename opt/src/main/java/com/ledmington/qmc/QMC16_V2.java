@@ -6,7 +6,7 @@
  * circuit-finder can not be copied and/or distributed without
  * the explicit permission of Filippo Barbari.
  */
-package com.ledmington.ast;
+package com.ledmington.qmc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,12 +29,12 @@ import com.ledmington.utils.MiniLogger;
  * Implementation of Quine-McCluskey algorithm (optimized for 16 bits).
  * <a href="https://www.tandfonline.com/doi/abs/10.1080/00029890.1952.11988183">Original paper</a>.
  */
-public final class QMC16 {
+public final class QMC16_V2 implements QMC16 {
 
     private static final MiniLogger logger = MiniLogger.getLogger("qmc16");
     private final ExecutorService executor;
 
-    public QMC16(int nThreads) {
+    public QMC16_V2(int nThreads) {
         final ThreadFactory customTF = new ThreadFactory() {
             private int n = 0;
 
@@ -45,6 +45,23 @@ public final class QMC16 {
         };
 
         this.executor = Executors.newFixedThreadPool(nThreads, customTF);
+
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread(
+                        () -> {
+                            // executors uglyness
+                            if (!executor.isShutdown()) {
+                                executor.shutdown();
+                                while (true) {
+                                    try {
+                                        if (executor.awaitTermination(1, TimeUnit.SECONDS)) break;
+                                    } catch (InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            }
+                        },
+                        "executor-killer"));
     }
 
     public List<MaskedShort> minimize(final int nBits, final List<Short> ones) {
@@ -204,18 +221,6 @@ public final class QMC16 {
             // printChart(chart, result.size(), ones.size());
 
             epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
-        }
-
-        // executors uglyness
-        if (!executor.isShutdown()) {
-            executor.shutdown();
-            while (true) {
-                try {
-                    if (executor.awaitTermination(1, TimeUnit.SECONDS)) break;
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
         }
 
         return finalResult;

@@ -13,10 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ledmington.ast.Optimizer;
-import com.ledmington.ast.QMC16;
 import com.ledmington.ast.nodes.Node;
 import com.ledmington.ast.nodes.NotNode;
 import com.ledmington.ast.nodes.VariableNode;
+import com.ledmington.qmc.QMC16;
+import com.ledmington.qmc.QMC16_V2;
 import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.Generators;
 import com.ledmington.utils.ImmutableMap;
@@ -166,7 +167,7 @@ public final class Main {
                 variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
             }
 
-            final QMC16 qmc = new QMC16(nJobs);
+            final QMC16 qmc = new QMC16_V2(nJobs);
             final List<MaskedShort> result = qmc.minimize(inputBits, ones);
 
             final List<Node> tmp = new ArrayList<>();
@@ -308,5 +309,7 @@ public final class Main {
             logger.error(t);
             System.exit(-1);
         }
+
+        System.exit(0);
     }
 }
