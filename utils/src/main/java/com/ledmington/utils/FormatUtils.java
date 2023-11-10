@@ -13,7 +13,7 @@ import java.math.BigInteger;
 public final class FormatUtils {
     private FormatUtils() {}
 
-    public static String thousands(BigInteger x, final String separator) {
+    public static String thousands(final BigInteger x, final String separator) {
         final String s = x.toString();
         final StringBuilder sb = new StringBuilder();
 

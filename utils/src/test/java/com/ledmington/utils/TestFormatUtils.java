@@ -11,6 +11,7 @@ package com.ledmington.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;
+import java.util.Locale;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -60,6 +61,7 @@ public class TestFormatUtils {
                 1_234_567_890_123_456_789L
             })
     public void thousands(long n) {
+        Locale.setDefault(Locale.US);
         assertEquals(String.format("%,d", n), FormatUtils.thousands(BigInteger.valueOf(n), ","));
     }
 }
