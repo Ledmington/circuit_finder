@@ -1,8 +1,10 @@
 plugins {
 	id 'java-library'
+	id 'pmd'
 	id 'com.diffplug.spotless' version '6.22.0'
 	id 'com.github.ben-manes.versions' version '0.49.0'
 	id 'com.adarshr.test-logger' version '4.0.0'
+	id 'info.solidsoft.pitest' version '1.15.0'
 	id 'me.champeau.jmh' version '0.7.2'
 }
 
@@ -33,6 +35,14 @@ dependencies {
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs << '-Xdiags:verbose'
+	options.compilerArgs << '-Xlint:all'
+	options.compilerArgs << '-Werror'
+	options.deprecation = true
+	options.encoding = 'UTF-8'
+}
+
 test {
 	useJUnitPlatform()
 }
@@ -60,12 +70,23 @@ testlogger {
 	showFailedStandardStreams true
 }
 
-tasks.withType(JavaCompile).configureEach {
-	options.compilerArgs << '-Xdiags:verbose'
-	options.compilerArgs << '-Xlint:all'
-	options.compilerArgs << '-Werror'
-	options.deprecation = true
-	options.encoding = 'UTF-8'
+pmd {
+	consoleOutput = true
+	toolVersion = "6.55.0"
+	rulesMinimumPriority = 5
+	ignoreFailures = false
+	ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
+}
+
+pitest {
+	targetClasses.set(['com.ledmington.*'])
+	targetTests.set(['com.ledmington.*'])
+	pitestVersion = '1.15.0' //not needed when a default PIT version should be used
+	junit5PluginVersion = '1.2.0'
+	threads = 4
+	outputFormats.set(['HTML'])
+	verbose = true
+	timestampedReports = false
 }
 
 spotless {

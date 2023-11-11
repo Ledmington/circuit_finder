@@ -1,5 +1,6 @@
 plugins {
 	id 'java-library'
+	id 'pmd'
 	id 'com.diffplug.spotless' version '6.22.0'
 	id 'com.github.ben-manes.versions' version '0.49.0'
 	id 'com.adarshr.test-logger' version '4.0.0'
@@ -38,6 +39,14 @@ dependencies {
 	}
 }
 
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs << '-Xdiags:verbose'
+	options.compilerArgs << '-Xlint:all'
+	options.compilerArgs << '-Werror'
+	options.deprecation = true
+	options.encoding = 'UTF-8'
+}
+
 test {
 	useJUnitPlatform()
 }
@@ -65,6 +74,14 @@ testlogger {
 	showFailedStandardStreams true
 }
 
+pmd {
+	consoleOutput = true
+	toolVersion = "6.55.0"
+	rulesMinimumPriority = 5
+	ignoreFailures = false
+	ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
+}
+
 pitest {
 	targetClasses.set(['com.ledmington.*'])
 	targetTests.set(['com.ledmington.*'])
@@ -74,14 +91,6 @@ pitest {
 	outputFormats.set(['HTML'])
 	verbose = true
 	timestampedReports = false
-}
-
-tasks.withType(JavaCompile).configureEach {
-	options.compilerArgs << '-Xdiags:verbose'
-	options.compilerArgs << '-Xlint:all'
-	options.compilerArgs << '-Werror'
-	options.deprecation = true
-	options.encoding = 'UTF-8'
 }
 
 spotless {
