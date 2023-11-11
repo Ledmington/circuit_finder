@@ -24,6 +24,10 @@ import java.util.Set;
  */
 public final class ImmutableMap<K, V> implements Map<K, V> {
 
+    // Cached UnsupportedOperationException
+    private static final UnsupportedOperationException uoe =
+            new UnsupportedOperationException("This is an ImmutableMap.");
+
     private final Map<K, V> m;
 
     /**
@@ -61,7 +65,7 @@ public final class ImmutableMap<K, V> implements Map<K, V> {
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException("This is an ImmutableMap.");
+        throw uoe;
     }
 
     @Override
@@ -96,17 +100,17 @@ public final class ImmutableMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V value) {
-        throw new UnsupportedOperationException("This is an ImmutableMap.");
+        throw uoe;
     }
 
     @Override
     public void putAll(final Map<? extends K, ? extends V> m) {
-        throw new UnsupportedOperationException("This is an ImmutableMap.");
+        throw uoe;
     }
 
     @Override
     public V remove(final Object key) {
-        throw new UnsupportedOperationException("This is an ImmutableMap.");
+        throw uoe;
     }
 
     @Override

@@ -8,13 +8,16 @@
  */
 package com.ledmington.utils;
 
+import java.util.Locale;
+
 /**
  * A class to format text on the terminal and to move the cursor around.
  */
+@SuppressWarnings("PMD.SystemPrintln")
 public final class TerminalCursor {
 
     private static final boolean SUPPORTS_COLORS =
-            System.getProperty("os.name").toLowerCase().contains("windows")
+            System.getProperty("os.name").toLowerCase(Locale.US).contains("windows")
                     ||
                     // this check works only on Unix
                     (

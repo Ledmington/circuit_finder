@@ -10,20 +10,20 @@ package com.ledmington.utils;
 
 public final class MaskedShort {
 
-    private final short value;
-    private final short mask;
+    private final short v;
+    private final short m;
 
     public MaskedShort(final short v, final short m) {
-        this.value = v;
-        this.mask = m;
+        this.v = v;
+        this.m = m;
     }
 
     public short value() {
-        return value;
+        return v;
     }
 
     public short mask() {
-        return mask;
+        return m;
     }
 
     /**
@@ -31,7 +31,7 @@ public final class MaskedShort {
      * 0-indexed.
      */
     public boolean isSet(int i) {
-        return (value & (1 << i)) != 0;
+        return (v & (1 << i)) != 0;
     }
 
     /**
@@ -39,9 +39,10 @@ public final class MaskedShort {
      * 0-indexed.
      */
     public boolean isRelevant(int i) {
-        return (mask & (1 << i)) != 0;
+        return (m & (1 << i)) != 0;
     }
 
+    @Override
     public String toString() {
         return toString(16);
     }
@@ -50,19 +51,21 @@ public final class MaskedShort {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < nBits; i++) {
             final short tmp = (short) (1 << (nBits - 1 - i));
-            if ((mask & tmp) == 0) {
+            if ((m & tmp) == 0) {
                 s.append('-');
             } else {
-                s.append((value & tmp) != 0 ? '1' : '0');
+                s.append((v & tmp) != 0 ? '1' : '0');
             }
         }
         return s.toString();
     }
 
+    @Override
     public int hashCode() {
-        return 17 + 31 * (this.value & this.mask);
+        return 17 + 31 * (this.v & this.m);
     }
 
+    @Override
     public boolean equals(final Object other) {
         if (other == null) {
             return false;

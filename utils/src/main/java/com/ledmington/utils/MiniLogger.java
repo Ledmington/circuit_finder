@@ -8,6 +8,7 @@
  */
 package com.ledmington.utils;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ public final class MiniLogger {
                     .put(LoggingLevel.ERROR, TerminalCursor.TerminalColor.RED)
                     .build();
     private static LoggingLevel minimumLevel = LoggingLevel.DEBUG;
+    private static final PrintWriter stdout = System.console().writer();
 
     /**
      * Specifies the level for all MiniLoggers.
@@ -129,7 +131,7 @@ public final class MiniLogger {
 
         synchronized (this) {
             // printing on console
-            System.out.println(coloredLine);
+            stdout.println(coloredLine);
         }
     }
 
@@ -196,6 +198,7 @@ public final class MiniLogger {
      * @param t
      *      The Throwable to be logged.
      */
+    @SuppressWarnings("PMD.GuardLogStatement")
     public void error(final Throwable t) {
         error(t.getClass().getName());
         if (t.getMessage() != null) {

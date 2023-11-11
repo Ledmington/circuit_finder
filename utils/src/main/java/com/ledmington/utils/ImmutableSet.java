@@ -22,6 +22,10 @@ import java.util.Set;
  */
 public final class ImmutableSet<X> implements Set<X> {
 
+    // Cached UnsupportedOperationException
+    private static final UnsupportedOperationException uoe =
+            new UnsupportedOperationException("This is an ImmutableSet.");
+
     private final Set<X> s;
 
     /**
@@ -87,12 +91,12 @@ public final class ImmutableSet<X> implements Set<X> {
 
     @Override
     public boolean add(final X x) {
-        throw new UnsupportedOperationException("This is an ImmutableSet.");
+        throw uoe;
     }
 
     @Override
     public boolean remove(final Object o) {
-        throw new UnsupportedOperationException("This is an ImmutableSet.");
+        throw uoe;
     }
 
     @Override
@@ -102,21 +106,21 @@ public final class ImmutableSet<X> implements Set<X> {
 
     @Override
     public boolean addAll(final Collection<? extends X> c) {
-        throw new UnsupportedOperationException("This is an ImmutableSet.");
+        throw uoe;
     }
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        throw new UnsupportedOperationException("This is an ImmutableSet.");
+        throw uoe;
     }
 
     @Override
     public boolean removeAll(final Collection<?> c) {
-        throw new UnsupportedOperationException("This is an ImmutableSet.");
+        throw uoe;
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException("This is an ImmutableSet.");
+        throw uoe;
     }
 }
