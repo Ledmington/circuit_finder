@@ -117,84 +117,25 @@ public final class QMC16_V1 implements QMC16 {
         }
 
         // Building prime implicant chart
-        // a big boolean table: one row for each final minterm and one column for each of the starting input 1s
-        final boolean[][] chart = new boolean[result.size()][ones.size()];
+        final PrimeImplicantChart pic = new PrimeImplicantChart(result.size(), ones.size());
         logger.debug(
                 "The prime implicant chart is %,dx%,d: %,d bytes",
                 result.size(), ones.size(), result.size() * ones.size());
         for (int i = 0; i < result.size(); i++) {
+            final short vi = result.get(i).value();
+            final short mi = result.get(i).mask();
             for (int j = 0; j < ones.size(); j++) {
-                chart[i][j] =
+                pic.set(
+                        i,
+                        j,
                         // checking that the 1s are in the right place
-                        (result.get(i).value() & result.get(i).mask() & ones.get(j))
-                                        == result.get(i).value()
+                        (vi & mi & ones.get(j)) == vi
                                 &&
                                 // checking that the 0s are in the right place
-                                (~(~result.get(i).value() & result.get(i).mask() & ~ones.get(j))
-                                                & result.get(i).mask())
-                                        == result.get(i).value();
+                                (~(~vi & mi & ~ones.get(j)) & mi) == vi);
             }
         }
 
-        // useful for debugging
-        // printChart(chart, result.size(), ones.size());
-
-        final List<MaskedShort> finalResult = new ArrayList<>();
-
-        // Choosing the essential prime implicants: rows of the chart with only one true value
-        int epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
-        while (epiIdx != -1) {
-            finalResult.add(result.get(epiIdx));
-
-            // zero-ing the selected row and all the columns where the selected row is true
-            for (int c = 0; c < ones.size(); c++) {
-                if (chart[epiIdx][c]) {
-                    for (int r = 0; r < result.size(); r++) {
-                        chart[r][c] = false;
-                    }
-                }
-                chart[epiIdx][c] = false;
-            }
-
-            // printChart(chart, result.size(), ones.size());
-
-            epiIdx = findEssentialPrimeImplicant(chart, result.size(), ones.size());
-        }
-
-        return finalResult;
-    }
-
-    private static void printChart(final boolean[][] chart, final int rows, final int columns) {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                sb.append(chart[i][j] ? '1' : '0');
-            }
-            if (i != rows - 1) {
-                sb.append('\n');
-            }
-        }
-        logger.debug(sb.toString());
-    }
-
-    private static int findEssentialPrimeImplicant(final boolean[][] chart, final int rows, final int columns) {
-        final int bitsToFind = 1;
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < columns; c++) {
-                if (!chart[r][c]) {
-                    continue;
-                }
-
-                int count = 0;
-                for (int i = 0; i < rows; i++) {
-                    count += chart[i][c] ? 1 : 0;
-                }
-
-                if (count == bitsToFind) {
-                    return r;
-                }
-            }
-        }
-        return -1;
+        return pic.findPrimeImplicants().stream().map(result::get).toList();
     }
 }
