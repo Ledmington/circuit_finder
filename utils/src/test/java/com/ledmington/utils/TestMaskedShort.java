@@ -16,7 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public final class TestMaskedShort {
+final class TestMaskedShort {
 
     private static Stream<Arguments> stringOutput() {
         return Stream.of(
@@ -34,8 +34,11 @@ public final class TestMaskedShort {
 
     @ParameterizedTest
     @MethodSource("stringOutput")
-    public void stringOutput(final MaskedShort ms, final int bits, final String output) {
-        assertEquals(output, ms.toString(bits));
+    void stringOutput(final MaskedShort ms, final int bits, final String output) {
+        assertEquals(
+                output,
+                ms.toString(bits),
+                String.format("Expected output formatted as '%s' but was '%s'.", output, ms.toString(bits)));
     }
 
     private static Stream<Arguments> equality() {
@@ -56,8 +59,18 @@ public final class TestMaskedShort {
 
     @ParameterizedTest
     @MethodSource("equality")
-    public void equality(final MaskedShort a, final MaskedShort b) {
-        assertEquals(a, b);
-        assertEquals(a.hashCode(), b.hashCode());
+    void equality(final MaskedShort a, final MaskedShort b) {
+        assertEquals(a, b, String.format("Expected '%s' and '%s' to be equal but .equals() returned false.", a, b));
+    }
+
+    @ParameterizedTest
+    @MethodSource("equality")
+    void equalityHashCode(final MaskedShort a, final MaskedShort b) {
+        assertEquals(
+                a.hashCode(),
+                b.hashCode(),
+                String.format(
+                        "Expected same hashCode between '%s' and '%s' but they were respectively %,d and %,d.",
+                        a, b, a.hashCode(), b.hashCode()));
     }
 }

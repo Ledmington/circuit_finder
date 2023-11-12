@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An immutable wrapper for the {@link java.util.Map<K,V>} interface. This means that
+ * An immutable wrapper for the {@link java.util.Map} interface. This means that
  * operations like put, putAll, clear, remove throw UnsupportedOperationException.
  *
  * @param <K>
@@ -43,7 +43,7 @@ public final class ImmutableMap<K, V> implements Map<K, V> {
      *     The type of element objects.
      */
     public static <X, Y> MapBuilder<X, Y> builder() {
-        return new MapBuilder<X, Y>();
+        return new MapBuilder<>();
     }
 
     /**

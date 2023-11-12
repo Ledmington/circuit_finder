@@ -16,7 +16,7 @@ import java.util.Locale;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class TestFormatUtils {
+final class TestFormatUtils {
     @ParameterizedTest
     @ValueSource(
             longs = {
@@ -60,8 +60,15 @@ public class TestFormatUtils {
                 123_456_789_012_345_678L,
                 1_234_567_890_123_456_789L
             })
-    public void thousands(long n) {
+    void thousands(long n) {
         Locale.setDefault(Locale.US);
-        assertEquals(String.format("%,d", n), FormatUtils.thousands(BigInteger.valueOf(n), ","));
+        final String expected = String.format("%,d", n);
+        final String actual = FormatUtils.thousands(BigInteger.valueOf(n), ",");
+        assertEquals(
+                expected,
+                actual,
+                String.format(
+                        "Expected number formatted as '%s' but was '%s'. Is the Locale correctly set?",
+                        expected, actual));
     }
 }

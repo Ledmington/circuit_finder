@@ -21,14 +21,14 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public final class TestBitUtils {
+final class TestBitUtils {
     @ParameterizedTest
     @ValueSource(
             shorts = {
                 0x0, 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000,
                 -32_768
             })
-    public void hasOneBit(short s) {
+    void hasOneBit(short s) {
         assertTrue(BitUtils.has_one_bit(s), String.format("%,d (0x%04x) has not 1 set bit", s, s));
     }
 
@@ -44,7 +44,7 @@ public final class TestBitUtils {
 
     @ParameterizedTest
     @MethodSource("twoBitShorts")
-    public void hasNotOneBit(short s) {
+    void hasNotOneBit(short s) {
         assertFalse(BitUtils.has_one_bit(s), String.format("%,d (0x%04x) has 1 set bit", s, s));
     }
 
@@ -61,7 +61,7 @@ public final class TestBitUtils {
 
     @ParameterizedTest
     @MethodSource("someShorts")
-    public void someShorts(final short s, final int nBits) {
+    void someShorts(final short s, final int nBits) {
         assertEquals(
                 nBits,
                 BitUtils.popcount(s),
