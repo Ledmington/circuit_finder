@@ -56,13 +56,13 @@ public class QMC16Bench {
     }
 
     @Benchmark
-    public void v1(final Blackhole bh) {
+    public void original(final Blackhole bh) {
         final List<MaskedShort> result = v1.minimize(inputBits, input);
         bh.consume(result);
     }
 
     @Benchmark
-    public void v2(final Blackhole bh) {
+    public void sameMaskOpt(final Blackhole bh) {
         final List<MaskedShort> result = v2.minimize(inputBits, input);
         bh.consume(result);
     }

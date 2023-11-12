@@ -18,7 +18,9 @@ import java.util.function.Consumer;
 
 public final class OrNode extends MultiNode {
 
-    private final List<Node> nodes;
+    private static final int minNodes = 2;
+
+    private final List<Node> n;
 
     /*
     Since all Nodes are immutable, we can cache the size, the hashCode and the String representation.
@@ -31,29 +33,31 @@ public final class OrNode extends MultiNode {
     private String cachedString = null;
 
     public OrNode(final List<Node> nodes) {
-        this.nodes = new ArrayList<>(Objects.requireNonNull(nodes));
-        Collections.sort(this.nodes);
-        if (nodes.size() < 2) {
+        this.n = new ArrayList<>(Objects.requireNonNull(nodes));
+        Collections.sort(this.n);
+        if (nodes.size() < minNodes) {
             throw new IllegalArgumentException(
                     String.format("Invalid list of nodes: should have had >=2 elements but had %,d", nodes.size()));
         }
     }
 
+    @Override
     public List<Node> nodes() {
-        return nodes;
+        return n;
     }
 
     public boolean contains(final Node n) {
-        final int idx = Collections.binarySearch(this.nodes, n);
-        return idx >= 0 && idx < this.nodes.size() && n.equals(this.nodes.get(idx));
+        final int idx = Collections.binarySearch(this.n, n);
+        return idx >= 0 && idx < this.n.size() && n.equals(this.n.get(idx));
     }
 
+    @Override
     public int size() {
         if (isSizeSet) {
             return cachedSize;
         }
         int s = 1;
-        for (final Node n : nodes) {
+        for (final Node n : n) {
             s += n.size();
         }
         cachedSize = s;
@@ -61,9 +65,10 @@ public final class OrNode extends MultiNode {
         return s;
     }
 
+    @Override
     public boolean evaluate(final Map<String, Boolean> values) {
         Objects.requireNonNull(values);
-        for (final Node n : nodes) {
+        for (final Node n : n) {
             if (n.evaluate(values)) {
                 return true;
             }
@@ -71,6 +76,7 @@ public final class OrNode extends MultiNode {
         return false;
     }
 
+    @Override
     public int compareTo(final Node other) {
         if (other instanceof ZeroNode
                 || other instanceof OneNode
@@ -81,21 +87,22 @@ public final class OrNode extends MultiNode {
         }
         final OrNode or = (OrNode) other;
         int i = 0;
-        for (; i < this.nodes.size() && i < or.nodes().size(); i++) {
-            final int r = this.nodes.get(i).compareTo(or.nodes().get(i));
+        for (; i < this.n.size() && i < or.nodes().size(); i++) {
+            final int r = this.n.get(i).compareTo(or.nodes().get(i));
             if (r != 0) {
                 return r;
             }
         }
-        if (i < this.nodes.size()) {
+        if (i < this.n.size()) {
             return 1;
         }
-        if (i < or.nodes.size()) {
+        if (i < or.n.size()) {
             return -1;
         }
         return 0;
     }
 
+    @Override
     public String toString() {
         if (isStringSet) {
             return cachedString;
@@ -108,25 +115,27 @@ public final class OrNode extends MultiNode {
                 sb.append(n.toString());
             }
         };
-        c.accept(nodes.get(0));
-        for (int i = 1; i < nodes.size(); i++) {
+        c.accept(n.get(0));
+        for (int i = 1; i < n.size(); i++) {
             sb.append('+');
-            c.accept(nodes.get(i));
+            c.accept(n.get(i));
         }
         cachedString = sb.toString();
         isStringSet = true;
         return cachedString;
     }
 
+    @Override
     public int hashCode() {
         if (isHashCodeSet) {
             return cachedHashCode;
         }
-        cachedHashCode = nodes.hashCode();
+        cachedHashCode = n.hashCode();
         isHashCodeSet = true;
         return cachedHashCode;
     }
 
+    @Override
     public boolean equals(final Object other) {
         if (other == null) {
             return false;
@@ -139,8 +148,8 @@ public final class OrNode extends MultiNode {
         }
 
         // Checking equals ignoring order of elements
-        final List<Node> mynodes = this.nodes;
-        final List<Node> othernodes = ((OrNode) other).nodes;
+        final List<Node> mynodes = this.n;
+        final List<Node> othernodes = ((OrNode) other).n;
         if (mynodes.size() != othernodes.size()) {
             return false;
         }

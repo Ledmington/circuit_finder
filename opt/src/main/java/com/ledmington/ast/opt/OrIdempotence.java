@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.OrNode;
  * A + A = A
  */
 public final class OrIdempotence implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

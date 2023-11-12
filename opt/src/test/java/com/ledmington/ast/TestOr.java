@@ -19,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class TestOr extends TestOptimizer {
+final class TestOr extends TestOptimizer {
 
     private static Stream<Arguments> orProperties() {
         return Stream.of(
@@ -32,13 +32,13 @@ public class TestOr extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("orProperties")
-    public void orProperties(final Node before, final Node expected) {
+    void orProperties(final Node before, final Node expected) {
         final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 
     @Test
-    public void stringRepresentation() {
+    void stringRepresentation() {
         assertEquals("A+(B&C)", or(A(), and(B(), C())).toString());
     }
 }

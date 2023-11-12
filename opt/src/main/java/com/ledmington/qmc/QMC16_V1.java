@@ -32,6 +32,7 @@ public final class QMC16_V1 implements QMC16 {
                 this.getClass().getName());
     }
 
+    @Override
     public List<MaskedShort> minimize(final int nBits, final List<Short> ones) {
         if (nBits < 1 || nBits > 16) {
             throw new IllegalArgumentException(
@@ -177,6 +178,7 @@ public final class QMC16_V1 implements QMC16 {
     }
 
     private static int findEssentialPrimeImplicant(final boolean[][] chart, final int rows, final int columns) {
+        final int bitsToFind = 1;
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < columns; c++) {
                 if (!chart[r][c]) {
@@ -188,7 +190,7 @@ public final class QMC16_V1 implements QMC16 {
                     count += chart[i][c] ? 1 : 0;
                 }
 
-                if (count == 1) {
+                if (count == bitsToFind) {
                     return r;
                 }
             }

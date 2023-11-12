@@ -10,7 +10,6 @@ package com.ledmington.ast.opt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -22,7 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public final class TestDeMorganOr extends TestOptimizer {
+final class TestDeMorganOr extends TestOptimizer {
 
     private final Optimization opt = new DeMorganOr();
 
@@ -33,7 +32,7 @@ public final class TestDeMorganOr extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("invalidCases")
-    public void invalidCases(final Node n) {
+    void invalidCases(final Node n) {
         assertFalse(opt.check(n).isPresent());
     }
 
@@ -51,10 +50,9 @@ public final class TestDeMorganOr extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("validCases")
-    public void validCases(final Node before, int score, final Node expected) {
+    void validCases(final Node before, int score, final Node expectedAST) {
         final Optional<OptimizationResult> r = opt.check(before);
-        assertTrue(r.isPresent());
-        assertEquals(score, r.orElseThrow().score());
-        assertEquals(expected, r.orElseThrow().result());
+        final OptimizationResult expected = new OptimizationResult(score, expectedAST);
+        assertEquals(r.orElseThrow(), expected);
     }
 }

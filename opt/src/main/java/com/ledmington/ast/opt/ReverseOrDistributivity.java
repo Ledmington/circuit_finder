@@ -25,8 +25,11 @@ import com.ledmington.ast.nodes.OrNode;
  * (A + B) & (A + C) & D = (A + (B & C)) & D
  */
 public final class ReverseOrDistributivity implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
+
+        final int minAndChildNodes = 2;
 
         if (root instanceof AndNode and) {
             final List<OrNode> ors = new ArrayList<>();
@@ -37,7 +40,7 @@ public final class ReverseOrDistributivity implements Optimization {
             }
 
             // this optimization needs at least two OrsNodes to group a common part
-            if (ors.size() < 2) {
+            if (ors.size() < minAndChildNodes) {
                 return Optional.empty();
             }
 
@@ -79,7 +82,7 @@ public final class ReverseOrDistributivity implements Optimization {
             for (final OrNode or : nodesWithCommon) {
                 // from each of these nodes we remove the common node
                 score--;
-                if (or.nodes().size() == 2) {
+                if (or.nodes().size() == minAndChildNodes) {
                     // from AndNodes with two inners we also remove the parent AndNode
                     score--;
                     if (or.nodes().get(0).equals(maxCommonNode)) {

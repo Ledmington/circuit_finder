@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class TestQMC16V2 extends TestQMC {
+final class TestQMC16V2 extends TestQMC {
 
     @Override
     @BeforeEach
@@ -34,7 +34,7 @@ public class TestQMC16V2 extends TestQMC {
 
     @ParameterizedTest
     @MethodSource("fourVariableCircuits")
-    public void parallelization(final Node before, final Node after) {
+    void parallelization(final Node before, final Node after) {
         // convert the AST into a truth table (an OR of ANDs)
         final List<Short> truthTable = new ArrayList<>();
         for (int i = 0; i < (1 << 4); i++) {
@@ -52,11 +52,10 @@ public class TestQMC16V2 extends TestQMC {
         final QMC16 qmc1 = new QMC16_V2(1);
         final QMC16 qmc2 = new QMC16_V2(2);
         final QMC16 qmc3 = new QMC16_V2(3);
-        final List<MaskedShort> result1 = qmc1.minimize(4, truthTable);
-        final List<MaskedShort> result2 = qmc2.minimize(4, truthTable);
-        final List<MaskedShort> result3 = qmc3.minimize(4, truthTable);
+        final List<MaskedShort> r1 = qmc1.minimize(4, truthTable);
+        final List<MaskedShort> r2 = qmc2.minimize(4, truthTable);
+        final List<MaskedShort> r3 = qmc3.minimize(4, truthTable);
 
-        assertEquals(result1, result2);
-        assertEquals(result2, result3);
+        assertEquals(List.of(r1, r1, r1), List.of(r1, r2, r3));
     }
 }

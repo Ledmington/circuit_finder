@@ -18,7 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class TestCombined extends TestOptimizer {
+final class TestCombined extends TestOptimizer {
 
     private static Stream<Arguments> booleanLaws() {
         return Stream.of(
@@ -71,7 +71,7 @@ public class TestCombined extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("booleanLaws")
-    public void booleanLaws(final Node before, final Node expected) {
+    void booleanLaws(final Node before, final Node expected) {
         final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }

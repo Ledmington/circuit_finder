@@ -19,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class TestNot extends TestOptimizer {
+final class TestNot extends TestOptimizer {
 
     private static Stream<Arguments> notProperties() {
         return Stream.of(
@@ -35,13 +35,13 @@ public class TestNot extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("notProperties")
-    public void notProperties(final Node before, final Node expected) {
+    void notProperties(final Node before, final Node expected) {
         final Node after = opt.optimize(before);
         assertEquals(expected, after);
     }
 
     @Test
-    public void stringRepresentation() {
+    void stringRepresentation() {
         assertEquals("~A", not(A()).toString());
     }
 }

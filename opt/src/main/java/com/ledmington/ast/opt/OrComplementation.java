@@ -24,6 +24,7 @@ import com.ledmington.ast.nodes.OrNode;
  *  A + ~A = 1
  */
 public final class OrComplementation implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

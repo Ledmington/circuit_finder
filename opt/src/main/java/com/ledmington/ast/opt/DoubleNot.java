@@ -19,6 +19,7 @@ import com.ledmington.ast.nodes.NotNode;
  *  ~~A = A
  */
 public final class DoubleNot implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

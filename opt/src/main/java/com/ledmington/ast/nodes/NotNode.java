@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public final class NotNode extends Node {
 
-    private final Node inner;
+    private final Node n;
 
     /*
     Since all Nodes are immutable, we can cache the size, the hashCode and the String representation.
@@ -26,27 +26,30 @@ public final class NotNode extends Node {
     private String cachedString = null;
 
     public NotNode(final Node inner) {
-        this.inner = Objects.requireNonNull(inner);
+        this.n = Objects.requireNonNull(inner);
     }
 
     public Node inner() {
-        return inner;
+        return n;
     }
 
+    @Override
     public int size() {
         if (isSizeSet) {
             return cachedSize;
         }
-        cachedSize = 1 + inner.size();
+        cachedSize = 1 + n.size();
         isSizeSet = true;
         return cachedSize;
     }
 
+    @Override
     public boolean evaluate(final Map<String, Boolean> values) {
         Objects.requireNonNull(values);
-        return !inner.evaluate(values);
+        return !n.evaluate(values);
     }
 
+    @Override
     public int compareTo(final Node other) {
         if (other instanceof ZeroNode || other instanceof OneNode || other instanceof VariableNode) {
             return 1;
@@ -54,31 +57,34 @@ public final class NotNode extends Node {
         if (other instanceof MultiNode) {
             return -1;
         }
-        return inner.compareTo(((NotNode) other).inner);
+        return n.compareTo(((NotNode) other).n);
     }
 
+    @Override
     public String toString() {
         if (isStringSet) {
             return cachedString;
         }
-        if (inner instanceof AndNode || inner instanceof OrNode) {
-            cachedString = "~(" + inner.toString() + ")";
+        if (n instanceof AndNode || n instanceof OrNode) {
+            cachedString = "~(" + n.toString() + ")";
         } else {
-            cachedString = "~" + inner.toString();
+            cachedString = "~" + n.toString();
         }
         isStringSet = true;
         return cachedString;
     }
 
+    @Override
     public int hashCode() {
         if (isHashCodeSet) {
             return cachedHashCode;
         }
-        cachedHashCode = inner.hashCode();
+        cachedHashCode = n.hashCode();
         isHashCodeSet = true;
         return cachedHashCode;
     }
 
+    @Override
     public boolean equals(final Object other) {
         if (other == null) {
             return false;
@@ -89,6 +95,6 @@ public final class NotNode extends Node {
         if (!this.getClass().equals(other.getClass())) {
             return false;
         }
-        return this.inner.equals(((NotNode) other).inner);
+        return this.n.equals(((NotNode) other).n);
     }
 }

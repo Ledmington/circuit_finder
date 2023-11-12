@@ -26,6 +26,7 @@ import com.ledmington.ast.nodes.OrNode;
  * ~A + ~B = ~(A & B)
  */
 public final class DeMorganOr implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

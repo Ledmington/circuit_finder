@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.Node;
  * A & A = A
  */
 public final class AndIdempotence implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

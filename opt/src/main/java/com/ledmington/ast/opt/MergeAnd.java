@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.Node;
  * (A & B) & (C & D) = A & B & C & D
  */
 public final class MergeAnd implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

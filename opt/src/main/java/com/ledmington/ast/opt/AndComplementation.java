@@ -24,6 +24,7 @@ import com.ledmington.ast.nodes.ZeroNode;
  *  A & ~A = 0
  */
 public final class AndComplementation implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

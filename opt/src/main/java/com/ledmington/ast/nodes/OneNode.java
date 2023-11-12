@@ -13,15 +13,18 @@ import java.util.Objects;
 
 public final class OneNode extends Node {
 
+    @Override
     public int size() {
         return 1;
     }
 
+    @Override
     public boolean evaluate(final Map<String, Boolean> values) {
         Objects.requireNonNull(values);
         return true;
     }
 
+    @Override
     public int compareTo(final Node other) {
         if (other instanceof ZeroNode) {
             return 1;
@@ -32,14 +35,17 @@ public final class OneNode extends Node {
         return -1;
     }
 
+    @Override
     public String toString() {
         return "1";
     }
 
+    @Override
     public int hashCode() {
         return 1;
     }
 
+    @Override
     public boolean equals(final Object other) {
         if (other == null) {
             return false;

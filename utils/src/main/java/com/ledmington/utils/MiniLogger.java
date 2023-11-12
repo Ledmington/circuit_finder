@@ -28,8 +28,10 @@ public final class MiniLogger {
                     .put(LoggingLevel.WARNING, TerminalCursor.TerminalColor.YELLOW)
                     .put(LoggingLevel.ERROR, TerminalCursor.TerminalColor.RED)
                     .build();
+    private static final PrintWriter stdout = System.console() == null
+            ? new PrintWriter(System.out)
+            : System.console().writer();
     private static LoggingLevel minimumLevel = LoggingLevel.DEBUG;
-    private static final PrintWriter stdout = System.console().writer();
 
     /**
      * Specifies the level for all MiniLoggers.

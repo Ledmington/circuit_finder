@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.OneNode;
  *  A & 1 = A
  */
 public final class AndOne implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

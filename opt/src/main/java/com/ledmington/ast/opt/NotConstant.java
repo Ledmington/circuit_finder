@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.ZeroNode;
  *  ~1 = 0
  */
 public final class NotConstant implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

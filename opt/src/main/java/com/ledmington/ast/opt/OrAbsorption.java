@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.OrNode;
  * A + (A & B) = A
  */
 public final class OrAbsorption implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

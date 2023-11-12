@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public final class TestQMC16V1 extends TestQMC {
+final class TestQMC16V1 extends TestQMC {
 
     @Override
     @BeforeEach
@@ -34,7 +34,7 @@ public final class TestQMC16V1 extends TestQMC {
 
     @ParameterizedTest
     @MethodSource("fourVariableCircuits")
-    public void parallelization(final Node before, final Node after) {
+    void parallelization(final Node before, final Node after) {
         // convert the AST into a truth table (an OR of ANDs)
         final List<Short> truthTable = new ArrayList<>();
         for (int i = 0; i < (1 << 4); i++) {

@@ -18,7 +18,9 @@ import java.util.function.Consumer;
 
 public final class AndNode extends MultiNode {
 
-    private final List<Node> nodes;
+    private static final int minChildNodes = 2;
+
+    private final List<Node> children;
 
     /*
     Since all Nodes are immutable, we can cache the size, the hashCode and the String representation.
@@ -30,30 +32,32 @@ public final class AndNode extends MultiNode {
     private boolean isStringSet = false;
     private String cachedString = null;
 
-    public AndNode(final List<Node> nodes) {
-        this.nodes = new ArrayList<>(Objects.requireNonNull(nodes));
-        Collections.sort(this.nodes);
-        if (nodes.size() < 2) {
+    public AndNode(final List<Node> children) {
+        this.children = new ArrayList<>(Objects.requireNonNull(children));
+        Collections.sort(this.children);
+        if (children.size() < minChildNodes) {
             throw new IllegalArgumentException(
-                    String.format("Invalid list of nodes: should have had >=2 elements but had %,d", nodes.size()));
+                    String.format("Invalid list of nodes: should have had >=2 elements but had %,d", children.size()));
         }
     }
 
+    @Override
     public List<Node> nodes() {
-        return nodes;
+        return children;
     }
 
     public boolean contains(final Node n) {
-        final int idx = Collections.binarySearch(this.nodes, n);
-        return idx >= 0 && idx < this.nodes.size() && n.equals(this.nodes.get(idx));
+        final int idx = Collections.binarySearch(this.children, n);
+        return idx >= 0 && idx < this.children.size() && n.equals(this.children.get(idx));
     }
 
+    @Override
     public int size() {
         if (isSizeSet) {
             return cachedSize;
         }
         int s = 1;
-        for (final Node n : nodes) {
+        for (final Node n : children) {
             s += n.size();
         }
         cachedSize = s;
@@ -61,9 +65,10 @@ public final class AndNode extends MultiNode {
         return s;
     }
 
+    @Override
     public boolean evaluate(final Map<String, Boolean> values) {
         Objects.requireNonNull(values);
-        for (final Node n : nodes) {
+        for (final Node n : children) {
             if (!n.evaluate(values)) {
                 return false;
             }
@@ -71,6 +76,7 @@ public final class AndNode extends MultiNode {
         return true;
     }
 
+    @Override
     public int compareTo(final Node other) {
         if (other instanceof ZeroNode
                 || other instanceof OneNode
@@ -83,21 +89,22 @@ public final class AndNode extends MultiNode {
         }
         final AndNode and = (AndNode) other;
         int i = 0;
-        for (; i < this.nodes.size() && i < and.nodes().size(); i++) {
-            final int r = this.nodes.get(i).compareTo(and.nodes().get(i));
+        for (; i < this.children.size() && i < and.nodes().size(); i++) {
+            final int r = this.children.get(i).compareTo(and.nodes().get(i));
             if (r != 0) {
                 return r;
             }
         }
-        if (i < this.nodes.size()) {
+        if (i < this.children.size()) {
             return 1;
         }
-        if (i < and.nodes.size()) {
+        if (i < and.children.size()) {
             return -1;
         }
         return 0;
     }
 
+    @Override
     public String toString() {
         if (isStringSet) {
             return cachedString;
@@ -110,25 +117,27 @@ public final class AndNode extends MultiNode {
                 sb.append(n.toString());
             }
         };
-        c.accept(nodes.get(0));
-        for (int i = 1; i < nodes.size(); i++) {
+        c.accept(children.get(0));
+        for (int i = 1; i < children.size(); i++) {
             sb.append('&');
-            c.accept(nodes.get(i));
+            c.accept(children.get(i));
         }
         cachedString = sb.toString();
         isStringSet = true;
         return cachedString;
     }
 
+    @Override
     public int hashCode() {
         if (isHashCodeSet) {
             return cachedHashCode;
         }
-        cachedHashCode = nodes.hashCode();
+        cachedHashCode = children.hashCode();
         isHashCodeSet = true;
         return cachedHashCode;
     }
 
+    @Override
     public boolean equals(final Object other) {
         if (other == null) {
             return false;
@@ -141,8 +150,8 @@ public final class AndNode extends MultiNode {
         }
 
         // Checking equals ignoring order of elements
-        final List<Node> mynodes = this.nodes;
-        final List<Node> othernodes = ((AndNode) other).nodes;
+        final List<Node> mynodes = this.children;
+        final List<Node> othernodes = ((AndNode) other).children;
         if (mynodes.size() != othernodes.size()) {
             return false;
         }

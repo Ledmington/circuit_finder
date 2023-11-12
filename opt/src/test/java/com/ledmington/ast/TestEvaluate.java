@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public final class TestEvaluate extends TestOptimizer {
+final class TestEvaluate extends TestOptimizer {
 
     private static Stream<Arguments> allNodeTypes() {
         return Stream.of(zero(), one(), A(), not(A()), and(A(), B()), or(A(), B()))
@@ -32,17 +32,17 @@ public final class TestEvaluate extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("allNodeTypes")
-    public void invalidInput(final Node n) {
+    void invalidInput(final Node n) {
         assertThrows(NullPointerException.class, () -> n.evaluate(null));
     }
 
     @Test
-    public void evalZero() {
+    void evalZero() {
         assertFalse(zero().evaluate(Map.of()));
     }
 
     @Test
-    public void evalOne() {
+    void evalOne() {
         assertTrue(one().evaluate(Map.of()));
     }
 
@@ -55,7 +55,7 @@ public final class TestEvaluate extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("evalVar")
-    public void evalVar(final Node ast, final Map<String, Boolean> input, final boolean result) {
+    void evalVar(final Node ast, final Map<String, Boolean> input, final boolean result) {
         assertEquals(result, ast.evaluate(input));
     }
 
@@ -69,7 +69,7 @@ public final class TestEvaluate extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("evalNot")
-    public void evalNot(final Node ast, final Map<String, Boolean> input, final boolean result) {
+    void evalNot(final Node ast, final Map<String, Boolean> input, final boolean result) {
         assertEquals(result, ast.evaluate(input));
     }
 
@@ -83,7 +83,7 @@ public final class TestEvaluate extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("evalOr")
-    public void evalOr(final Node ast, final Map<String, Boolean> input, final boolean result) {
+    void evalOr(final Node ast, final Map<String, Boolean> input, final boolean result) {
         assertEquals(result, ast.evaluate(input));
     }
 
@@ -97,7 +97,7 @@ public final class TestEvaluate extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("evalAnd")
-    public void evalAnd(final Node ast, final Map<String, Boolean> input, final boolean result) {
+    void evalAnd(final Node ast, final Map<String, Boolean> input, final boolean result) {
         assertEquals(result, ast.evaluate(input));
     }
 }

@@ -51,7 +51,7 @@ public abstract class TestQMC extends TestOptimizer {
 
     @ParameterizedTest
     @MethodSource("fourVariableCircuits")
-    public void fourVariableCircuits(final Node before, final Node after) {
+    void fourVariableCircuits(final Node before, final Node after) {
         // convert the AST into a truth table (an OR of ANDs)
         final List<Short> truthTable = new ArrayList<>();
         for (int i = 0; i < (1 << 4); i++) {

@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.OrNode;
  * (A + B) + (C + D) = A + B + C + D
  */
 public final class MergeOr implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 

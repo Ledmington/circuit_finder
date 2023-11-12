@@ -22,6 +22,7 @@ import com.ledmington.ast.nodes.ZeroNode;
  *  A + 0 = A
  */
 public final class OrZero implements Optimization {
+    @Override
     public Optional<OptimizationResult> check(final Node root) {
         Objects.requireNonNull(root);
 
