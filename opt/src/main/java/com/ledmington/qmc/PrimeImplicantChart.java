@@ -61,9 +61,21 @@ public final class PrimeImplicantChart {
         this.m[r][c] = value;
     }
 
+    /**
+     * A dominated row is a row which is entirely "contained" or "covered" by another row.
+     * If Ri and Rj are two rows of the chart, we say that Ri dominates Rj
+     * if and only if every '1' bit of Rj is also a '1' bit in Ri.
+     */
     private void removeDominatedRows() {
         for (int i = 0; i < rows; i++) {
+            if (deletedRows[i]) {
+                continue;
+            }
             for (int j = i + 1; j < rows; j++) {
+                if (deletedRows[j]) {
+                    continue;
+                }
+
                 // checking rows i and j
                 boolean iDominatesJ = true;
                 boolean jDominatesI = true;
@@ -73,6 +85,9 @@ public final class PrimeImplicantChart {
                     }
                     if (m[j][k] && !m[i][k]) {
                         iDominatesJ = false;
+                    }
+                    if (!iDominatesJ && !jDominatesI) {
+                        break;
                     }
                 }
                 if (iDominatesJ && jDominatesI) {
@@ -92,9 +107,22 @@ public final class PrimeImplicantChart {
         }
     }
 
+    /**
+     * A dominated column is a column which is entirely "contained" or "covered" by another column.
+     * If Ci and Cj are two columns of the chart, we say that Ci dominates Cj
+     * if and only if every '1' bit of Cj is also a '1' bit in Ci.
+     */
     private void removeDominatedColumns() {
         for (int i = 0; i < columns; i++) {
+            if (deletedColumns[i]) {
+                continue;
+            }
+
             for (int j = i + 1; j < columns; j++) {
+                if (deletedColumns[j]) {
+                    continue;
+                }
+
                 // checking columns i and j
                 boolean iDominatesJ = true;
                 boolean jDominatesI = true;
@@ -104,6 +132,9 @@ public final class PrimeImplicantChart {
                     }
                     if (m[k][j] && !m[k][i]) {
                         iDominatesJ = false;
+                    }
+                    if (!iDominatesJ && !jDominatesI) {
+                        break;
                     }
                 }
                 if (iDominatesJ && jDominatesI) {
@@ -123,7 +154,7 @@ public final class PrimeImplicantChart {
         }
     }
 
-    private int findEssentialPrimeImplicant() {
+    private int findEssentialPrimeImplicants() {
         final int bitsToFind = 1;
         for (int r = 0; r < rows; r++) {
             if (deletedRows[r]) {
@@ -148,14 +179,17 @@ public final class PrimeImplicantChart {
     }
 
     public List<Integer> findPrimeImplicants() {
+        logger.debug("PIC before removing rows");
         logger.debug(this.toString(true));
         removeDominatedRows();
+        logger.debug("PIC before removing columns");
         logger.debug(this.toString(true));
         removeDominatedColumns();
+        logger.debug("PIC after removing columns");
         logger.debug(this.toString(true));
 
         final List<Integer> result = new ArrayList<>();
-        int epiIdx = findEssentialPrimeImplicant();
+        int epiIdx = findEssentialPrimeImplicants();
 
         while (epiIdx != -1) {
             result.add(epiIdx);
@@ -170,7 +204,7 @@ public final class PrimeImplicantChart {
 
             logger.debug(this.toString(true));
 
-            epiIdx = findEssentialPrimeImplicant();
+            epiIdx = findEssentialPrimeImplicants();
         }
 
         return result;
