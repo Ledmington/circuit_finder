@@ -9,11 +9,9 @@
 package com.ledmington.utils;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * Personal implementation of a simple Logger
@@ -28,7 +26,7 @@ public final class MiniLogger {
                     .put(LoggingLevel.WARNING, TerminalCursor.TerminalColor.YELLOW)
                     .put(LoggingLevel.ERROR, TerminalCursor.TerminalColor.RED)
                     .build();
-    private static final PrintWriter stdout = System.console() == null
+    private static PrintWriter stdout = System.console() == null
             ? new PrintWriter(System.out)
             : System.console().writer();
     private static LoggingLevel minimumLevel = LoggingLevel.DEBUG;
@@ -53,7 +51,7 @@ public final class MiniLogger {
         WARNING,
 
         /**
-         * Generally used for critical errors and exceptions.
+         * Generally used for critical errors and exceptions. Cannot be disabled.
          */
         ERROR
     }
@@ -95,16 +93,25 @@ public final class MiniLogger {
         return minimumLevel;
     }
 
-    private final String name;
+    /**
+     * Allows to change Where the output will go.
+     *
+     * @param pw
+     *      A non-null PrintWriter. Defaults to System.console().writer() if available,
+     *      otherwise System.out.
+     */
+    public static void setWriter(final PrintWriter pw) {
+        stdout = Objects.requireNonNull(pw);
+    }
+
+    private final String loggerName;
 
     private MiniLogger(final String name) {
         Objects.requireNonNull(name);
-        this.name = name;
+        this.loggerName = name;
     }
 
-    private void log(final String formatString, final LoggingLevel tag, final Object... args) {
-        Objects.requireNonNull(formatString);
-        Objects.requireNonNull(tag);
+    private String getFormattedTime() {
         long t = System.nanoTime() - BEGINNING;
         t /= 1_000_000;
         final long milliseconds = t % 1000;
@@ -115,26 +122,60 @@ public final class MiniLogger {
         t /= 60;
         final long hours = t % 24;
 
-        final String coloredHeader = String.format(
-                "[%02d:%02d:%02d.%03d][%s][%s][%s]",
-                hours,
-                minutes,
-                seconds,
-                milliseconds,
-                Thread.currentThread().getName(),
-                name,
-                TerminalCursor.color(tag.name(), TAG_COLORS.getOrDefault(tag, TerminalCursor.TerminalColor.WHITE)));
+        return String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds);
+    }
 
-        String coloredLine = String.format(
-                "%s " + formatString,
-                Stream.concat(Stream.of(coloredHeader), Arrays.stream(args)).toArray());
+    private String getFormattedHeader(final LoggingLevel tag) {
+        Objects.requireNonNull(tag);
 
-        coloredLine = coloredLine.replace("\n", String.format("\n%s ", coloredHeader));
+        return '['
+                + getFormattedTime()
+                + ']'
+                + '['
+                + Thread.currentThread().getName()
+                + ']'
+                + '['
+                + loggerName
+                + ']'
+                + '['
+                + TerminalCursor.color(tag.name(), TAG_COLORS.getOrDefault(tag, TerminalCursor.TerminalColor.WHITE))
+                + ']';
+    }
 
+    private void outputActual(final String line) {
         synchronized (this) {
             // printing on console
-            stdout.println(coloredLine);
+            stdout.println(line);
         }
+    }
+
+    private void log(final String msg, final LoggingLevel tag) {
+        Objects.requireNonNull(msg);
+
+        final String coloredHeader = getFormattedHeader(tag);
+
+        final StringBuilder sb = new StringBuilder(coloredHeader + ' ');
+        for (final char c : msg.toCharArray()) {
+            sb.append(c);
+            if (c == '\n') {
+                sb.append(coloredHeader).append(' ');
+            }
+        }
+
+        outputActual(sb.toString());
+    }
+
+    /**
+     * Logs a message with logging level DEBUG.
+     *
+     * @param msg
+     *      The string to be printed.
+     */
+    public void debug(final String msg) {
+        if (minimumLevel != LoggingLevel.DEBUG) {
+            return;
+        }
+        log(msg, LoggingLevel.DEBUG);
     }
 
     /**
@@ -149,7 +190,20 @@ public final class MiniLogger {
         if (minimumLevel != LoggingLevel.DEBUG) {
             return;
         }
-        log(formatString, LoggingLevel.DEBUG, args);
+        log(String.format(formatString, args), LoggingLevel.DEBUG);
+    }
+
+    /**
+     * Logs a message with logging level INFO.
+     *
+     * @param msg
+     *      The string to be printed.
+     */
+    public void info(final String msg) {
+        if (minimumLevel == LoggingLevel.WARNING || minimumLevel == LoggingLevel.ERROR) {
+            return;
+        }
+        log(msg, LoggingLevel.INFO);
     }
 
     /**
@@ -164,7 +218,20 @@ public final class MiniLogger {
         if (minimumLevel == LoggingLevel.WARNING || minimumLevel == LoggingLevel.ERROR) {
             return;
         }
-        log(formatString, LoggingLevel.INFO, args);
+        log(String.format(formatString, args), LoggingLevel.INFO);
+    }
+
+    /**
+     * Logs a message with logging level WARNING.
+     *
+     * @param msg
+     *      The string to be printed.
+     */
+    public void warning(final String msg) {
+        if (minimumLevel == LoggingLevel.ERROR) {
+            return;
+        }
+        log(msg, LoggingLevel.WARNING);
     }
 
     /**
@@ -179,7 +246,17 @@ public final class MiniLogger {
         if (minimumLevel == LoggingLevel.ERROR) {
             return;
         }
-        log(formatString, LoggingLevel.WARNING, args);
+        log(String.format(formatString, args), LoggingLevel.WARNING);
+    }
+
+    /**
+     * Logs a message with logging level ERROR.
+     *
+     * @param msg
+     *      The string to be printed.
+     */
+    public void error(final String msg) {
+        log(msg, LoggingLevel.ERROR);
     }
 
     /**
@@ -191,7 +268,7 @@ public final class MiniLogger {
      *      The arguments to be placed inside the string.
      */
     public void error(final String formatString, final Object... args) {
-        log(formatString, LoggingLevel.ERROR, args);
+        log(String.format(formatString, args), LoggingLevel.ERROR);
     }
 
     /**

@@ -73,7 +73,7 @@ public class PopCountBench {
         5, 6, 6, 7, 6, 7, 7, 8
     };
 
-    @Setup(Level.Iteration)
+    @Setup(Level.Invocation)
     public void setup() {
         x = (short) (rng.nextInt() & 0xffff);
     }
