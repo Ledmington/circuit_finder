@@ -146,6 +146,7 @@ public final class MiniLogger {
         synchronized (this) {
             // printing on console
             stdout.println(line);
+            stdout.flush();
         }
     }
 
