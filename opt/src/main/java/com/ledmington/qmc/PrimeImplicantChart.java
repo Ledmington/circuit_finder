@@ -107,53 +107,6 @@ public final class PrimeImplicantChart {
         }
     }
 
-    /**
-     * A dominated column is a column which is entirely "contained" or "covered" by another column.
-     * If Ci and Cj are two columns of the chart, we say that Ci dominates Cj
-     * if and only if every '1' bit of Cj is also a '1' bit in Ci.
-     */
-    private void removeDominatedColumns() {
-        for (int i = 0; i < columns; i++) {
-            if (deletedColumns[i]) {
-                continue;
-            }
-
-            for (int j = i + 1; j < columns; j++) {
-                if (deletedColumns[j]) {
-                    continue;
-                }
-
-                // checking columns i and j
-                boolean iDominatesJ = true;
-                boolean jDominatesI = true;
-                for (int k = 0; k < rows; k++) {
-                    if (m[k][i] && !m[k][j]) {
-                        jDominatesI = false;
-                    }
-                    if (m[k][j] && !m[k][i]) {
-                        iDominatesJ = false;
-                    }
-                    if (!iDominatesJ && !jDominatesI) {
-                        break;
-                    }
-                }
-                if (iDominatesJ && jDominatesI) {
-                    // the columns i and j, were equal, so we delete only j
-                    deletedColumns[j] = true;
-                    logger.debug("Deleted column %,d: dominated by column %,d", j, i);
-                } else if (iDominatesJ) {
-                    // i dominates j, we delete j
-                    deletedColumns[j] = true;
-                    logger.debug("Deleted column %,d: dominated by column %,d", j, i);
-                } else if (jDominatesI) {
-                    // j dominates i, we delete i
-                    deletedColumns[i] = true;
-                    logger.debug("Deleted column %,d: dominated by column %,d", i, j);
-                }
-            }
-        }
-    }
-
     private int findEssentialPrimeImplicants() {
         final int bitsToFind = 1;
         for (int r = 0; r < rows; r++) {
@@ -179,14 +132,7 @@ public final class PrimeImplicantChart {
     }
 
     public List<Integer> findPrimeImplicants() {
-        logger.debug("PIC before removing rows");
-        logger.debug(this.toString(true));
         removeDominatedRows();
-        logger.debug("PIC before removing columns");
-        logger.debug(this.toString(true));
-        removeDominatedColumns();
-        logger.debug("PIC after removing columns");
-        logger.debug(this.toString(true));
 
         final List<Integer> result = new ArrayList<>();
         int epiIdx = findEssentialPrimeImplicants();
@@ -203,6 +149,8 @@ public final class PrimeImplicantChart {
             }
 
             logger.debug(this.toString(true));
+
+            removeDominatedRows();
 
             epiIdx = findEssentialPrimeImplicants();
         }

@@ -305,11 +305,10 @@ public final class Main {
             // computeCorrelationMatrix(limit, inputBits, outputBits, op);
 
             buildCircuit(inputBits, outputBits, op, nJobs);
+            System.exit(0);
         } catch (Throwable t) {
             logger.error(t);
             System.exit(-1);
         }
-
-        System.exit(0);
     }
 }
