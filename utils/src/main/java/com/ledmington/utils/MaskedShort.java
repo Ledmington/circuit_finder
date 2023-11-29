@@ -12,9 +12,11 @@ public final class MaskedShort {
 
     private final short v;
     private final short m;
+    private boolean isCachedHashCodeSet = false;
+    private int cachedHashCode = -1;
 
     public MaskedShort(final short v, final short m) {
-        this.v = v;
+        this.v = (short) (v & m);
         this.m = m;
     }
 
@@ -26,11 +28,18 @@ public final class MaskedShort {
         return m;
     }
 
+    private void assertValidIndex(int i) {
+        if (i < 0 || i >= 16) {
+            throw new IllegalArgumentException(String.format("Invalid bit index %,d for a short", i));
+        }
+    }
+
     /**
      * Returns true is the i-th bit of the value is set.
      * 0-indexed.
      */
     public boolean isSet(int i) {
+        assertValidIndex(i);
         return (v & (1 << i)) != 0;
     }
 
@@ -39,6 +48,7 @@ public final class MaskedShort {
      * 0-indexed.
      */
     public boolean isRelevant(int i) {
+        assertValidIndex(i);
         return (m & (1 << i)) != 0;
     }
 
@@ -48,6 +58,10 @@ public final class MaskedShort {
     }
 
     public String toString(final int nBits) {
+        if (nBits <= 0 || nBits > 16) {
+            throw new IllegalArgumentException(String.format(
+                    "Invalid number of bits to represent a short: expected between 1 and 16 but was %,d", nBits));
+        }
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < nBits; i++) {
             final short tmp = (short) (1 << (nBits - 1 - i));
@@ -62,7 +76,12 @@ public final class MaskedShort {
 
     @Override
     public int hashCode() {
-        return 17 + 31 * (this.v & this.m);
+        if (isCachedHashCodeSet) {
+            return cachedHashCode;
+        }
+        cachedHashCode = 17 + 31 * this.v + 31 * 31 * this.m;
+        isCachedHashCodeSet = true;
+        return cachedHashCode;
     }
 
     @Override
@@ -77,7 +96,6 @@ public final class MaskedShort {
             return false;
         }
         final MaskedShort ms = (MaskedShort) other;
-        // FIXME: avoid having to rely on toString
-        return this.toString().equals(ms.toString());
+        return ((this.m & this.v) == (ms.m & ms.v));
     }
 }

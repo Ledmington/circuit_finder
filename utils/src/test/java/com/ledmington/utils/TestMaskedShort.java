@@ -9,14 +9,23 @@
 package com.ledmington.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.random.RandomGenerator;
+import java.util.random.RandomGeneratorFactory;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 final class TestMaskedShort {
+
+    private static final RandomGenerator rng =
+            RandomGeneratorFactory.getDefault().create(System.nanoTime());
 
     private static Stream<Arguments> stringOutput() {
         return Stream.of(
@@ -42,19 +51,24 @@ final class TestMaskedShort {
     }
 
     private static Stream<Arguments> equality() {
-        return Stream.of(
-                Arguments.of(new MaskedShort((short) 0, (short) 0), new MaskedShort((short) 0, (short) 0)),
-                Arguments.of(new MaskedShort((short) 1, (short) 0), new MaskedShort((short) 1, (short) 0)),
-                Arguments.of(new MaskedShort((short) 2, (short) 0), new MaskedShort((short) 2, (short) 0)),
-                Arguments.of(new MaskedShort((short) 3, (short) 0), new MaskedShort((short) 3, (short) 0)),
-                Arguments.of(new MaskedShort((short) 0, (short) 0xffff), new MaskedShort((short) 0, (short) 0xffff)),
-                Arguments.of(new MaskedShort((short) 1, (short) 0xffff), new MaskedShort((short) 1, (short) 0xffff)),
-                Arguments.of(new MaskedShort((short) 2, (short) 0xffff), new MaskedShort((short) 2, (short) 0xffff)),
-                Arguments.of(new MaskedShort((short) 3, (short) 0xffff), new MaskedShort((short) 3, (short) 0xffff)),
-                Arguments.of(new MaskedShort((short) 0x00ff, (short) 0x00f0), new MaskedShort((short) 0x00f0, (short)
-                        0x00f0)),
-                Arguments.of(new MaskedShort((short) 0xffff, (short) 0x5555), new MaskedShort((short) 0x5555, (short)
-                        0x5555)));
+        final List<Short> ls = Stream.concat(
+                        Stream.of((short) 0, (short) 1, (short) 2, (short) 3),
+                        Stream.generate(() -> (short) rng.nextInt()))
+                .distinct()
+                .limit(10)
+                .toList();
+        final List<Arguments> result = new ArrayList<>();
+        for (final short a : ls) {
+            for (final short b : ls) {
+                final short andMask = (short) (a & b);
+                final short orMask = (short) (a | b);
+                result.add(Arguments.of(new MaskedShort(a, andMask), new MaskedShort(b, andMask)));
+                result.add(Arguments.of(new MaskedShort(a, andMask), new MaskedShort(orMask, andMask)));
+                result.add(Arguments.of(new MaskedShort(orMask, andMask), new MaskedShort(b, andMask)));
+                result.add(Arguments.of(new MaskedShort(orMask, andMask), new MaskedShort(orMask, andMask)));
+            }
+        }
+        return result.stream();
     }
 
     @ParameterizedTest
@@ -72,5 +86,42 @@ final class TestMaskedShort {
                 String.format(
                         "Expected same hashCode between '%s' and '%s' but they were respectively %,d and %,d.",
                         a, b, a.hashCode(), b.hashCode()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 16})
+    void invalidMaskIndex(int i) {
+        assertThrows(IllegalArgumentException.class, () -> new MaskedShort((short) 0, (short) 0).isRelevant(i));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 16})
+    void invalidValueIndex(int i) {
+        assertThrows(IllegalArgumentException.class, () -> new MaskedShort((short) 0, (short) 0).isSet(i));
+    }
+
+    private static Stream<Arguments> randomMaskedShorts() {
+        return Stream.generate(() -> new MaskedShort((short) rng.nextInt(), (short) rng.nextInt()))
+                .distinct()
+                .limit(10)
+                .map(Arguments::of);
+    }
+
+    @ParameterizedTest
+    @MethodSource("randomMaskedShorts")
+    void bitAPI(final MaskedShort ms) {
+        for (int i = 0; i < 16; i++) {
+            final boolean expected = (ms.mask() & (1 << i)) != 0;
+            final boolean actual = ms.isRelevant(i);
+            assertEquals(
+                    expected, actual, String.format("Expected %s for mask bit %,d but was %s", expected, i, actual));
+        }
+
+        for (int i = 0; i < 16; i++) {
+            final boolean expected = ((ms.mask() & ms.value()) & (1 << i)) != 0;
+            final boolean actual = ms.isSet(i);
+            assertEquals(
+                    expected, actual, String.format("Expected %s for value bit %,d but was %s", expected, i, actual));
+        }
     }
 }
