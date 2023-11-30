@@ -56,6 +56,7 @@ public final class Main {
         " logic_not           N -> N      Bitwise NOT.",
         " logic_and         2*N -> N      Bitwise AND.",
         " logic_or          2*N -> N      Bitwise OR.",
+        " logic_nand        2*N -> N      Bitwise NAND.",
         " signed_sum        2*N -> N      Sum of signed integers.",
         ""
     });
@@ -65,6 +66,7 @@ public final class Main {
                     .put("logic_not", new LogicNot())
                     .put("logic_and", new LogicAnd())
                     .put("logic_or", new LogicOr())
+                    .put("logic_nand", new LogicNand())
                     .put("signed_sum", new SignedSum())
                     .build();
 
