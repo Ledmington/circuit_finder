@@ -55,6 +55,7 @@ public final class Main {
         "   OP_NAME            BITS           DESCRIPTION",
         " logic_not           N -> N      Bitwise NOT.",
         " logic_and         2*N -> N      Bitwise AND.",
+        " logic_or          2*N -> N      Bitwise OR.",
         " signed_sum        2*N -> N      Sum of signed integers.",
         ""
     });
@@ -63,6 +64,7 @@ public final class Main {
             ImmutableMap.<String, LogicFunction>builder()
                     .put("logic_not", new LogicNot())
                     .put("logic_and", new LogicAnd())
+                    .put("logic_or", new LogicOr())
                     .put("signed_sum", new SignedSum())
                     .build();
 

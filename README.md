@@ -32,7 +32,7 @@ Obviously, I will implement a lot more functions like:
 |-----------|--------------|
 | NOT       | ✅            |
 | AND       | ✅            |
-| OR        |              |
+| OR        | ✅            |
 | NAND      |              |
 | NOR       |              |
 | XOR       |              |

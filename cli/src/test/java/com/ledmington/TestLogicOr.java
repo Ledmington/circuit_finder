@@ -22,16 +22,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class TestLogicAnd extends TestLogicFunction {
+public class TestLogicOr extends TestLogicFunction {
 
     @BeforeAll
     public static void setup() {
-        lf = new LogicAnd();
+        lf = new LogicOr();
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 3, 5, 7, 9})
-    public void noAndWithOddNumberOfBits(int n) {
+    public void noOrWithOddNumberOfBits(int n) {
         assertThrows(IllegalArgumentException.class, () -> lf.apply(new BitArray(n)));
     }
 
@@ -43,10 +43,10 @@ public class TestLogicAnd extends TestLogicFunction {
 
     @ParameterizedTest
     @MethodSource("bitStrings")
-    public void correctAnd(final BitArray in) {
+    public void correctOr(final BitArray in) {
         final BitArray out = new BitArray(in.length() / 2);
         for (int i = 0; i < out.length(); i++) {
-            out.set(i, in.get(i) & in.get(i + out.length()));
+            out.set(i, in.get(i) | in.get(i + out.length()));
         }
 
         assertEquals(out, lf.apply(in));
