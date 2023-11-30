@@ -116,3 +116,6 @@ Currently, the javadoc comments are present only in some critical methods of som
 Pull requests and bug reports are always welcome.
 
 If you want to add a specific function, open an issue explaining what it does with examples and maybe some links to existing implementations.
+
+## License
+This project is licensed under the GNU General Public License version 3.
