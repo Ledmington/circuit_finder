@@ -27,8 +27,8 @@ String author = 'Filippo Barbari'
 String authorMail = 'filippo.barbari@gmail.com'
 String basePackage = "com.ledmington"
 String fatJarBaseName = "${appNameLowercase}"
-String fatJarName = "${fatJarBaseName}.jar"
-String fatJarPath = path("${buildDir}", "libs", "${fatJarName}")
+String fatJarName = "${fatJarBaseName}-v${version}.jar"
+String fatJarPath = path("${project.layout.buildDirectory.get()}", "libs", "${fatJarName}")
 String mainClassName = "${basePackage}.Main"
 
 java {
@@ -173,17 +173,17 @@ if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 } else {
 	tasks.register('downloadAsyncProfiler', Download) {
 		src "https://github.com/async-profiler/async-profiler/releases/download/v${asyncProfilerVersion}/async-profiler-${asyncProfilerVersion}-linux-x64.tar.gz"
-		dest new File(buildDir, "async-profiler.tar.gz")
+		dest new File(project.layout.buildDirectory.asFile.get(), "async-profiler.tar.gz")
 		overwrite false
 	}
 
 	tasks.register('asyncProfiler', Copy) {
 		dependsOn downloadAsyncProfiler
 		from tarTree(downloadAsyncProfiler.dest)
-		into path("${buildDir}", "async-profiler")
+		into path("${project.layout.buildDirectory.get()}", "async-profiler")
 		includeEmptyDirs(false)
 		ext {
-			profiler = path("${buildDir}", "async-profiler", "async-profiler-${asyncProfilerVersion}-linux-x64", "build", "libasyncProfiler.so")
+			profiler = path("${project.layout.buildDirectory.get()}", "async-profiler", "async-profiler-${asyncProfilerVersion}-linux-x64", "build", "libasyncProfiler.so")
 		}
 	}
 
@@ -191,9 +191,9 @@ if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 		dependsOn([asyncProfiler, fatJar])
 		group 'useful'
 		description 'Runs the app with async-profiler attached and generates a flamegraph'
-		String flamegraphFile = path("${buildDir}", "flamegraphs", "flamegraph-cpu-${getDate()}.html")
+		String flamegraphFile = path("${project.layout.buildDirectory.get()}", "flamegraphs", "flamegraph-cpu-${getDate()}.html")
 		doFirst {
-			mkdir path("${buildDir}", "flamegraphs")
+			mkdir path("${project.layout.buildDirectory.get()}", "flamegraphs")
 		}
 		classpath fatJarPath
 		//args = []

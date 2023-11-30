@@ -23,8 +23,8 @@ String author = 'Filippo Barbari'
 String authorMail = 'filippo.barbari@gmail.com'
 String basePackage = "com.ledmington"
 String fatJarBaseName = "${appNameLowercase}"
-String fatJarName = "${fatJarBaseName}.jar"
-String fatJarPath = path("${buildDir}", "libs", "${fatJarName}")
+String fatJarName = "${fatJarBaseName}-v${version}.jar"
+String fatJarPath = path("${project.layout.buildDirectory.get()}", "libs", "${fatJarName}")
 String mainClassName = "${basePackage}.Main"
 
 java {

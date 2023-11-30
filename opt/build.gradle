@@ -17,7 +17,6 @@ static def path(String... args) {
 }
 
 String appName = 'circuit-finder'
-String version = '0.1.0'
 String appDescription = 'A search algorithm to find optimal logic circuits.'
 String author = 'Filippo Barbari'
 String authorMail = 'filippo.barbari@gmail.com'
@@ -155,7 +154,7 @@ jmh {
 	//jvmArgsAppend = ['Custom JVM args to use when forking (append these)']
 	//jvmArgsPrepend =[ 'Custom JVM args to use when forking (prepend these)']
 	//humanOutputFile = project.file("${project.buildDir}/reports/jmh/human.txt") // human-readable output file
-	resultsFile = project.file("${project.buildDir}/reports/jmh/results.txt") // results file
+	resultsFile = project.file("${project.layout.buildDirectory.get()}/reports/jmh/results.txt") // results file
 	//operationsPerInvocation = 10 // Operations per invocation.
 	//benchmarkParameters =  [:] // Benchmark parameters.
 	//profilers = [] // Use profilers to collect additional data. Supported profilers: [cl, comp, gc, stack, perf, perfnorm, perfasm, xperf, xperfasm, hs_cl, hs_comp, hs_gc, hs_rt, hs_thr, async]
