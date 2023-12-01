@@ -63,9 +63,8 @@ public final class QMC16_V1 implements QMC16 {
         List<MaskedShort> next = new ArrayList<>();
         final List<MaskedShort> result = new ArrayList<>();
 
-        for (int it = 0; it < nBits; it++) {
+        for (int it = 0; it <= nBits; it++) {
             logger.debug("Computing size-%,d prime implicants", 1 << it);
-
             logger.debug("Initial size: %,d", base.size());
 
             final int length = base.size();
@@ -126,10 +125,13 @@ public final class QMC16_V1 implements QMC16 {
         }
 
         // Building prime implicant chart
+        final PrimeImplicantChart pic = getPrimeImplicantChart(ones, result);
+
+        return pic.findPrimeImplicants().stream().map(result::get).toList();
+    }
+
+    private static PrimeImplicantChart getPrimeImplicantChart(final List<Short> ones, final List<MaskedShort> result) {
         final PrimeImplicantChart pic = new PrimeImplicantChart(result.size(), ones.size());
-        logger.debug(
-                "The prime implicant chart is %,dx%,d: %,d bytes",
-                result.size(), ones.size(), result.size() * ones.size());
         for (int i = 0; i < result.size(); i++) {
             final short vi = result.get(i).value();
             final short mi = result.get(i).mask();
@@ -144,7 +146,6 @@ public final class QMC16_V1 implements QMC16 {
                                 (~(~vi & mi & ~ones.get(j)) & mi) == vi);
             }
         }
-
-        return pic.findPrimeImplicants().stream().map(result::get).toList();
+        return pic;
     }
 }

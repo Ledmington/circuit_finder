@@ -42,6 +42,7 @@ public final class PrimeImplicantChart {
         this.m = new boolean[r][c];
         this.deletedRows = new boolean[r];
         this.deletedColumns = new boolean[c];
+        logger.debug("The prime implicant chart is %,dx%,d: %,d bytes", r, c, r * c + r + c);
     }
 
     private void assertRowIndexIsValid(int r) {
