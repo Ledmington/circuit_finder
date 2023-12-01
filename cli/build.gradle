@@ -26,8 +26,8 @@ String appDescription = 'A search algorithm to find optimal logic circuits.'
 String author = 'Filippo Barbari'
 String authorMail = 'filippo.barbari@gmail.com'
 String basePackage = "com.ledmington"
-String fatJarBaseName = "${appNameLowercase}"
-String fatJarName = "${fatJarBaseName}-v${version}.jar"
+String fatJarBaseName = "${appNameLowercase}-v${version}"
+String fatJarName = "${fatJarBaseName}.jar"
 String fatJarPath = path("${project.layout.buildDirectory.get()}", "libs", "${fatJarName}")
 String mainClassName = "${basePackage}.Main"
 
@@ -150,7 +150,7 @@ tasks.register('fatJar', Jar) {
 	}
 	duplicatesStrategy = 'include'
 	manifest {
-		archiveBaseName = appNameLowercase
+		archiveBaseName = fatJarBaseName
 		attributes(
 				//"Implementation-Title": "Gradle",
 				"Implementation-Version": version,
@@ -161,7 +161,7 @@ tasks.register('fatJar', Jar) {
 
 	doLast {
 		println "The fat jar is ${fatJarPath}"
-		println String.format("Fat jar size: %.3f MB", new File(fatJarPath).length() / 1_000_000)
+		println String.format("Fat jar size: %.3f MB", (double) new File(fatJarPath).length() / 1_000_000.0)
 	}
 }
 
