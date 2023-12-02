@@ -35,6 +35,7 @@ import com.ledmington.function.LogicOr;
 import com.ledmington.function.LogicXnor;
 import com.ledmington.function.LogicXor;
 import com.ledmington.function.SignedSum;
+import com.ledmington.function.UnsignedSum;
 import com.ledmington.qmc.QMC16;
 import com.ledmington.qmc.QMC16_V2;
 import com.ledmington.utils.FormatUtils;
@@ -80,6 +81,7 @@ public final class Main {
         " logic_xor         2*N -> N      Bitwise XOR.",
         " logic_xnor        2*N -> N      Bitwise XNOR.",
         " signed_sum        2*N -> N      Sum of signed integers.",
+        " unsigned_sum      2*N -> N      Sum of unsigned integers.",
         ""
     });
 
@@ -93,6 +95,7 @@ public final class Main {
                     .put("logic_xor", new LogicXor())
                     .put("logic_xnor", new LogicXnor())
                     .put("signed_sum", new SignedSum())
+                    .put("unsigned_sum", new UnsignedSum())
                     .build();
 
     private static void computeCorrelationMatrix(

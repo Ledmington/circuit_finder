@@ -42,9 +42,10 @@ For testing.
 | Operation | Implemented? |
 |-----------|--------------|
 | iadd      | ✅            |
-| uadd      |              |
+| uadd      | ✅            |
 | isub      |              |
 | usub      |              |
+| neg       |              |
 | imul      |              |
 | umul      |              |
 | idiv      |              |
