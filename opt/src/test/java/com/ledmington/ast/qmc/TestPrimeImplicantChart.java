@@ -20,9 +20,13 @@ package com.ledmington.ast.qmc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.random.RandomGenerator;
 import java.util.random.RandomGeneratorFactory;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.ledmington.qmc.PrimeImplicantChart;
@@ -85,5 +89,67 @@ final class TestPrimeImplicantChart {
         final int j = RandomGeneratorFactory.getDefault().create().nextInt(0, n);
         pic.set(i, j, true);
         assertEquals(List.of(i), pic.findPrimeImplicants());
+    }
+
+    private static Stream<Arguments> multipleImplicants() {
+        final int maxNumberOfImplicants = 6;
+        final int maxNumberOfChartsPerImplicant = 5;
+        final int maxSize = Math.max(maxNumberOfImplicants, 10);
+        final RandomGenerator rng = RandomGeneratorFactory.getDefault().create(System.nanoTime());
+        final List<List<Integer>> inputs = new ArrayList<>();
+        final List<PrimeImplicantChart> pics = new ArrayList<>();
+
+        for (int numberOfImplicants = 2; numberOfImplicants <= maxNumberOfImplicants; numberOfImplicants++) {
+            for (int chartIdx = 0; chartIdx < maxNumberOfChartsPerImplicant; chartIdx++) {
+                // we want a chart with exactly n implicants
+                // so we need at least n rows and at least n columns
+                final int rows = rng.nextInt(numberOfImplicants, maxSize);
+                final int columns = rng.nextInt(numberOfImplicants, maxSize);
+
+                // select random rows to be prime implicants
+                final List<Integer> primeImplicantRows = Stream.generate(() -> rng.nextInt(0, rows))
+                        .distinct()
+                        .limit(numberOfImplicants)
+                        .toList();
+
+                // select random columns where to place the 1
+                final List<Integer> primeImplicantColumns = Stream.generate(() -> rng.nextInt(0, columns))
+                        .distinct()
+                        .limit(numberOfImplicants)
+                        .toList();
+
+                final PrimeImplicantChart pic = new PrimeImplicantChart(rows, columns);
+
+                // add the prime implicants
+                for (int i = 0; i < numberOfImplicants; i++) {
+                    pic.set(primeImplicantRows.get(i), primeImplicantColumns.get(i), true);
+                }
+
+                // add random ones in the chart
+                final int additionalOnes =
+                        rng.nextInt(0, Math.max(1, rows * columns - numberOfImplicants * numberOfImplicants));
+                for (int i = 0; i < additionalOnes; i++) {
+                    final int r = rng.nextInt(0, rows);
+                    final int c = rng.nextInt(0, columns);
+                    // we add the random 1 either on a row which already has a prime implicant
+                    // or we add it on another row and another column
+                    if (!primeImplicantRows.contains(r) || primeImplicantColumns.contains(c)) {
+                        continue;
+                    }
+                    pic.set(r, c, true);
+                }
+
+                inputs.add(primeImplicantRows);
+                pics.add(pic);
+            }
+        }
+
+        return IntStream.range(0, inputs.size()).mapToObj(i -> Arguments.of(inputs.get(i), pics.get(i)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("multipleImplicants")
+    void multipleImplicants(final List<Integer> solution, final PrimeImplicantChart pic) {
+        assertEquals(new HashSet<>(solution), new HashSet<>(pic.findPrimeImplicants()));
     }
 }

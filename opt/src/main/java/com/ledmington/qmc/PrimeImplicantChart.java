@@ -32,17 +32,18 @@ public final class PrimeImplicantChart {
     private final boolean[] deletedRows;
     private final boolean[] deletedColumns;
 
-    public PrimeImplicantChart(int r, int c) {
-        if (r < 1 || c < 1) {
+    public PrimeImplicantChart(int rows, int columns) {
+        if (rows < 1 || columns < 1) {
             throw new IllegalArgumentException(String.format(
-                    "Invalid number of rows and columns: should have been both >= 1 but were %,d and %,d", r, c));
+                    "Invalid number of rows and columns: should have been both >= 1 but were %,d and %,d",
+                    rows, columns));
         }
-        this.rows = r;
-        this.columns = c;
-        this.m = new boolean[r][c];
-        this.deletedRows = new boolean[r];
-        this.deletedColumns = new boolean[c];
-        logger.debug("The prime implicant chart is %,dx%,d: %,d bytes", r, c, r * c + r + c);
+        this.rows = rows;
+        this.columns = columns;
+        this.m = new boolean[rows][columns];
+        this.deletedRows = new boolean[rows];
+        this.deletedColumns = new boolean[columns];
+        logger.debug("The prime implicant chart is %,dx%,d: %,d bytes", rows, columns, rows * columns + rows + columns);
     }
 
     private void assertRowIndexIsValid(int r) {
@@ -59,16 +60,16 @@ public final class PrimeImplicantChart {
         }
     }
 
-    public void set(int r, int c, boolean value) {
-        assertRowIndexIsValid(r);
-        assertColumnIndexIsValid(c);
-        if (deletedRows[r]) {
-            throw new IllegalArgumentException(String.format("Cannot set value on deleted row %,d", r));
+    public void set(int rowIndex, int columnIndex, boolean value) {
+        assertRowIndexIsValid(rowIndex);
+        assertColumnIndexIsValid(columnIndex);
+        if (deletedRows[rowIndex]) {
+            throw new IllegalArgumentException(String.format("Cannot set value on deleted row %,d", rowIndex));
         }
-        if (deletedColumns[c]) {
-            throw new IllegalArgumentException(String.format("Cannot set value on deleted column %,d", c));
+        if (deletedColumns[columnIndex]) {
+            throw new IllegalArgumentException(String.format("Cannot set value on deleted column %,d", columnIndex));
         }
-        this.m[r][c] = value;
+        this.m[rowIndex][columnIndex] = value;
     }
 
     /**
@@ -90,6 +91,9 @@ public final class PrimeImplicantChart {
                 boolean iDominatesJ = true;
                 boolean jDominatesI = true;
                 for (int k = 0; k < columns; k++) {
+                    if (deletedColumns[k]) {
+                        continue;
+                    }
                     if (m[i][k] && !m[j][k]) {
                         jDominatesI = false;
                     }
@@ -130,7 +134,12 @@ public final class PrimeImplicantChart {
 
                 int count = 0;
                 for (int i = 0; i < rows; i++) {
-                    count += m[i][c] ? 1 : 0;
+                    if (deletedRows[i]) {
+                        continue;
+                    }
+                    if (m[i][c]) {
+                        count++;
+                    }
                 }
 
                 if (count == bitsToFind) {
@@ -150,6 +159,7 @@ public final class PrimeImplicantChart {
         while (epiIdx != -1) {
             result.add(epiIdx);
             logger.debug("Found essential prime implicant: row %,d", epiIdx);
+            logger.debug(this.toString(true));
 
             deletedRows[epiIdx] = true;
             for (int c = 0; c < columns; c++) {
@@ -157,8 +167,6 @@ public final class PrimeImplicantChart {
                     deletedColumns[c] = true;
                 }
             }
-
-            logger.debug(this.toString(true));
 
             removeDominatedRows();
 
