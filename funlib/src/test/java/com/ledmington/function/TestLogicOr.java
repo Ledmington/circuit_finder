@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington;
+package com.ledmington.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,16 +31,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class TestLogicNand extends TestLogicFunction {
+public class TestLogicOr extends TestLogicFunction {
 
     @BeforeAll
     public static void setup() {
-        lf = new LogicNand();
+        lf = new LogicOr();
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 3, 5, 7, 9})
-    public void noNandWithOddNumberOfBits(int n) {
+    public void noOrWithOddNumberOfBits(int n) {
         assertThrows(IllegalArgumentException.class, () -> lf.apply(new BitArray(n)));
     }
 
@@ -52,10 +52,10 @@ public class TestLogicNand extends TestLogicFunction {
 
     @ParameterizedTest
     @MethodSource("bitStrings")
-    public void correctNand(final BitArray in) {
+    public void correctOr(final BitArray in) {
         final BitArray out = new BitArray(in.length() / 2);
         for (int i = 0; i < out.length(); i++) {
-            out.set(i, !(in.get(i) & in.get(i + out.length())));
+            out.set(i, in.get(i) | in.get(i + out.length()));
         }
 
         assertEquals(out, lf.apply(in));

@@ -1,0 +1,141 @@
+plugins {
+	id 'java-library'
+	id 'pmd'
+	id 'com.diffplug.spotless' version '6.22.0'
+	id 'com.github.ben-manes.versions' version '0.49.0'
+	id 'com.adarshr.test-logger' version '4.0.0'
+	id 'info.solidsoft.pitest' version '1.15.0'
+	id 'me.champeau.jmh' version '0.7.2'
+}
+
+repositories {
+	mavenCentral()
+}
+
+static def path(String... args) {
+	return String.join(File.separator, args)
+}
+
+String appName = 'circuit-finder'
+String appDescription = 'A search algorithm to find optimal logic circuits.'
+String author = 'Filippo Barbari'
+String authorMail = 'filippo.barbari@gmail.com'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+ext.junitVersion = "5.10.0"
+dependencies {
+	implementation project(':utils')
+	testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+	testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher:1.10.0') {
+		because("required for pitest")
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs << '-Xdiags:verbose'
+	options.compilerArgs << '-Xlint:all'
+	options.compilerArgs << '-Werror'
+	options.deprecation = true
+	options.encoding = 'UTF-8'
+}
+
+test {
+	useJUnitPlatform()
+}
+
+testlogger {
+	theme 'standard'
+
+	showExceptions true
+	showStackTraces false
+	showFullStackTraces true
+	showCauses true
+
+	slowThreshold 2000
+
+	showSummary true
+	showSimpleNames false
+	showPassed false
+	showSkipped true
+	showFailed true
+	showOnlySlow false
+
+	showStandardStreams true
+	showPassedStandardStreams false
+	showSkippedStandardStreams false
+	showFailedStandardStreams true
+}
+
+pmd {
+	consoleOutput = true
+	toolVersion = "6.55.0"
+	rulesMinimumPriority = 5
+	ignoreFailures = false
+	ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
+}
+
+pitest {
+	targetClasses.set(['com.ledmington.*'])
+	targetTests.set(['com.ledmington.*'])
+	pitestVersion = '1.15.0' //not needed when a default PIT version should be used
+	junit5PluginVersion = '1.2.0'
+	threads = 4
+	outputFormats.set(['HTML'])
+	verbose = true
+	timestampedReports = false
+}
+
+spotless {
+	format 'misc', {
+		target '*.gradle', '*.md', '.gitignore'
+		trimTrailingWhitespace()
+		indentWithTabs()
+		endWithNewline()
+		setEncoding('utf-8')
+	}
+
+	java {
+		target fileTree('.') {
+			include path('**', '*.java')
+			exclude path('**', 'build', '**'), path('**', 'build-*', '**'), path('**', 'bin', '**')
+		}
+		removeUnusedImports()
+		formatAnnotations()
+		trimTrailingWhitespace()
+		endWithNewline()
+		setEncoding('utf-8')
+		palantirJavaFormat('2.38.0')
+
+		// check https://javadoc.io/doc/com.diffplug.spotless/spotless-plugin-gradle/latest/com/diffplug/gradle/spotless/JavaExtension.html
+		importOrder('java', 'javax', 'javafx', 'com', 'org', group as String)
+
+		licenseHeader String.join("\n",
+				"/*",
+				"* ${appName} - ${appDescription}",
+				"* Copyright (C) 2023-${new Date().format('yyyy')} ${author} <${authorMail}>",
+				"*",
+				"* This program is free software: you can redistribute it and/or modify",
+				"* it under the terms of the GNU General Public License as published by",
+				"* the Free Software Foundation, either version 3 of the License, or",
+				"* (at your option) any later version.",
+				"*",
+				"* This program is distributed in the hope that it will be useful,",
+				"* but WITHOUT ANY WARRANTY; without even the implied warranty of",
+				"* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
+				"* GNU General Public License for more details.",
+				"*",
+				"* You should have received a copy of the GNU General Public License",
+				"* along with this program. If not, see <http://www.gnu.org/licenses/>.",
+				"*/",
+		)
+	}
+}
+
+tasks.compileJava.dependsOn(spotlessApply)

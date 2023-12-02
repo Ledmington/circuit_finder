@@ -15,34 +15,12 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington;
+package com.ledmington.function;
 
-public final class LogicOr extends AbstractLogicFunction {
-    @Override
-    public int inputBits(int n) {
-        assertValidBits(n);
-        return 2 * n;
-    }
+import java.util.function.Function;
 
-    @Override
-    public int outputBits(int n) {
-        assertValidBits(n);
-        return n;
-    }
+public interface LogicFunction extends Function<BitArray, BitArray> {
+    int inputBits(int n);
 
-    @Override
-    public BitArray apply(final BitArray in) {
-        final BitArray out = new BitArray(in.length() / 2);
-
-        if (in.length() % 2 != 0) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid number of input bits: expected an even number but was %,d", in.length()));
-        }
-
-        for (int i = 0; i < in.length() / 2; i++) {
-            out.set(i, in.get(i) | in.get((in.length() / 2) + i));
-        }
-
-        return out;
-    }
+    int outputBits(int n);
 }

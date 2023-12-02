@@ -7,4 +7,5 @@ include('cli')
 include('opt')
 include('utils')
 include('repl')
+include('funlib')
 

@@ -15,34 +15,45 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington;
+package com.ledmington.function;
 
-public final class LogicNand extends AbstractLogicFunction {
-    @Override
+public final class SignedSum extends AbstractLogicFunction {
+
     public int inputBits(int n) {
         assertValidBits(n);
         return 2 * n;
     }
 
-    @Override
     public int outputBits(int n) {
         assertValidBits(n);
         return n;
     }
 
-    @Override
-    public BitArray apply(final BitArray in) {
-        final BitArray out = new BitArray(in.length() / 2);
+    public BitArray apply(final BitArray bits) {
+        final int length = bits.length();
 
-        if (in.length() % 2 != 0) {
+        if (length % 2 != 0 || length < 4) {
             throw new IllegalArgumentException(
-                    String.format("Invalid number of input bits: expected an even number but was %,d", in.length()));
+                    String.format("Invalid number of input bits: expected an even number >=4 but was %,d", length));
         }
 
-        for (int i = 0; i < in.length() / 2; i++) {
-            out.set(i, !(in.get(i) & in.get((in.length() / 2) + i)));
+        // we assume that 'bits' contains two same-sized arrays
+        // representing the signed integers 'a' and 'b'
+        final int halfLength = length / 2;
+        final boolean[] a = new boolean[halfLength];
+        final boolean[] b = new boolean[halfLength];
+        for (int i = 0; i < halfLength; i++) {
+            a[i] = bits.get(i);
+            b[i] = bits.get(halfLength + i);
         }
 
-        return out;
+        final BitArray c = new BitArray(halfLength);
+        boolean carry = false;
+        for (int i = halfLength - 1; i >= 0; i--) {
+            c.set(i, a[i] ^ b[i] ^ carry);
+            carry = (a[i] & b[i]) | (a[i] & carry) | (b[i] & carry);
+        }
+
+        return c;
     }
 }

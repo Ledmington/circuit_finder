@@ -15,12 +15,13 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington;
+package com.ledmington.function;
 
-import java.util.function.Function;
-
-public interface LogicFunction extends Function<BitArray, BitArray> {
-    int inputBits(int n);
-
-    int outputBits(int n);
+public abstract class AbstractLogicFunction implements LogicFunction {
+    protected void assertValidBits(int n) {
+        if (n < 1) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid number of bits: should have been >=1 but was %,d", n));
+        }
+    }
 }

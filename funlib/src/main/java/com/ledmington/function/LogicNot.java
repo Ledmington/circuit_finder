@@ -15,13 +15,29 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package com.ledmington;
+package com.ledmington.function;
 
-public abstract class AbstractLogicFunction implements LogicFunction {
-    protected void assertValidBits(int n) {
-        if (n < 1) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid number of bits: should have been >=1 but was %,d", n));
+public final class LogicNot extends AbstractLogicFunction {
+    @Override
+    public int inputBits(int n) {
+        assertValidBits(n);
+        return n;
+    }
+
+    @Override
+    public int outputBits(int n) {
+        assertValidBits(n);
+        return n;
+    }
+
+    @Override
+    public BitArray apply(final BitArray in) {
+        final BitArray out = new BitArray(in.length());
+
+        for (int i = 0; i < in.length(); i++) {
+            out.set(i, !in.get(i));
         }
+
+        return out;
     }
 }
