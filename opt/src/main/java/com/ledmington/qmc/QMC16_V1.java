@@ -64,6 +64,9 @@ public final class QMC16_V1 implements QMC16 {
         final List<MaskedShort> result = new ArrayList<>();
 
         for (int it = 0; it <= nBits; it++) {
+            if (base.isEmpty()) {
+                break;
+            }
             logger.debug("Computing size-%,d prime implicants", 1 << it);
             logger.debug("Initial size: %,d", base.size());
 
