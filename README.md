@@ -19,7 +19,7 @@ For testing.
 | NAND      | ✅            |
 | NOR       | ✅            |
 | XOR       | ✅            |
-| XNOR      |              |
+| XNOR      | ✅            |
 
 ### Bitwise operations
 
