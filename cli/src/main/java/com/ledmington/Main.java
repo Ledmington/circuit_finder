@@ -32,6 +32,7 @@ import com.ledmington.function.LogicNand;
 import com.ledmington.function.LogicNor;
 import com.ledmington.function.LogicNot;
 import com.ledmington.function.LogicOr;
+import com.ledmington.function.LogicXor;
 import com.ledmington.function.SignedSum;
 import com.ledmington.qmc.QMC16;
 import com.ledmington.qmc.QMC16_V2;
@@ -75,6 +76,7 @@ public final class Main {
         " logic_or          2*N -> N      Bitwise OR.",
         " logic_nand        2*N -> N      Bitwise NAND.",
         " logic_nor         2*N -> N      Bitwise NOR.",
+        " logic_xor         2*N -> N      Bitwise XOR.",
         " signed_sum        2*N -> N      Sum of signed integers.",
         ""
     });
@@ -86,6 +88,7 @@ public final class Main {
                     .put("logic_or", new LogicOr())
                     .put("logic_nand", new LogicNand())
                     .put("logic_nor", new LogicNor())
+                    .put("logic_xor", new LogicXor())
                     .put("signed_sum", new SignedSum())
                     .build();
 
