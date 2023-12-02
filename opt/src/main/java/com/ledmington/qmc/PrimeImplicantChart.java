@@ -159,7 +159,6 @@ public final class PrimeImplicantChart {
         while (epiIdx != -1) {
             result.add(epiIdx);
             logger.debug("Found essential prime implicant: row %,d", epiIdx);
-            logger.debug(this.toString(true));
 
             deletedRows[epiIdx] = true;
             for (int c = 0; c < columns; c++) {
