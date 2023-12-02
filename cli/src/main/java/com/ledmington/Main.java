@@ -29,6 +29,7 @@ import com.ledmington.function.BitArray;
 import com.ledmington.function.LogicAnd;
 import com.ledmington.function.LogicFunction;
 import com.ledmington.function.LogicNand;
+import com.ledmington.function.LogicNor;
 import com.ledmington.function.LogicNot;
 import com.ledmington.function.LogicOr;
 import com.ledmington.function.SignedSum;
@@ -73,6 +74,7 @@ public final class Main {
         " logic_and         2*N -> N      Bitwise AND.",
         " logic_or          2*N -> N      Bitwise OR.",
         " logic_nand        2*N -> N      Bitwise NAND.",
+        " logic_nor         2*N -> N      Bitwise NOR.",
         " signed_sum        2*N -> N      Sum of signed integers.",
         ""
     });
@@ -83,6 +85,7 @@ public final class Main {
                     .put("logic_and", new LogicAnd())
                     .put("logic_or", new LogicOr())
                     .put("logic_nand", new LogicNand())
+                    .put("logic_nor", new LogicNor())
                     .put("signed_sum", new SignedSum())
                     .build();
 

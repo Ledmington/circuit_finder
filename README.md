@@ -17,7 +17,7 @@ For testing.
 | AND       | ✅            |
 | OR        | ✅            |
 | NAND      | ✅            |
-| NOR       |              |
+| NOR       | ✅            |
 | XOR       |              |
 | XNOR      |              |
 
