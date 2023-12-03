@@ -37,13 +37,16 @@ dependencies {
 tasks.withType(JavaCompile).configureEach {
 	options.compilerArgs << '-Xdiags:verbose'
 	options.compilerArgs << '-Xlint:all'
-	options.compilerArgs << '-Werror'
+	options.compilerArgs << '--add-modules' << 'jdk.incubator.vector'
 	options.deprecation = true
 	options.encoding = 'UTF-8'
 }
 
 test {
 	useJUnitPlatform()
+	jvmArgs = [
+			"--add-modules", "jdk.incubator.vector"
+	]
 }
 
 testlogger {
@@ -137,7 +140,7 @@ spotless {
 tasks.compileJava.dependsOn(spotlessApply)
 
 jmh {
-	includes = ['com.ledmington.bench..*'] // include pattern (regular expression) for benchmarks to be executed
+	includes = ['Short.*'] // include pattern (regular expression) for benchmarks to be executed
 	excludes = ['Pop.*'] // exclude pattern (regular expression) for benchmarks to be executed
 	iterations = 10 // Number of measurement iterations to do.
 	//benchmarkMode = ['thrpt','ss'] // Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]
