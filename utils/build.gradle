@@ -140,7 +140,7 @@ spotless {
 tasks.compileJava.dependsOn(spotlessApply)
 
 jmh {
-	includes = ['Short.*'] // include pattern (regular expression) for benchmarks to be executed
+	includes = ['List.*'] // include pattern (regular expression) for benchmarks to be executed
 	excludes = ['Pop.*'] // exclude pattern (regular expression) for benchmarks to be executed
 	iterations = 10 // Number of measurement iterations to do.
 	//benchmarkMode = ['thrpt','ss'] // Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]
@@ -149,7 +149,7 @@ jmh {
 	failOnError = true // Should JMH fail immediately if any benchmark had experienced the unrecoverable error?
 	forceGC = false // Should JMH force GC between iterations?
 	//jvm = 'myjvm' // Custom JVM to use when forking.
-	//jvmArgs = ['Custom JVM args to use when forking.']
+	jvmArgs = ['--add-modules', 'jdk.incubator.vector']
 	//jvmArgsAppend = ['Custom JVM args to use when forking (append these)']
 	//jvmArgsPrepend =[ 'Custom JVM args to use when forking (prepend these)']
 	//humanOutputFile = project.file("${project.buildDir}/reports/jmh/human.txt") // human-readable output file

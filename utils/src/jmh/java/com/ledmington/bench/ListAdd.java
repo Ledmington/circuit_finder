@@ -43,7 +43,7 @@ import org.openjdk.jmh.annotations.Warmup;
 @Warmup(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 20, time = 1, timeUnit = TimeUnit.SECONDS)
 @Timeout(time = 5)
-public class ShortListVSArrayList {
+public class ListAdd {
 
     private static final RandomGenerator rng =
             RandomGeneratorFactory.getDefault().create(System.nanoTime());
