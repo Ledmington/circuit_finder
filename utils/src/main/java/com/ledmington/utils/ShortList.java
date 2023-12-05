@@ -17,10 +17,13 @@
 */
 package com.ledmington.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 import jdk.incubator.vector.ShortVector;
 import jdk.incubator.vector.VectorMask;
@@ -51,6 +54,15 @@ public final class ShortList implements List<Short> {
         this(16);
     }
 
+    public ShortList(final Collection<Short> cs) {
+        this(cs.size());
+        final Iterator<Short> it = cs.iterator();
+        for (int i = 0; i < cs.size(); i++) {
+            this.v[i] = it.next();
+        }
+        this.size = cs.size();
+    }
+
     private boolean isFull() {
         return size == v.length;
     }
@@ -78,6 +90,7 @@ public final class ShortList implements List<Short> {
 
     @Override
     public boolean contains(final Object o) {
+        Objects.requireNonNull(o);
         if (!o.getClass().equals(Short.class)) {
             return false;
         }
@@ -100,29 +113,21 @@ public final class ShortList implements List<Short> {
 
     @Override
     public Iterator<Short> iterator() {
-        return new Iterator<>() {
-            private int i = 0;
-
-            @Override
-            public boolean hasNext() {
-                return i < size;
-            }
-
-            @Override
-            public Short next() {
-                return v[i++];
-            }
-        };
+        return new ArrayList<>(IntStream.range(0, size).boxed().map(i -> v[i]).toList()).iterator();
     }
 
     @Override
     public Object[] toArray() {
-        throw new UnsupportedOperationException();
+        final Short[] newArray = new Short[this.size];
+        for (int i = 0; i < size; i++) {
+            newArray[i] = v[i];
+        }
+        return newArray;
     }
 
     @Override
     public <T> T[] toArray(final T[] a) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("toArray");
     }
 
     public void add(final short s) {
@@ -134,88 +139,134 @@ public final class ShortList implements List<Short> {
 
     @Override
     public boolean add(final Short s) {
+        Objects.requireNonNull(s);
         this.add(s.shortValue());
         return true;
     }
 
     @Override
     public boolean remove(final Object o) {
-        throw new UnsupportedOperationException();
+        Objects.requireNonNull(o);
+        if (!o.getClass().equals(Short.class)) {
+            return false;
+        }
+        final int index = this.indexOf(o);
+        if (index == -1) {
+            return false;
+        }
+        if (index < size) {
+            System.arraycopy(v, index + 1, v, index, size - index - 1);
+        }
+        size--;
+        return true;
     }
 
     @Override
     public boolean containsAll(final Collection<?> c) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("containsAll");
     }
 
     @Override
     public boolean addAll(final Collection<? extends Short> c) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("addAll");
     }
 
     @Override
     public boolean addAll(final int index, final Collection<? extends Short> c) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("addAll with index");
     }
 
     @Override
     public boolean removeAll(final Collection<?> c) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("removeAll");
     }
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("retainAll");
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException();
+        size = 0;
+    }
+
+    private void assertValidIndex(final int index) {
+        if (index < 0 || index >= size) {
+            throw new IllegalArgumentException(String.format("Invalid index %,d for list of size %,d", index, size));
+        }
     }
 
     @Override
     public Short get(final int index) {
-        throw new UnsupportedOperationException();
+        assertValidIndex(index);
+        return v[index];
     }
 
     @Override
     public Short set(final int index, final Short element) {
-        throw new UnsupportedOperationException();
+        assertValidIndex(index);
+        final short previous = v[index];
+        v[index] = element;
+        return previous;
     }
 
     @Override
     public void add(final int index, final Short element) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("add with index");
     }
 
     @Override
     public Short remove(final int index) {
-        throw new UnsupportedOperationException();
+        assertValidIndex(index);
+        final short previous = v[index];
+        System.arraycopy(v, index + 1, v, index, size - index);
+        size--;
+        return previous;
     }
 
     @Override
     public int indexOf(final Object o) {
-        throw new UnsupportedOperationException();
+        Objects.requireNonNull(o);
+        if (!o.getClass().equals(Short.class)) {
+            return -1;
+        }
+        final short s = (Short) o;
+        final ShortVector vs = ShortVector.broadcast(species, s);
+        int i = 0;
+        for (; i + (lanes - 1) < size; i += lanes) {
+            final ShortVector vi = ShortVector.fromArray(species, v, i);
+            final VectorMask<Short> m = vs.eq(vi);
+            if (m.anyTrue()) {
+                return i + m.firstTrue();
+            }
+        }
+        for (; i < size; i++) {
+            if (v[i] == s) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
     public int lastIndexOf(final Object o) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("lastIndexOf");
     }
 
     @Override
     public ListIterator<Short> listIterator() {
-        throw new UnsupportedOperationException();
+        return new ArrayList<>(IntStream.range(0, size).boxed().map(i -> v[i]).toList()).listIterator();
     }
 
     @Override
     public ListIterator<Short> listIterator(final int index) {
-        throw new UnsupportedOperationException();
+        return new ArrayList<>(IntStream.range(0, size).boxed().map(i -> v[i]).toList()).listIterator(index);
     }
 
     @Override
     public List<Short> subList(final int fromIndex, final int toIndex) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("subList");
     }
 
     public String toString() {
@@ -234,7 +285,7 @@ public final class ShortList implements List<Short> {
     public int hashCode() {
         ShortVector s = ShortVector.broadcast(species, (short) 17);
         int i = 0;
-        for (; i + (lanes - 1) < size; i++) {
+        for (; i + (lanes - 1) < size; i += lanes) {
             final ShortVector vi = ShortVector.fromArray(species, v, i);
             s = s.mul((short) 31).add(vi);
         }
@@ -262,7 +313,7 @@ public final class ShortList implements List<Short> {
             return false;
         }
         int i = 0;
-        for (; i + (lanes - 1) < size; i++) {
+        for (; i + (lanes - 1) < size; i += lanes) {
             final ShortVector vi = ShortVector.fromArray(species, this.v, i);
             final ShortVector wi = ShortVector.fromArray(species, sl.v, i);
             if (!vi.eq(wi).allTrue()) {

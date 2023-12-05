@@ -37,7 +37,7 @@ public final class QMC16_V1 implements QMC16 {
 
     public QMC16_V1() {
         logger.warning(
-                "The class %s is deprecated: use QMC16_V2 instead",
+                "The class %s is deprecated: use QMC16_V3 instead",
                 this.getClass().getName());
     }
 

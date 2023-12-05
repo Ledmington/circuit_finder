@@ -33,20 +33,18 @@ import java.util.concurrent.TimeUnit;
 import com.ledmington.utils.BitUtils;
 import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
+import com.ledmington.utils.ShortList;
 
 /**
  * Implementation of Quine-McCluskey algorithm (optimized for 16 bits).
  * <a href="https://www.tandfonline.com/doi/abs/10.1080/00029890.1952.11988183">Original paper</a>.
  */
-public final class QMC16_V2 implements QMC16 {
+public final class QMC16_V3 implements QMC16 {
 
     private static final MiniLogger logger = MiniLogger.getLogger("qmc16");
     private final ExecutorService executor;
 
-    public QMC16_V2(int nThreads) {
-        logger.warning(
-                "The class %s is deprecated: use QMC16_V3 instead",
-                this.getClass().getName());
+    public QMC16_V3(int nThreads) {
         final ThreadFactory customTF = new ThreadFactory() {
             private int n = 0;
 
@@ -92,7 +90,7 @@ public final class QMC16_V2 implements QMC16 {
         }
 
         Map<Short, List<Short>> base = new ConcurrentHashMap<>();
-        base.put(mask, Collections.synchronizedList(new ArrayList<>()));
+        base.put(mask, Collections.synchronizedList(new ShortList()));
         for (final short s : ones) {
             base.get(mask).add((short) (s & mask));
         }
@@ -132,7 +130,7 @@ public final class QMC16_V2 implements QMC16 {
                                 final short newValue = (short) (first & newMask);
 
                                 if (!finalNext.containsKey(newMask)) {
-                                    final List<Short> newList = Collections.synchronizedList(new ArrayList<>());
+                                    final List<Short> newList = Collections.synchronizedList(new ShortList());
                                     newList.add(newValue);
                                     finalNext.put(newMask, newList);
                                 } else {
@@ -184,7 +182,7 @@ public final class QMC16_V2 implements QMC16 {
             base = new ConcurrentHashMap<>();
             for (final short m : next.keySet()) {
                 // TODO: check if the HashSet is useful
-                base.put(m, Collections.synchronizedList(new ArrayList<>(new HashSet<>(next.get(m)))));
+                base.put(m, Collections.synchronizedList(new ShortList(new HashSet<>(next.get(m)))));
             }
             next = new ConcurrentHashMap<>();
         }

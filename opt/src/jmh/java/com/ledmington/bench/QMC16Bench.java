@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.ledmington.qmc.QMC16_V1;
 import com.ledmington.qmc.QMC16_V2;
+import com.ledmington.qmc.QMC16_V3;
 import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
 
@@ -55,6 +56,7 @@ public class QMC16Bench {
     private static List<Short> input;
     private static final QMC16_V1 v1 = new QMC16_V1();
     private static final QMC16_V2 v2 = new QMC16_V2(1);
+    private static final QMC16_V3 v3 = new QMC16_V3(1);
 
     @Setup(Level.Iteration)
     public void setup() {
@@ -73,6 +75,12 @@ public class QMC16Bench {
     @Benchmark
     public void sameMaskOpt(final Blackhole bh) {
         final List<MaskedShort> result = v2.minimize(inputBits, input);
+        bh.consume(result);
+    }
+
+    @Benchmark
+    public void vectorizedShortList(final Blackhole bh) {
+        final List<MaskedShort> result = v3.minimize(inputBits, input);
         bh.consume(result);
     }
 }

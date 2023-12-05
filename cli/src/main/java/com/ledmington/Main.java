@@ -37,12 +37,13 @@ import com.ledmington.function.LogicXor;
 import com.ledmington.function.SignedSum;
 import com.ledmington.function.UnsignedSum;
 import com.ledmington.qmc.QMC16;
-import com.ledmington.qmc.QMC16_V2;
+import com.ledmington.qmc.QMC16_V3;
 import com.ledmington.utils.FormatUtils;
 import com.ledmington.utils.Generators;
 import com.ledmington.utils.ImmutableMap;
 import com.ledmington.utils.MaskedShort;
 import com.ledmington.utils.MiniLogger;
+import com.ledmington.utils.ShortList;
 import com.ledmington.utils.TerminalCursor;
 import com.ledmington.utils.TerminalCursor.TerminalColor;
 
@@ -179,7 +180,7 @@ public final class Main {
 
         for (int i = 0; i < outputBits; i++) {
             // Inputs for which the i-th output bit is 1
-            final List<Short> ones = new ArrayList<>();
+            final List<Short> ones = new ShortList();
             final int limit = 1 << inputBits;
 
             for (int j = 0; j < limit; j++) {
@@ -199,7 +200,7 @@ public final class Main {
                 variables.add(new VariableNode(String.valueOf((char) ('A' + k))));
             }
 
-            final QMC16 qmc = new QMC16_V2(nJobs);
+            final QMC16 qmc = new QMC16_V3(nJobs);
             final List<MaskedShort> result = qmc.minimize(inputBits, ones);
 
             final List<Node> tmp = new ArrayList<>();

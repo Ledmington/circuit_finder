@@ -45,6 +45,7 @@ dependencies {
 application {
 	mainClass = 'com.ledmington.Main'
 	applicationDefaultJvmArgs = [
+			"--add-modules", "jdk.incubator.vector"
 			//"-XX:+UnlockDiagnosticVMOptions",
 			//"-XX:+PrintCompilation",
 			//"-XX:+PrintInlining",
@@ -56,7 +57,7 @@ application {
 tasks.withType(JavaCompile).configureEach {
 	options.compilerArgs << '-Xdiags:verbose'
 	options.compilerArgs << '-Xlint:all'
-	options.compilerArgs << '-Werror'
+	options.compilerArgs << '--add-modules' << 'jdk.incubator.vector'
 	options.deprecation = true
 	options.encoding = 'UTF-8'
 }
