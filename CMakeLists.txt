@@ -6,7 +6,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "The type of build" FORCE)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native" CACHE STRING "Release flags" FORCE)
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native -fno-exceptions -fno-rtti" CACHE STRING "Release flags" FORCE)
 endif()
 
 enable_language(CXX)
