@@ -41,8 +41,6 @@ CPMAddPackage(
 
 add_executable(cf "${CMAKE_SOURCE_DIR}/src/main.cpp")
 target_include_directories(cf PUBLIC "${CMAKE_SOURCE_DIR}/include/")
-target_link_libraries(cf hwy)
-add_dependencies(cf hwy_list_targets)
 
 find_package(ClangFormat QUIET)
 
@@ -54,13 +52,13 @@ if(CLANG_FORMAT_FOUND)
         COMMAND
         ${CLANG_FORMAT_EXECUTABLE} -style=file --dry-run --Werror
         "${CMAKE_SOURCE_DIR}/include/*.hpp"
-        "${CMAKE_SOURCE_DIR}/bench/*.cpp"
+        "${CMAKE_SOURCE_DIR}/src/*.cpp"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     add_custom_target(format-fix
         COMMAND
         ${CLANG_FORMAT_EXECUTABLE} -style=file -i
         "${CMAKE_SOURCE_DIR}/include/*.hpp"
-        "${CMAKE_SOURCE_DIR}/bench/*.cpp"
+        "${CMAKE_SOURCE_DIR}/src/*.cpp"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
