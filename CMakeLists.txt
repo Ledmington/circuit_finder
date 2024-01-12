@@ -9,7 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native -fno-exceptions -fno-rtti" CACHE STRING "Release flags" FORCE)
 endif()
 
-option(CF_TEST "Enable build of test suite" OFF)
+option(CF_TEST "Enable build of test suite" ON)
 option(CF_BENCH "Enable build of benchmark suite" OFF)
 
 enable_language(CXX)

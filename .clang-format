@@ -83,21 +83,20 @@ IfMacros:
   - KJ_IF_MAYBE
 IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '^<ext/.*\.h>'
-    Priority:        2
-    SortPriority:    0
-    CaseSensitive:   false
   - Regex:           '^<.*\.h>'
-    Priority:        1
-    SortPriority:    0
+    SortPriority:    1
     CaseSensitive:   false
-  - Regex:           '^<.*'
-    Priority:        2
-    SortPriority:    0
+  - Regex:           '^<ext/.*\.h>'
+    SortPriority:    2
+    CaseSensitive:   false
+  - Regex:           '^<cf/.*\.hpp>'
+    SortPriority:    4
+    CaseSensitive:   false
+  - Regex:           '^<.*>'
+    SortPriority:    3
     CaseSensitive:   false
   - Regex:           '.*'
-    Priority:        3
-    SortPriority:    0
+    SortPriority:    5
     CaseSensitive:   false
 IncludeIsMainRegex: '([-_](test|unittest))?$'
 IncludeIsMainSourceRegex: ''
@@ -108,7 +107,7 @@ IndentGotoLabels: true
 IndentPPDirectives: None
 IndentExternBlock: AfterExternBlock
 IndentRequires:  false
-IndentWidth:     2
+IndentWidth:     4
 IndentWrappedFunctionNames: false
 InsertTrailingCommas: None
 JavaScriptQuotes: Leave
@@ -213,9 +212,9 @@ StatementAttributeLikeMacros:
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
-TabWidth:        8
+TabWidth:        4
 UseCRLF:         false
-UseTab:          Never
+UseTab:          Always
 WhitespaceSensitiveMacros:
   - STRINGIZE
   - PP_STRINGIZE
@@ -223,4 +222,3 @@ WhitespaceSensitiveMacros:
   - NS_SWIFT_NAME
   - CF_SWIFT_NAME
 ...
-
