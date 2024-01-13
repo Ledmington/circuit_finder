@@ -6,6 +6,6 @@
 
 namespace cf {
 
-void search(const uint64_t limit, const size_t bits, logic_function fun);
+void search(const uint64_t limit, const size_t bits, logic_function *fun);
 
 }  // namespace cf

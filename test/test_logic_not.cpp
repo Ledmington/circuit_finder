@@ -10,8 +10,7 @@ namespace {
 static std::vector<bool> convert_to_vector(const uint8_t x) {
 	std::vector<bool> v(8);
 	for (size_t i{0}; i < 8; i++) {
-		v[i] =
-			(x & (static_cast<uint8_t>(0x01) << i)) != static_cast<uint8_t>(0);
+		v[i] = (x & (1 << i)) != 0;
 	}
 	return v;
 }
@@ -66,12 +65,14 @@ TEST(LogicFunction, LogicNot) {
 		0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04,
 		0x03, 0x02, 0x01, 0x00};
 
-	cf::logic_function fun = cf::bitwise_not();
+	cf::logic_function* fun = new cf::bitwise_not();
 	for (auto i{0u}; i < size; i++) {
 		const std::vector<bool> in = convert_to_vector(input[i]);
 		const std::vector<bool> out = convert_to_vector(solution[i]);
-		EXPECT_EQ(out, fun.apply(in));
+		EXPECT_EQ(out, fun->apply(in));
 	}
+
+	delete fun;
 }
 
 }  // namespace

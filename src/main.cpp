@@ -37,8 +37,8 @@ static constexpr std::string_view operation_list = R""""(
     unsigned_sum      2*N -> N      Sum of unsigned integers.
 )"""";
 
-static std::unordered_map<std::string, cf::logic_function> name_to_operation = {
-	{"logic_not", cf::bitwise_not()}};
+static std::unordered_map<std::string, cf::logic_function*> name_to_operation =
+	{{"logic_not", new cf::bitwise_not()}};
 
 bool is_help_argument(const std::string arg) {
 	return arg == "-h" or arg == "--help";
@@ -108,12 +108,12 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	cf::logic_function fun =
+	cf::logic_function* fun =
 		cf::cli::name_to_operation.find(operation_name)->second;
 
 	std::cout << "Selected operation '" << operation_name << "' needs "
-			  << fun.input_bits(bits) << " input bits to produce "
-			  << fun.output_bits(bits) << " output bits" << std::endl;
+			  << fun->input_bits(bits) << " input bits to produce "
+			  << fun->output_bits(bits) << " output bits" << std::endl;
 
 	const uint64_t limit = 1 << bits;
 	std::cout << "Dataset size: " << limit << std::endl;
