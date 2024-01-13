@@ -9,6 +9,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native -fno-exceptions -fno-rtti" CACHE STRING "Release flags" FORCE)
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -fno-omit-frame-pointer -fsanitize=leak,address,undefined,float-divide-by-zero" CACHE STRING "Debug flags" FORCE)
+endif()
+
 option(CF_TEST "Enable build of test suite" ON)
 option(CF_BENCH "Enable build of benchmark suite" OFF)
 
@@ -70,7 +74,7 @@ if(CF_TEST)
     include(GoogleTest)
     gtest_discover_tests(cf-test)
 
-    add_dependencies(circuit-finder cf)
+    add_dependencies(circuit-finder cf-test)
 endif()
 
 if(CF_BENCH)
@@ -109,6 +113,9 @@ message(STATUS "CMAKE_BUILD_TYPE         : ${CMAKE_BUILD_TYPE}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "CMAKE_CXX_FLAGS_RELEASE  : ${CMAKE_CXX_FLAGS_RELEASE}")
+endif()
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "CMAKE_CXX_FLAGS_DEBUG    : ${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 
 if(CF_TEST)
