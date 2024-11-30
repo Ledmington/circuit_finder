@@ -84,7 +84,20 @@ For testing.
 
 
 ## How to use
-TBD
+You need to have
+ - cmake
+ - a working c++17 compiler
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -- main
+```
+
+## How to contribute
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCF_TEST=ON
+cmake --build build -- all test format-fix tidy
+```
 
 ## Ideas/Future work
 Not sorted by priority.
