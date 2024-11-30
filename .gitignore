@@ -1,6 +1,4 @@
-.vscode/
-bin/
-build/
-.idea/
-.gradle/
-.antlr/
+build
+bin
+.vscode
+.idea

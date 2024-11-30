@@ -6,20 +6,20 @@ Unfortunately, for simplicity of design and reduced cost of reusable parts, many
 If you don't believe it, like I did, take a look [here](https://www.agner.org/optimize/instruction_tables.pdf).
 
 ## Features
-Currently, `cf` implements only some of the functions reported in the following tables. You can see the complete list by running `java -jar cf-cli.jar --op_list`.
+Currently, `cf` implements only some of the functions reported in the following tables.
 
 ### Logic gates
 For testing.
 
 | Operation | Implemented? |
 |-----------|--------------|
-| NOT       | ✅            |
-| AND       | ✅            |
-| OR        | ✅            |
-| NAND      | ✅            |
-| NOR       | ✅            |
-| XOR       | ✅            |
-| XNOR      | ✅            |
+| NOT       |             |
+| AND       |             |
+| OR        |             |
+| NAND      |             |
+| NOR       |             |
+| XOR       |             |
+| XNOR      |             |
 
 ### Bitwise operations
 
@@ -41,8 +41,8 @@ For testing.
 
 | Operation | Implemented? |
 |-----------|--------------|
-| iadd      | ✅            |
-| uadd      | ✅            |
+| iadd      |             |
+| uadd      |             |
 | isub      |              |
 | usub      |              |
 | neg       |              |
@@ -55,6 +55,7 @@ For testing.
 | pow       |              |
 | logn      |              |
 | log       |              |
+| sqrt8     | yes          |
 | sqrt      |              |
 | cbrt      |              |
 | nroot     |              |
@@ -83,16 +84,7 @@ For testing.
 
 
 ## How to use
-Currently, no ready jar is provided, so you need to build it yourself. For that, you need:
- - `gradle`
- - `java` >= 17
-
-You can run `./gradlew :cli:run` to run more quickly during development and testing, or you can produce a fat jar with `./gradlew :cli:fatjar` and then run it directly with
-```bash
-java -jar cli/build/libs/cf-cli.jar
-```
-
-If you want to test the algorithm in an interactive way, the `repl` module is for you. It includes a little ANTLR4 parser which you can use to optimize handwritten boolean expressions on-the-fly.
+TBD
 
 ## Ideas/Future work
 Not sorted by priority.
@@ -111,7 +103,7 @@ To simplify testing of the produced circuits and integration into existing appli
  - Since, the reusability of common parts may help in reducing circuit size in an actual CPU, add the option to merge together different circuits (this could be expanded to create little complete ALU circuits)
 
 ### Documentation and cleaner API
-Currently, the javadoc comments are present only in some critical methods of some specific classes without any criterion.
+Currently, the doc comments are present only in some critical methods of some specific classes without any criterion.
 
 ## How to contribute?
 Pull requests and bug reports are always welcome.
