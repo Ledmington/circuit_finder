@@ -6,6 +6,7 @@
 
 #include <cf.hpp>
 #include <functions.hpp>
+#include <qmc.hpp>
 
 int main() {
 	std::vector<std::vector<cf::input<uint8_t>>> dataset(8);
@@ -26,7 +27,7 @@ int main() {
 	std::cout << "Dataset size: " << std::endl;
 	for (size_t i{0}; i < dataset.size(); i++) {
 		std::cout << "  bit [" << i << "] -> " << dataset[i].size() << " entries" << std::endl;
-		cf::qmc(dataset[i], 8);
+		cf::minimize::qmc(dataset[i], 8);
 		std::cout << std::endl;
 	}
 
