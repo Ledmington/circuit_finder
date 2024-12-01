@@ -4,12 +4,11 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     # We are building as a stand-alone project
     project("Circuit Finder" VERSION 0.1.0)
 
-    cmake_policy(SET CMP0135 NEW)
-
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
 option(CF_TEST "Enables compilation of the test suite" OFF)
+option(CF_BENCH "Enables compilation of the benchmark suite" OFF)
 
 # Build in Debug mode by default
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -17,6 +16,18 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
+
+include("${CMAKE_MODULE_PATH}/CPM.cmake")
+
+if(CF_BENCH)
+    set(GBENCHMARK_VERSION "1.9.1")
+    CPMAddPackage(
+        NAME benchmark
+        GITHUB_REPOSITORY google/benchmark
+        VERSION ${GBENCHMARK_VERSION}
+        OPTIONS "BENCHMARK_ENABLE_TESTING Off"
+    )
+endif()
 
 # Default Release flags
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -77,6 +88,17 @@ if(CF_TEST)
     add_cf_test_executable(functions)
 endif()
 
+if(CF_BENCH)
+
+    macro(add_cf_bench_executable NAME)
+        set(bench_executable "bench_${NAME}")
+        add_executable(${bench_executable} "${CF_BENCH_DIR}/${bench_executable}.cpp")
+        target_link_libraries(${bench_executable} PRIVATE cf benchmark)
+    endmacro()
+
+    add_cf_bench_executable(qmc)
+endif()
+
 find_package(ClangFormat QUIET)
 
 file(GLOB_RECURSE CF_SOURCE_FILES
@@ -130,4 +152,8 @@ message(STATUS "CMAKE_CXX_COMPILER : ${CMAKE_CXX_COMPILER} (${CMAKE_CXX_COMPILER
 message(STATUS "CMAKE_BUILD_TYPE   : ${CMAKE_BUILD_TYPE}")
 message(STATUS "CF_FLAGS           : ${CF_FLAGS}")
 message(STATUS "CF_TEST            : ${CF_TEST}")
+message(STATUS "CF_BENCH           : ${CF_BENCH}")
+if(CF_BENCH)
+    message(STATUS "Google Benchmark   : ${GBENCHMARK_VERSION}")
+endif()
 message(STATUS "")
