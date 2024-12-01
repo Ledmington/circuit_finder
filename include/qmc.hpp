@@ -50,15 +50,15 @@ void remove_dominated_rows(prime_implicant_chart& chart) {
 			if (i_dominates_j && j_dominates_i) {
 				// the rows i and j, were equal, so we delete only j
 				chart.deleted_rows[j] = true;
-				std::cout << "Deleted row " << j << ": dominated by row " << i << std::endl;
+				std::clog << "Deleted row " << j << ": dominated by row " << i << std::endl;
 			} else if (i_dominates_j) {
 				// i dominates j, we delete j
 				chart.deleted_rows[j] = true;
-				std::cout << "Deleted row " << j << ": dominated by row " << i << std::endl;
+				std::clog << "Deleted row " << j << ": dominated by row " << i << std::endl;
 			} else if (j_dominates_i) {
 				// j dominates i, we delete i
 				chart.deleted_rows[i] = true;
-				std::cout << "Deleted row " << i << ": dominated by row " << j << std::endl;
+				std::clog << "Deleted row " << i << ": dominated by row " << j << std::endl;
 			}
 		}
 	}
@@ -105,7 +105,7 @@ std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart
 	while (epi_idx != -1) {
 		const size_t epi = static_cast<size_t>(epi_idx);
 		result.push_back(epi);
-		std::cout << "Found essential prime implicant: row " << epi << std::endl;
+		std::clog << "Found essential prime implicant: row " << epi << std::endl;
 
 		chart.deleted_rows[epi] = true;
 		for (size_t c{0}; c < chart.columns; c++) {
@@ -150,8 +150,8 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 
 		const size_t length = base.size();
 
-		std::cout << "Computing size-" << (1 << it) << " prime implicants." << std::endl;
-		std::cout << "Initial size: " << length << std::endl;
+		std::clog << "Computing size-" << (1 << it) << " prime implicants." << std::endl;
+		std::clog << "Initial size: " << length << std::endl;
 
 		std::vector<bool> used(length);
 
@@ -191,12 +191,12 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 			// This implicant was not used to compute the "next size" implicants.
 			const cf::input<T> to_be_added = base.at(i);
 			result.push_back(to_be_added);
-			std::cout << "The value " << cf::utils::get_bit_string(to_be_added) << " was not used"
+			std::clog << "The value " << cf::utils::get_bit_string(to_be_added) << " was not used"
 					  << std::endl;
 		}
 
-		std::cout << "Next size: " << next.size() << std::endl;
-		std::cout << "Result size: " << result.size() << std::endl;
+		std::clog << "Next size: " << next.size() << std::endl;
+		std::clog << "Result size: " << result.size() << std::endl;
 
 		// Removing duplicates from 'next'
 		std::sort(next.begin(), next.end());
