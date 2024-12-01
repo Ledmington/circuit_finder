@@ -29,7 +29,30 @@ int main() {
 	std::cout << "Dataset size: " << std::endl;
 	for (size_t i{0}; i < dataset.size(); i++) {
 		std::cout << "  bit [" << i << "] -> " << dataset[i].size() << " entries" << std::endl;
-		cf::minimize::qmc(dataset[i], nbits);
+		std::cout << std::endl;
+	}
+
+	std::cout << std::endl;
+	std::cout << "Minimizing functions..." << std::endl;
+	std::vector<std::vector<cf::input<data_type>>> result;
+	for (size_t i{0}; i < dataset.size(); i++) {
+		result.push_back(cf::minimize::qmc(dataset[i], nbits));
+	}
+
+	std::cout << std::endl;
+	for (size_t i{0}; i < result.size(); i++) {
+		std::cout << "Minimized function for bit n." << i << ":" << std::endl;
+		std::cout << "  ";
+		if (result[i].size() == 0) {
+			std::cout << "0";
+		} else {
+			for (size_t j{0}; j < result[i].size(); j++) {
+				std::cout << "(" << cf::utils::get_expression(result[i][j]) << ")";
+				if (j < result[i].size() - 1) {
+					std::cout << " + ";
+				}
+			}
+		}
 		std::cout << std::endl;
 	}
 
