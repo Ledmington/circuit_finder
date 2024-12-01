@@ -69,7 +69,7 @@ static void BM_QMC(benchmark::State& state) {
 		{0b11111100, 0b11111111}, {0b11111101, 0b11111111}, {0b11111110, 0b11111111},
 		{0b11111111, 0b11111111}};
 
-	for (auto _ : state) {
+	for (auto _ : state) {	// NOLINT
 		const auto start = std::chrono::high_resolution_clock::now();
 		auto result = cf::minimize::qmc(ones, 8);
 		benchmark::DoNotOptimize(result);

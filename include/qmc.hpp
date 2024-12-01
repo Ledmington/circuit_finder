@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <cf.hpp>
+
 namespace cf {
 namespace minimize {
 
