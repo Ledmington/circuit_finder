@@ -50,6 +50,14 @@ void test_expression() {
 		cf::input<uint8_t> x{0b10110011, 0b01111101};
 		testing::assert_equals(std::string("(~B)&C&D&(~E)&(~F)&H"), cf::utils::get_expression(x));
 	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0b10000000, 0b10000000};
+		testing::assert_equals(std::string("A"), cf::utils::get_expression(x));
+	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0b00000000, 0b10000000};
+		testing::assert_equals(std::string("(~A)"), cf::utils::get_expression(x));
+	});
 }
 
 int main() {
