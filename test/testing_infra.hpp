@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <functional>
 #include <iostream>
+#include <sstream>
 
 namespace testing {
 
@@ -33,14 +34,28 @@ void report() {
 }
 
 template <typename T>
+static std::string get_string(const T& val) {
+	if constexpr (std::is_same_v<T, std::string>) {
+		return val;
+	} else {
+		return std::to_string(val);
+	}
+}
+
+template <typename T>
 void assert_equals(const T& expected, const T& actual) {
 	if (expected != actual) {
-		if constexpr (std::is_same_v<T, std::string>) {
-			throw std::runtime_error("Expected '" + expected + "' but was '" + actual + "'");
-		} else {
-			throw std::runtime_error("Expected '" + std::to_string(expected) + "' but was '" +
-									 std::to_string(actual) + "'");
-		}
+		throw std::runtime_error("Expected '" + get_string(expected) + "' but was '" +
+								 get_string(actual) + "'");
+	}
+}
+
+template <typename T>
+void assert_same_size(const std::vector<T>& expected, const std::vector<T>& actual) {
+	if (expected.size() != actual.size()) {
+		throw std::runtime_error("Expected to have same size but were " +
+								 std::to_string(expected.size()) + " and " +
+								 std::to_string(actual.size()) + ", respectively.");
 	}
 }
 

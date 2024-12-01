@@ -86,6 +86,7 @@ if(CF_TEST)
 
     add_cf_test_executable(utils)
     add_cf_test_executable(functions)
+    add_cf_test_executable(qmc)
 endif()
 
 if(CF_BENCH)
