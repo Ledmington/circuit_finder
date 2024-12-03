@@ -4,6 +4,7 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 namespace testing {
 
@@ -26,9 +27,10 @@ void run(const std::function<void(void)>& test) {
 
 void report() {
 	std::cout << std::endl;
-	std::cout << " " << failed_tests << " failed tests out of " << total_tests << " ("
-			  << (static_cast<double>(failed_tests) / static_cast<double>(total_tests)) << ")."
-			  << std::endl;
+	std::cout << " " << failed_tests << " failed tests out of " << total_tests << " (" << std::fixed
+			  << std::setprecision(2)
+			  << (static_cast<double>(failed_tests) / static_cast<double>(total_tests) * 100.0)
+			  << "%)." << std::endl;
 	std::cout << std::endl;
 	std::exit(failed_tests == 0 ? 0 : -1);
 }

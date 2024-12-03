@@ -50,15 +50,18 @@ void remove_dominated_rows(prime_implicant_chart& chart) {
 			if (i_dominates_j && j_dominates_i) {
 				// the rows i and j, were equal, so we delete only j
 				chart.deleted_rows[j] = true;
-				std::clog << "Deleted row " << j << ": dominated by row " << i << std::endl;
+				cf::utils::debug("Deleted row " + std::to_string(j) + ": dominated by row " +
+								 std::to_string(i));
 			} else if (i_dominates_j) {
 				// i dominates j, we delete j
 				chart.deleted_rows[j] = true;
-				std::clog << "Deleted row " << j << ": dominated by row " << i << std::endl;
+				cf::utils::debug("Deleted row " + std::to_string(j) + ": dominated by row " +
+								 std::to_string(i));
 			} else if (j_dominates_i) {
 				// j dominates i, we delete i
 				chart.deleted_rows[i] = true;
-				std::clog << "Deleted row " << i << ": dominated by row " << j << std::endl;
+				cf::utils::debug("Deleted row " + std::to_string(i) + ": dominated by row " +
+								 std::to_string(j));
 			}
 		}
 	}
@@ -105,7 +108,7 @@ std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart
 	while (epi_idx != -1) {
 		const size_t epi = static_cast<size_t>(epi_idx);
 		result.push_back(epi);
-		std::clog << "Found essential prime implicant: row " << epi << std::endl;
+		cf::utils::debug("Found essential prime implicant: row " + std::to_string(epi));
 
 		chart.deleted_rows[epi] = true;
 		for (size_t c{0}; c < chart.columns; c++) {
@@ -150,8 +153,8 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 
 		const size_t length = base.size();
 
-		std::clog << "Computing size-" << (1 << it) << " prime implicants." << std::endl;
-		std::clog << "Initial size: " << length << std::endl;
+		cf::utils::debug("Computing size-" + std::to_string(1 << it) + " prime implicants.");
+		cf::utils::debug("Initial size: " + std::to_string(length));
 
 		std::vector<bool> used(length);
 
@@ -165,7 +168,7 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 				}
 
 				const T combined = (first.value & first.mask) ^ (second.value & second.mask);
-				const T bits = __builtin_popcount(combined);
+				const T bits = cf::utils::popcount(combined);
 				assert(bits != 0);
 				if (bits == 1) {
 					// if there is only 1 set bit, one variable may be omitted
@@ -191,12 +194,12 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 			// This implicant was not used to compute the "next size" implicants.
 			const cf::input<T> to_be_added = base.at(i);
 			result.push_back(to_be_added);
-			std::clog << "The value " << cf::utils::get_bit_string(to_be_added) << " was not used"
-					  << std::endl;
+			cf::utils::debug("The value " + cf::utils::get_bit_string(to_be_added) +
+							 " was not used");
 		}
 
-		std::clog << "Next size: " << next.size() << std::endl;
-		std::clog << "Result size: " << result.size() << std::endl;
+		cf::utils::debug("Next size: " + std::to_string(next.size()));
+		cf::utils::debug("Result size: " + std::to_string(result.size()));
 
 		// Removing duplicates from 'next'
 		std::sort(next.begin(), next.end());

@@ -9,6 +9,7 @@ endif()
 
 option(CF_TEST "Enables compilation of the test suite" OFF)
 option(CF_BENCH "Enables compilation of the benchmark suite" OFF)
+option(CF_LOGGING "Adds debug logs into the algorithm" OFF)
 
 # Build in Debug mode by default
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -69,6 +70,10 @@ add_library(cf INTERFACE)
 target_include_directories(cf INTERFACE ${CF_INCLUDE_DIR})
 target_link_libraries(cf INTERFACE cf-config)
 
+if(CF_LOGGING)
+    target_compile_definitions(cf INTERFACE CF_LOGGING=1)
+endif()
+
 add_executable(main "${CF_EXEC_DIR}/main.cpp")
 target_link_libraries(main PRIVATE cf)
 target_compile_options(main PRIVATE -fno-exceptions -fno-rtti)
@@ -90,7 +95,6 @@ if(CF_TEST)
 endif()
 
 if(CF_BENCH)
-
     macro(add_cf_bench_executable NAME)
         set(bench_executable "bench_${NAME}")
         add_executable(${bench_executable} "${CF_BENCH_DIR}/${bench_executable}.cpp")
@@ -98,6 +102,7 @@ if(CF_BENCH)
     endmacro()
 
     add_cf_bench_executable(qmc)
+    add_cf_bench_executable(remove_duplicates)
 endif()
 
 find_package(ClangFormat QUIET)
@@ -152,9 +157,12 @@ message(STATUS "Successfully configured ${CMAKE_PROJECT_NAME} v${CMAKE_PROJECT_V
 message(STATUS "CMAKE_CXX_COMPILER : ${CMAKE_CXX_COMPILER} (${CMAKE_CXX_COMPILER_ID}) v${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE   : ${CMAKE_BUILD_TYPE}")
 message(STATUS "CF_FLAGS           : ${CF_FLAGS}")
+message(STATUS "CF_LOGGING         : ${CF_LOGGING}")
 message(STATUS "CF_TEST            : ${CF_TEST}")
 message(STATUS "CF_BENCH           : ${CF_BENCH}")
+
 if(CF_BENCH)
     message(STATUS "Google Benchmark   : ${GBENCHMARK_VERSION}")
 endif()
+
 message(STATUS "")
