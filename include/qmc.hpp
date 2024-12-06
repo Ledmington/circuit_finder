@@ -4,6 +4,7 @@
 #include <cassert>
 #include <algorithm>
 #include <iostream>
+#include <unordered_set>
 
 #include <cf.hpp>
 
@@ -48,7 +49,7 @@ void remove_dominated_rows(prime_implicant_chart& chart) {
 			}
 
 			if (i_dominates_j && j_dominates_i) {
-				// the rows i and j, were equal, so we delete only j
+				// the rows i and j were equal, so we delete only j
 				chart.deleted_rows[j] = true;
 				cf::utils::debug("Deleted row " + std::to_string(j) + ": dominated by row " +
 								 std::to_string(i));
@@ -68,39 +69,109 @@ void remove_dominated_rows(prime_implicant_chart& chart) {
 }
 
 int find_first_essential_prime_implicant(const prime_implicant_chart& chart) {
-	const size_t bits_to_find{1};
-	for (size_t r{0}; r < chart.rows; r++) {
-		if (chart.deleted_rows[r]) {
+	cf::utils::debug(
+		"The chart has " + std::to_string(chart.rows) + " (" +
+		std::to_string(std::count(chart.deleted_rows.begin(), chart.deleted_rows.end(), true)) +
+		" deleted) and " + std::to_string(chart.columns) + " columns (" +
+		std::to_string(
+			std::count(chart.deleted_columns.begin(), chart.deleted_columns.end(), true)) +
+		" deleted)");
+
+	// for (size_t r{0}; r < chart.rows; r++) {
+	// 	if (chart.deleted_rows[r]) {
+	// 		continue;
+	// 	}
+
+	// 	for (size_t c{0}; c < chart.columns; c++) {
+	// 		if (chart.deleted_columns[c]) {
+	// 			continue;
+	// 		}
+
+	// 		size_t count{0};
+	// 		for (size_t i{0}; i < chart.rows; i++) {
+	// 			if (chart.deleted_rows[i]) {
+	// 				continue;
+	// 			}
+
+	// 			if (chart.chart[i * chart.columns + c]) {
+	// 				count++;
+	// 			}
+	// 		}
+
+	// 		if (count == 1) {
+	// 			return r;
+	// 		}
+	// 	}
+	// }
+
+	for (size_t c{0}; c < chart.columns; c++) {
+		if (chart.deleted_columns[c]) {
 			continue;
 		}
 
-		for (size_t c{0}; c < chart.columns; c++) {
-			if (chart.deleted_columns[c]) {
+		int index{-1};
+		for (size_t r{0}; r < chart.rows; r++) {
+			if (chart.deleted_rows[r]) {
 				continue;
 			}
 
-			size_t count{0};
-			for (size_t i{0}; i < chart.rows; i++) {
-				if (chart.deleted_rows[i]) {
-					continue;
+			if (chart.chart[r * chart.columns + c]) {
+				if (index != -1) {
+					break;
 				}
-
-				if (chart.chart[i * chart.columns + c]) {
-					count++;
-				}
+				index = r;
 			}
+		}
 
-			if (count == bits_to_find) {
-				return r;
-			}
+		if (index != -1) {
+			return index;
 		}
 	}
 
 	return -1;
 }
 
+#if defined(CF_LOGGING) && CF_LOGGING == 1
+void print_chart(const prime_implicant_chart& chart) {
+	std::clog << "Chart:" << std::endl;
+	for (size_t i{0}; i < chart.rows; i++) {
+		if (chart.deleted_rows[i]) {
+			continue;
+		}
+		for (size_t j{0}; j < chart.columns; j++) {
+			if (chart.deleted_columns[j]) {
+				continue;
+			}
+			if (!chart.chart[i * chart.columns + j]) {
+				std::clog << "0";
+			} else {
+				std::clog << "1";
+			}
+		}
+		std::clog << std::endl;
+	}
+}
+#else
+void print_chart(const prime_implicant_chart&) {}
+#endif	// CF_LOGGING
+
 std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart) {
+	assert(chart.chart.size() == chart.rows * chart.columns);
+	assert(chart.deleted_rows.size() == chart.rows);
+	assert(chart.deleted_columns.size() == chart.columns);
+	assert(std::all_of(chart.deleted_rows.begin(), chart.deleted_rows.end(), [](const bool x) {
+		return !x;
+	}));
+	assert(
+		std::all_of(chart.deleted_columns.begin(), chart.deleted_columns.end(), [](const bool x) {
+		return !x;
+	}));
+
+	// print_chart(chart);
+
 	remove_dominated_rows(chart);
+
+	// print_chart(chart);
 
 	std::vector<size_t> result;
 	int epi_idx = find_first_essential_prime_implicant(chart);
@@ -112,15 +183,30 @@ std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart
 
 		chart.deleted_rows[epi] = true;
 		for (size_t c{0}; c < chart.columns; c++) {
+			if (chart.deleted_columns[c]) {
+				continue;
+			}
 			if (chart.chart[epi * chart.columns + c]) {
 				chart.deleted_columns[c] = true;
 			}
 		}
 
+		// print_chart(chart);
+
 		remove_dominated_rows(chart);
+
+		// print_chart(chart);
 
 		epi_idx = find_first_essential_prime_implicant(chart);
 	}
+
+	assert(std::all_of(chart.deleted_rows.begin(), chart.deleted_rows.end(), [](const bool x) {
+		return x;
+	}));
+	assert(
+		std::all_of(chart.deleted_columns.begin(), chart.deleted_columns.end(), [](const bool x) {
+		return x;
+	}));
 
 	return result;
 }
@@ -131,16 +217,24 @@ std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart
  * Quine, W. V. (1952). The Problem of Simplifying Truth Functions. The American Mathematical
  * Monthly, 59(8), 521–531. https://doi.org/10.1080/00029890.1952.11988183
  *
- * Quine, W. V. (1955). A Way to Simplify Truth Functions. The American Mathematical Monthly, 62(9),
- * 627–631. https://doi.org/10.1080/00029890.1955.11988710
+ * Quine, W. V. (1955). A Way to Simplify Truth Functions. The American Mathematical Monthly,
+ * 62(9), 627–631. https://doi.org/10.1080/00029890.1955.11988710
  *
- * E. J. McCluskey, "Minimization of Boolean functions," in The Bell System Technical Journal, vol.
- * 35, no. 6, pp. 1417-1444, Nov. 1956, doi: 10.1002/j.1538-7305.1956.tb03835.x.
+ * E. J. McCluskey, "Minimization of Boolean functions," in The Bell System Technical Journal,
+ * vol. 35, no. 6, pp. 1417-1444, Nov. 1956, doi: 10.1002/j.1538-7305.1956.tb03835.x.
  *
  */
 template <typename T>
 std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_t nbits) {
 	assert(nbits > 0 && nbits <= 8 * sizeof(T));
+
+#ifdef NDEBUG
+	for (size_t i{0}; i < ones.size(); i++) {
+		for (size_t j{i + 1}; j < ones.size(); j++) {
+			assert(ones[i] != ones[j]);
+		}
+	}
+#endif
 
 	std::vector<cf::input<T>> base = ones;
 	std::vector<cf::input<T>> next;
@@ -202,10 +296,15 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 		cf::utils::debug("Result size: " + std::to_string(result.size()));
 
 		// Removing duplicates from 'next'
-		std::sort(next.begin(), next.end());
-		next.erase(std::unique(next.begin(), next.end()), next.end());
-		base = next;
-		next = std::vector<cf::input<T>>();
+		std::unordered_set<cf::input<T>> s;
+		for (const auto x : next) {
+			s.insert(x);
+		}
+		base.clear();
+		for (const auto x : s) {
+			base.push_back(x);
+		}
+		next.clear();
 	}
 
 	// building the prime implicant chart
@@ -228,6 +327,7 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 
 	std::vector<size_t> epi_indices = find_essential_prime_implicants(chart);
 	std::vector<cf::input<T>> out;
+	out.reserve(epi_indices.size());
 	for (const size_t idx : epi_indices) {
 		out.push_back(result.at(idx));
 	}

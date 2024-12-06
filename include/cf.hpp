@@ -18,15 +18,31 @@ struct input {
 	T value;
 	T mask;
 
-	bool operator==(const input<T>& other) const {
-		return value == other.value && mask == other.mask;
-	}
+	input() = delete;
 
-	bool operator<(const input<T>& other) const {
-		return std::tie(value, mask) < std::tie(other.value, other.mask);
+	bool operator==(const input<T>& other) const {
+		// Give priority to the mask
+		return mask == other.mask && (value & mask) == (other.value & other.mask);
 	}
 };
 
+}  // namespace cf
+
+template <typename T>
+struct std::hash<cf::input<T>> {
+	size_t operator()(const cf::input<T>& x) const noexcept {
+		if constexpr (sizeof(size_t) >= 2 * sizeof(T)) {
+			// for types up to 32 bits
+			return (static_cast<size_t>(x.value) << (8 * sizeof(T))) |
+				   (static_cast<size_t>(x.mask));
+		} else {
+			// only for uint64_t
+			return (x.value << 5) ^ (x.mask);
+		}
+	}
+};
+
+namespace cf {
 namespace utils {
 
 uint8_t popcount(uint8_t x) {
