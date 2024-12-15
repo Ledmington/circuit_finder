@@ -18,8 +18,6 @@ struct input {
 	T value;
 	T mask;
 
-	input() = delete;
-
 	bool operator==(const input<T>& other) const {
 		// Give priority to the mask
 		return mask == other.mask && (value & mask) == (other.value & other.mask);
