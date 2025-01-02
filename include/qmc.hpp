@@ -77,33 +77,6 @@ int find_first_essential_prime_implicant(const prime_implicant_chart& chart) {
 			std::count(chart.deleted_columns.begin(), chart.deleted_columns.end(), true)) +
 		" deleted)");
 
-	// for (size_t r{0}; r < chart.rows; r++) {
-	// 	if (chart.deleted_rows[r]) {
-	// 		continue;
-	// 	}
-
-	// 	for (size_t c{0}; c < chart.columns; c++) {
-	// 		if (chart.deleted_columns[c]) {
-	// 			continue;
-	// 		}
-
-	// 		size_t count{0};
-	// 		for (size_t i{0}; i < chart.rows; i++) {
-	// 			if (chart.deleted_rows[i]) {
-	// 				continue;
-	// 			}
-
-	// 			if (chart.chart[i * chart.columns + c]) {
-	// 				count++;
-	// 			}
-	// 		}
-
-	// 		if (count == 1) {
-	// 			return r;
-	// 		}
-	// 	}
-	// }
-
 	for (size_t c{0}; c < chart.columns; c++) {
 		if (chart.deleted_columns[c]) {
 			continue;
