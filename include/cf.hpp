@@ -125,7 +125,8 @@ std::string get_bit_string(const cf::input<T>& x) {
 }
 
 template <typename T>
-std::string get_boolean_expression(const cf::input<T>& x) {
+std::string get_expression(const cf::input<T>& x, const bool uppercase,
+						   const std::string& and_symbol, const std::string& not_symbol) {
 	std::ostringstream ss;
 	const size_t nbits = 8 * sizeof(T);
 	for (size_t i{0}; i < nbits; i++) {
@@ -135,12 +136,12 @@ std::string get_boolean_expression(const cf::input<T>& x) {
 		}
 
 		if (ss.tellp() > 0) {
-			ss << "&";
+			ss << and_symbol;
 		}
 		if ((x.value & bit) != 0) {
-			ss << static_cast<char>('A' + i);
+			ss << static_cast<char>((uppercase ? 'A' : 'a') + i);
 		} else {
-			ss << "(~" << static_cast<char>('A' + i) << ")";
+			ss << "(" << not_symbol << static_cast<char>((uppercase ? 'A' : 'a') + i) << ")";
 		}
 	}
 
@@ -148,26 +149,42 @@ std::string get_boolean_expression(const cf::input<T>& x) {
 }
 
 template <typename T>
-std::string get_cpp_expression(const cf::input<T>& x) {
-	std::ostringstream ss;
-	const size_t nbits = 8 * sizeof(T);
-	for (size_t i{0}; i < nbits; i++) {
-		const T bit = cf::utils::single_bit<T>(nbits - i - 1);
-		if ((x.mask & bit) == 0) {
-			continue;
-		}
+std::string get_boolean_expression(const cf::input<T>& x) {
+	return get_expression(x, true, "&", "~");
+}
 
-		if (ss.tellp() > 0) {
-			ss << "&&";
-		}
-		if ((x.value & bit) != 0) {
-			ss << static_cast<char>('a' + i);
-		} else {
-			ss << "(!" << static_cast<char>('a' + i) << ")";
+template <typename T>
+std::string get_cpp_expression(const cf::input<T>& x) {
+	return get_expression(x, false, "&&", "!");
+}
+
+template <typename T>
+std::string get_expression(const std::vector<cf::input<T>>& result, const bool uppercase,
+						   const std::string& false_symbol, const std::string& or_symbol,
+						   const std::string& and_symbol, const std::string& not_symbol) {
+	std::ostringstream ss;
+	if (result.size() == 0) {
+		ss << false_symbol;
+	} else {
+		for (size_t i{0}; i < result.size(); i++) {
+			ss << "(" << cf::utils::get_expression(result.at(i), uppercase, and_symbol, not_symbol)
+			   << ")";
+			if (i < result.size() - 1) {
+				ss << " " << or_symbol << " ";
+			}
 		}
 	}
-
 	return ss.str();
+}
+
+template <typename T>
+std::string get_boolean_expression(const std::vector<cf::input<T>>& result) {
+	return get_expression(result, true, "0", "+", "&", "~");
+}
+
+template <typename T>
+std::string get_cpp_expression(const std::vector<cf::input<T>>& result) {
+	return get_expression(result, false, "false", "||", "&&", "!");
 }
 
 #if defined(CF_LOGGING) && CF_LOGGING == 1

@@ -72,18 +72,8 @@ void run(const size_t nbits, const size_t bit, const output_format& out_fmt) {
 
 	if (out_fmt == output_format::BOOL) {
 		std::cout << std::endl;
-		std::cout << "Minimized function for bit n." << bit << ":" << std::endl;
-		std::cout << "  ";
-		if (result.size() == 0) {
-			std::cout << "0";
-		} else {
-			for (size_t i{0}; i < result.size(); i++) {
-				std::cout << "(" << cf::utils::get_boolean_expression(result.at(i)) << ")";
-				if (i < result.size() - 1) {
-					std::cout << " + ";
-				}
-			}
-		}
+		std::cout << "Minimized function for bit n." << bit << ":  "
+				  << cf::utils::get_boolean_expression(result) << std::endl;
 		std::cout << std::endl;
 	} else if (out_fmt == output_format::CPP) {
 		std::cout << std::endl;
@@ -95,18 +85,7 @@ void run(const size_t nbits, const size_t bit, const output_format& out_fmt) {
 			}
 		}
 		std::cout << ") {" << std::endl;
-		std::cout << "    return ";
-		if (result.size() == 0) {
-			std::cout << "false";
-		} else {
-			for (size_t i{0}; i < result.size(); i++) {
-				std::cout << "(" << cf::utils::get_cpp_expression(result.at(i)) << ")";
-				if (i < result.size() - 1) {
-					std::cout << " || ";
-				}
-			}
-		}
-		std::cout << ";" << std::endl;
+		std::cout << "    return " << cf::utils::get_cpp_expression(result) << ";" << std::endl;
 		std::cout << "}" << std::endl;
 		std::cout << std::endl;
 	} else {
