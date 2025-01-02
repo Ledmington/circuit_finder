@@ -57,7 +57,7 @@ void run(const size_t nbits, const size_t bit) {
 		std::cout << "0";
 	} else {
 		for (size_t i{0}; i < result.size(); i++) {
-			std::cout << "(" << cf::utils::get_expression(result[i]) << ")";
+			std::cout << "(" << cf::utils::get_expression(result.at(i)) << ")";
 			if (i < result.size() - 1) {
 				std::cout << " + ";
 			}

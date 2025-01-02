@@ -8,11 +8,27 @@
 #include <cf.hpp>
 
 template <typename T>
+std::string get_type_name() {
+	if constexpr (std::is_same_v<T, uint8_t>) {
+		return "u8";
+	}
+	if constexpr (std::is_same_v<T, uint16_t>) {
+		return "u16";
+	}
+	if constexpr (std::is_same_v<T, uint32_t>) {
+		return "u32";
+	}
+	if constexpr (std::is_same_v<T, uint64_t>) {
+		return "u64";
+	}
+}
+
+template <typename T>
 void test_popcount() {
-	testing::run("popcount_" + cf::utils::get_type_name<T>() + "_min", []() {
+	testing::run("popcount_" + get_type_name<T>() + "_min", []() {
 		testing::assert_equals(static_cast<T>(0), cf::utils::popcount(static_cast<T>(0)));
 	});
-	testing::run("popcount_" + cf::utils::get_type_name<T>() + "_max", []() {
+	testing::run("popcount_" + get_type_name<T>() + "_max", []() {
 		testing::assert_equals(static_cast<T>(8 * sizeof(T)),
 							   cf::utils::popcount(std::numeric_limits<T>::max()));
 	});
@@ -20,7 +36,7 @@ void test_popcount() {
 	std::mt19937 rnd{42};
 	std::uniform_int_distribution<T> dist{0, std::numeric_limits<T>::max()};
 	for (size_t i{0}; i < 100; i++) {
-		testing::run("popcount_" + cf::utils::get_type_name<T>() + "_" + std::to_string(i), [&]() {
+		testing::run("popcount_" + get_type_name<T>() + "_" + std::to_string(i), [&]() {
 			T x{dist(rnd)};
 			testing::assert_equals(static_cast<T>(std::bitset<8 * sizeof(T)>(x).count()),
 								   cf::utils::popcount(x));
@@ -31,13 +47,11 @@ void test_popcount() {
 template <typename T>
 void test_single_bit() {
 	for (size_t i{0}; i < 8 * sizeof(T); i++) {
-		testing::run("SingleBit_" + cf::utils::get_type_name<T>() + "_" + std::to_string(i) + "th",
-					 [i]() {
+		testing::run("SingleBit_" + get_type_name<T>() + "_" + std::to_string(i) + "th", [i]() {
 			testing::assert_equals(static_cast<T>(1),
 								   cf::utils::popcount(cf::utils::single_bit<T>(i)));
 		});
-		testing::run("SingleBit_" + cf::utils::get_type_name<T>() + "_" + std::to_string(i) + "th",
-					 [i]() {
+		testing::run("SingleBit_" + get_type_name<T>() + "_" + std::to_string(i) + "th", [i]() {
 			T x = cf::utils::single_bit<T>(i);
 			testing::assert_equals(static_cast<T>(0), static_cast<T>(x & (x - 1)));
 		});
@@ -47,7 +61,7 @@ void test_single_bit() {
 template <typename T>
 void test_get_mask() {
 	for (size_t i{0}; i <= 8 * sizeof(T); i++) {
-		testing::run("GetMask_" + cf::utils::get_type_name<T>() + "_" + std::to_string(i), [i]() {
+		testing::run("GetMask_" + get_type_name<T>() + "_" + std::to_string(i), [i]() {
 			testing::assert_equals(static_cast<T>(i),
 								   cf::utils::popcount(cf::utils::get_mask<T>(i)));
 		});
@@ -57,7 +71,7 @@ void test_get_mask() {
 template <typename T>
 void test_bit_string() {
 	for (size_t i{0}; i <= 8 * sizeof(T); i++) {
-		testing::run("BitString_" + cf::utils::get_type_name<T>() + "_" + std::to_string(i), [i]() {
+		testing::run("BitString_" + get_type_name<T>() + "_" + std::to_string(i), [i]() {
 			cf::input<T> x{0u, cf::utils::get_mask<T>(i)};
 			testing::assert_equals(std::string(8 * sizeof(T) - i, '-') + std::string(i, '0'),
 								   cf::utils::get_bit_string(x));

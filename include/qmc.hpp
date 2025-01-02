@@ -20,27 +20,34 @@ struct prime_implicant_chart {
 	std::vector<bool> deleted_columns;
 };
 
-void remove_dominated_rows(prime_implicant_chart& chart) {
+static void remove_dominated_rows(prime_implicant_chart& chart) {
+	assert(chart.chart.size() == chart.rows * chart.columns);
+	assert(chart.deleted_rows.size() == chart.rows);
+	assert(chart.deleted_columns.size() == chart.columns);
+
 	for (size_t i{0}; i < chart.rows; i++) {
-		if (chart.deleted_rows[i]) {
+		if (chart.deleted_rows.at(i)) {
 			continue;
 		}
 
 		for (size_t j{i + 1}; j < chart.rows; j++) {
-			if (chart.deleted_rows[j]) {
+			if (chart.deleted_rows.at(j)) {
 				continue;
 			}
 
 			bool i_dominates_j = true;
 			bool j_dominates_i = true;
 			for (size_t k{0}; k < chart.columns; k++) {
-				if (chart.deleted_columns[k]) {
+				if (chart.deleted_columns.at(k)) {
 					continue;
 				}
-				if (chart.chart[i * chart.columns + k] && !chart.chart[j * chart.columns + k]) {
+
+				const size_t i_idx = i * chart.columns + k;
+				const size_t j_idx = j * chart.columns + k;
+				if (chart.chart.at(i_idx) && !chart.chart.at(j_idx)) {
 					j_dominates_i = false;
 				}
-				if (chart.chart[j * chart.columns + k] && !chart.chart[i * chart.columns + k]) {
+				if (chart.chart.at(j_idx) && !chart.chart.at(i_idx)) {
 					i_dominates_j = false;
 				}
 				if (!i_dominates_j && !j_dominates_i) {
@@ -50,17 +57,17 @@ void remove_dominated_rows(prime_implicant_chart& chart) {
 
 			if (i_dominates_j && j_dominates_i) {
 				// the rows i and j were equal, so we delete only j
-				chart.deleted_rows[j] = true;
+				chart.deleted_rows.at(j) = true;
 				cf::utils::debug("Deleted row " + std::to_string(j) + ": dominated by row " +
 								 std::to_string(i));
 			} else if (i_dominates_j) {
 				// i dominates j, we delete j
-				chart.deleted_rows[j] = true;
+				chart.deleted_rows.at(j) = true;
 				cf::utils::debug("Deleted row " + std::to_string(j) + ": dominated by row " +
 								 std::to_string(i));
 			} else if (j_dominates_i) {
 				// j dominates i, we delete i
-				chart.deleted_rows[i] = true;
+				chart.deleted_rows.at(i) = true;
 				cf::utils::debug("Deleted row " + std::to_string(i) + ": dominated by row " +
 								 std::to_string(j));
 			}
@@ -68,7 +75,11 @@ void remove_dominated_rows(prime_implicant_chart& chart) {
 	}
 }
 
-int find_first_essential_prime_implicant(const prime_implicant_chart& chart) {
+static int find_first_essential_prime_implicant(const prime_implicant_chart& chart) {
+	assert(chart.chart.size() == chart.rows * chart.columns);
+	assert(chart.deleted_rows.size() == chart.rows);
+	assert(chart.deleted_columns.size() == chart.columns);
+
 	cf::utils::debug(
 		"The chart has " + std::to_string(chart.rows) + " (" +
 		std::to_string(std::count(chart.deleted_rows.begin(), chart.deleted_rows.end(), true)) +
@@ -76,19 +87,28 @@ int find_first_essential_prime_implicant(const prime_implicant_chart& chart) {
 		std::to_string(
 			std::count(chart.deleted_columns.begin(), chart.deleted_columns.end(), true)) +
 		" deleted)");
+	cf::utils::debug("Total size: " + std::to_string(chart.rows * chart.columns) + " elements.");
+	cf::utils::debug(
+		"Actual size: " +
+		std::to_string(
+			(chart.rows - static_cast<size_t>(std::count(chart.deleted_rows.begin(),
+														 chart.deleted_rows.end(), true))) *
+			(chart.columns - static_cast<size_t>(std::count(chart.deleted_columns.begin(),
+															chart.deleted_columns.end(), true)))) +
+		" elements.");
 
 	for (size_t c{0}; c < chart.columns; c++) {
-		if (chart.deleted_columns[c]) {
+		if (chart.deleted_columns.at(c)) {
 			continue;
 		}
 
 		int index{-1};
 		for (size_t r{0}; r < chart.rows; r++) {
-			if (chart.deleted_rows[r]) {
+			if (chart.deleted_rows.at(r)) {
 				continue;
 			}
 
-			if (chart.chart[r * chart.columns + c]) {
+			if (chart.chart.at(r * chart.columns + c)) {
 				if (index != -1) {
 					break;
 				}
@@ -105,17 +125,21 @@ int find_first_essential_prime_implicant(const prime_implicant_chart& chart) {
 }
 
 #if defined(CF_LOGGING) && CF_LOGGING == 1
-void print_chart(const prime_implicant_chart& chart) {
+static void print_chart(const prime_implicant_chart& chart) {
+	assert(chart.chart.size() == chart.rows * chart.columns);
+	assert(chart.deleted_rows.size() == chart.rows);
+	assert(chart.deleted_columns.size() == chart.columns);
+
 	std::clog << "Chart:" << std::endl;
 	for (size_t i{0}; i < chart.rows; i++) {
-		if (chart.deleted_rows[i]) {
+		if (chart.deleted_rows.at(i)) {
 			continue;
 		}
 		for (size_t j{0}; j < chart.columns; j++) {
-			if (chart.deleted_columns[j]) {
+			if (chart.deleted_columns.at(j)) {
 				continue;
 			}
-			if (!chart.chart[i * chart.columns + j]) {
+			if (!chart.chart.at(i * chart.columns + j)) {
 				std::clog << "0";
 			} else {
 				std::clog << "1";
@@ -128,7 +152,7 @@ void print_chart(const prime_implicant_chart& chart) {
 void print_chart(const prime_implicant_chart&) {}
 #endif	// CF_LOGGING
 
-std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart) {
+static std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart) {
 	assert(chart.chart.size() == chart.rows * chart.columns);
 	assert(chart.deleted_rows.size() == chart.rows);
 	assert(chart.deleted_columns.size() == chart.columns);
@@ -140,11 +164,15 @@ std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart
 		return !x;
 	}));
 
-	// print_chart(chart);
+#if defined(CF_LOGGING) && CF_LOGGING == 1
+	print_chart(chart);
+#endif	// CF_LOGGING
 
 	remove_dominated_rows(chart);
 
-	// print_chart(chart);
+#if defined(CF_LOGGING) && CF_LOGGING == 1
+	print_chart(chart);
+#endif	// CF_LOGGING
 
 	std::vector<size_t> result;
 	int epi_idx = find_first_essential_prime_implicant(chart);
@@ -154,21 +182,25 @@ std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart
 		result.push_back(epi);
 		cf::utils::debug("Found essential prime implicant: row " + std::to_string(epi));
 
-		chart.deleted_rows[epi] = true;
+		chart.deleted_rows.at(epi) = true;
 		for (size_t c{0}; c < chart.columns; c++) {
-			if (chart.deleted_columns[c]) {
+			if (chart.deleted_columns.at(c)) {
 				continue;
 			}
-			if (chart.chart[epi * chart.columns + c]) {
-				chart.deleted_columns[c] = true;
+			if (chart.chart.at(epi * chart.columns + c)) {
+				chart.deleted_columns.at(c) = true;
 			}
 		}
 
-		// print_chart(chart);
+#if defined(CF_LOGGING) && CF_LOGGING == 1
+		print_chart(chart);
+#endif	// CF_LOGGING
 
 		remove_dominated_rows(chart);
 
-		// print_chart(chart);
+#if defined(CF_LOGGING) && CF_LOGGING == 1
+		print_chart(chart);
+#endif	// CF_LOGGING
 
 		epi_idx = find_first_essential_prime_implicant(chart);
 	}
@@ -200,14 +232,14 @@ std::vector<size_t> find_essential_prime_implicants(prime_implicant_chart& chart
 template <typename T>
 std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_t nbits) {
 	assert(nbits > 0 && nbits <= 8 * sizeof(T));
+	assert(ones.size() <= (1u << nbits));
 
-#ifdef NDEBUG
+	// Check that there are no duplicate entries
 	for (size_t i{0}; i < ones.size(); i++) {
 		for (size_t j{i + 1}; j < ones.size(); j++) {
-			assert(ones[i] != ones[j]);
+			assert(ones.at(i) != ones.at(j));
 		}
 	}
-#endif
 
 	std::vector<cf::input<T>> base = ones;
 	std::vector<cf::input<T>> next;
@@ -239,8 +271,8 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 				assert(bits != 0);
 				if (bits == 1) {
 					// if there is only 1 set bit, one variable may be omitted
-					used[i] = true;
-					used[j] = true;
+					used.at(i) = true;
+					used.at(j) = true;
 					const cf::input<T> res{static_cast<T>(first.value & (~combined)),
 										   static_cast<T>(first.mask & (~combined))};
 					next.push_back(res);
@@ -254,7 +286,7 @@ std::vector<cf::input<T>> qmc(const std::vector<cf::input<T>>& ones, const size_
 		}
 
 		for (size_t i{0}; i < length; i++) {
-			if (used[i]) {
+			if (used.at(i)) {
 				continue;
 			}
 

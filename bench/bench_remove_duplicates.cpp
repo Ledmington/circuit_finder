@@ -38,11 +38,12 @@ static void BM_RemoveDuplicates_Manual(benchmark::State& state) {
 		for (size_t i{0}; i < static_cast<size_t>(state.range(0)); i++) {
 			v.push_back(dist(rnd));
 		}
-		std::vector<uint8_t> w(v.size());
+		const size_t n = v.size();
+		std::vector<uint8_t> w(n);
 		const auto start = std::chrono::high_resolution_clock::now();
-		for (size_t i{0}; i < v.size(); i++) {
+		for (size_t i{0}; i < n; i++) {
 			bool found = false;
-			for (size_t j{i + 1}; j < v.size(); j++) {
+			for (size_t j{i + 1}; j < n; j++) {
 				if (v[i] == v[j]) {
 					found = true;
 					break;
@@ -52,9 +53,9 @@ static void BM_RemoveDuplicates_Manual(benchmark::State& state) {
 				w.push_back(v[i]);
 			}
 		}
-		const auto end = std::chrono::high_resolution_clock::now();
 		benchmark::DoNotOptimize(w);
 		benchmark::ClobberMemory();
+		const auto end = std::chrono::high_resolution_clock::now();
 
 		const auto elapsed_seconds =
 			std::chrono::duration_cast<std::chrono::duration<double>>(end - start);

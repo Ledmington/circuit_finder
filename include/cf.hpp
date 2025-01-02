@@ -22,6 +22,10 @@ struct input {
 		// Give priority to the mask
 		return mask == other.mask && (value & mask) == (other.value & other.mask);
 	}
+
+	bool operator!=(const input<T>& other) const {
+		return !(*this == other);
+	}
 };
 
 }  // namespace cf
@@ -47,6 +51,7 @@ uint8_t popcount(uint8_t x) {
 	x = (x & 0x55u) + ((x >> 1) & 0x55u);
 	x = (x & 0x33u) + ((x >> 2) & 0x33u);
 	x = (x & 0x0fu) + ((x >> 4) & 0x0fu);
+	assert(x <= 8);
 	return x;
 }
 
@@ -55,6 +60,7 @@ uint16_t popcount(uint16_t x) {
 	x = (x & 0x3333u) + ((x >> 2) & 0x3333u);
 	x = (x & 0x0f0fu) + ((x >> 4) & 0x0f0fu);
 	x = (x & 0x00ffu) + ((x >> 8) & 0x00ffu);
+	assert(x <= 16);
 	return x;
 }
 
@@ -64,6 +70,7 @@ uint32_t popcount(uint32_t x) {
 	x = (x & 0x0f0f0f0fu) + ((x >> 4) & 0x0f0f0f0fu);
 	x = (x & 0x00ff00ffu) + ((x >> 8) & 0x00ff00ffu);
 	x = (x & 0x0000ffffu) + ((x >> 16) & 0x0000ffffu);
+	assert(x <= 32);
 	return x;
 }
 
@@ -74,6 +81,7 @@ uint64_t popcount(uint64_t x) {
 	x = (x & 0x00ff00ff00ff00ffu) + ((x >> 8) & 0x00ff00ff00ff00ffu);
 	x = (x & 0x0000ffff0000ffffu) + ((x >> 16) & 0x0000ffff0000ffffu);
 	x = (x & 0x00000000ffffffffu) + ((x >> 32) & 0x00000000ffffffffu);
+	assert(x <= 64);
 	return x;
 }
 
@@ -88,6 +96,7 @@ T get_mask(const size_t nbits) {
 	static_assert(std::is_integral_v<T>);
 	static_assert(std::is_unsigned_v<T>);
 	assert(nbits <= 8u * sizeof(T));
+
 	if (nbits == 8u * sizeof(T)) {
 		return std::numeric_limits<T>::max();
 	} else {
@@ -136,22 +145,6 @@ std::string get_expression(const cf::input<T>& x) {
 	}
 
 	return ss.str();
-}
-
-template <typename T>
-std::string get_type_name() {
-	if constexpr (std::is_same_v<T, uint8_t>) {
-		return "u8";
-	}
-	if constexpr (std::is_same_v<T, uint16_t>) {
-		return "u16";
-	}
-	if constexpr (std::is_same_v<T, uint32_t>) {
-		return "u32";
-	}
-	if constexpr (std::is_same_v<T, uint64_t>) {
-		return "u64";
-	}
 }
 
 #if defined(CF_LOGGING) && CF_LOGGING == 1
