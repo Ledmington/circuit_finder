@@ -95,35 +95,71 @@ void test_bit_string() {
 	});
 }
 
-void test_expression() {
+void test_boolean_expression() {
 	testing::run([]() {
 		cf::input<uint8_t> x{0, 0};
-		testing::assert_equals(std::string(""), cf::utils::get_expression(x));
+		testing::assert_equals(std::string(""), cf::utils::get_boolean_expression(x));
 	});
 	testing::run([]() {
 		cf::input<uint8_t> x{0b11111111, 0};
-		testing::assert_equals(std::string(""), cf::utils::get_expression(x));
+		testing::assert_equals(std::string(""), cf::utils::get_boolean_expression(x));
 	});
 	testing::run([]() {
 		cf::input<uint8_t> x{0, 0b11111111};
 		testing::assert_equals(std::string("(~A)&(~B)&(~C)&(~D)&(~E)&(~F)&(~G)&(~H)"),
-							   cf::utils::get_expression(x));
+							   cf::utils::get_boolean_expression(x));
 	});
 	testing::run([]() {
 		cf::input<uint8_t> x{0b11111111, 0b11111111};
-		testing::assert_equals(std::string("A&B&C&D&E&F&G&H"), cf::utils::get_expression(x));
+		testing::assert_equals(std::string("A&B&C&D&E&F&G&H"),
+							   cf::utils::get_boolean_expression(x));
 	});
 	testing::run([]() {
 		cf::input<uint8_t> x{0b10110011, 0b01111101};
-		testing::assert_equals(std::string("(~B)&C&D&(~E)&(~F)&H"), cf::utils::get_expression(x));
+		testing::assert_equals(std::string("(~B)&C&D&(~E)&(~F)&H"),
+							   cf::utils::get_boolean_expression(x));
 	});
 	testing::run([]() {
 		cf::input<uint8_t> x{0b10000000, 0b10000000};
-		testing::assert_equals(std::string("A"), cf::utils::get_expression(x));
+		testing::assert_equals(std::string("A"), cf::utils::get_boolean_expression(x));
 	});
 	testing::run([]() {
 		cf::input<uint8_t> x{0b00000000, 0b10000000};
-		testing::assert_equals(std::string("(~A)"), cf::utils::get_expression(x));
+		testing::assert_equals(std::string("(~A)"), cf::utils::get_boolean_expression(x));
+	});
+}
+
+void test_cpp_expression() {
+	testing::run([]() {
+		cf::input<uint8_t> x{0, 0};
+		testing::assert_equals(std::string(""), cf::utils::get_cpp_expression(x));
+	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0b11111111, 0};
+		testing::assert_equals(std::string(""), cf::utils::get_cpp_expression(x));
+	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0, 0b11111111};
+		testing::assert_equals(std::string("(!a)&&(!b)&&(!c)&&(!d)&&(!e)&&(!f)&&(!g)&&(!h)"),
+							   cf::utils::get_cpp_expression(x));
+	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0b11111111, 0b11111111};
+		testing::assert_equals(std::string("a&&b&&c&&d&&e&&f&&g&&h"),
+							   cf::utils::get_cpp_expression(x));
+	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0b10110011, 0b01111101};
+		testing::assert_equals(std::string("(!b)&&c&&d&&(!e)&&(!f)&&h"),
+							   cf::utils::get_cpp_expression(x));
+	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0b10000000, 0b10000000};
+		testing::assert_equals(std::string("a"), cf::utils::get_cpp_expression(x));
+	});
+	testing::run([]() {
+		cf::input<uint8_t> x{0b00000000, 0b10000000};
+		testing::assert_equals(std::string("(!a)"), cf::utils::get_cpp_expression(x));
 	});
 }
 
@@ -148,7 +184,8 @@ int main() {
 	test_bit_string<uint32_t>();
 	test_bit_string<uint64_t>();
 
-	test_expression();
+	test_boolean_expression();
+	test_cpp_expression();
 
 	testing::report();
 }

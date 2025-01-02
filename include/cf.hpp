@@ -125,7 +125,7 @@ std::string get_bit_string(const cf::input<T>& x) {
 }
 
 template <typename T>
-std::string get_expression(const cf::input<T>& x) {
+std::string get_boolean_expression(const cf::input<T>& x) {
 	std::ostringstream ss;
 	const size_t nbits = 8 * sizeof(T);
 	for (size_t i{0}; i < nbits; i++) {
@@ -141,6 +141,29 @@ std::string get_expression(const cf::input<T>& x) {
 			ss << static_cast<char>('A' + i);
 		} else {
 			ss << "(~" << static_cast<char>('A' + i) << ")";
+		}
+	}
+
+	return ss.str();
+}
+
+template <typename T>
+std::string get_cpp_expression(const cf::input<T>& x) {
+	std::ostringstream ss;
+	const size_t nbits = 8 * sizeof(T);
+	for (size_t i{0}; i < nbits; i++) {
+		const T bit = cf::utils::single_bit<T>(nbits - i - 1);
+		if ((x.mask & bit) == 0) {
+			continue;
+		}
+
+		if (ss.tellp() > 0) {
+			ss << "&&";
+		}
+		if ((x.value & bit) != 0) {
+			ss << static_cast<char>('a' + i);
+		} else {
+			ss << "(!" << static_cast<char>('a' + i) << ")";
 		}
 	}
 
